@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include "xtcio.h"
+#include <xdrfile/xdrfile_xtc.h>
 
 #define N  0
 #define CA 1
@@ -69,7 +69,7 @@ void  semilla(ATOM *, float *);
 void  imprime(FILE *, ATOM *, int , int );
 void  readdata(int , FILE *, float *, float *, float *, float *); 
 void  clearatm(ATOM *, int);
-void  writextc (int xfp, int nres, int n, ATOM *patm);
+void  writextc (XDRFILE* xfp, int nres, int n, ATOM *patm);
 
 #ifdef CPLUSPLUS
 };

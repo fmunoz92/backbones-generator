@@ -15,7 +15,7 @@ enum Ejes
 
 typedef float EjesCartesianos[CantidadDeEjes];
 
-void writextc (int xfp, int nres, int n, ATOM *patm)
+void writextc (XDRFILE* xfp, int nres, int n, ATOM *patm)
 {
 
 	const int natom=3*nres;

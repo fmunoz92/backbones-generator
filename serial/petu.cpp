@@ -14,7 +14,7 @@ struct ArbolData
 	ATOM  atm[3*NRESMAX];       // estructura parcial
 	unsigned int nres, ndat;    // constantes
 	long int cont;              // cantidad de estructuras exitosas hasta el momento
-	int xfp;                    // file handler (constante)
+	XDRFILE* xfp;                    // file handler (constante)
 	bool hubo_algun_exito;      // si encendido, dice que hubo al menos una rama que llego al final
 };
 
@@ -91,7 +91,7 @@ int main (int argc , char **argv)
 	dmax2= DMax; dmax2 *= dmax2;
 	setr(RN,RCa,RC,Scal_1_4,Scal_1_5);
 
-	arbol_data.xfp = open_xtc("traj.xtc","w");
+	arbol_data.xfp = xdrfile_open("traj.xtc","w");
 	filer=fopen("data","r");
 	readdata(arbol_data.ndat, filer, arbol_data.cosfi, arbol_data.sinfi, arbol_data.cossi, arbol_data.sinsi);
 	generar_arbol(&arbol_data);

@@ -16,11 +16,11 @@ OBJECTS      = calcrdg.o clearatm.o copymat.o imprime.o int2car.o islong.o petu.
 FILES        = calcrdg.c clearatm.c copymat.c imprime.c int2car.c isclash.c islong.c \
                petu.c poneres.c readdata.c semilla.c setr.c writextc.c 
 HEADERS      = petu.h
-LIBS         = -lgmx -lm -lpopt
-LDFLAGS      = -L/usr/local/gromacs/lib   
+LIBS         = -lxdrfile -lm -lpopt
+#LDFLAGS      = -L/usr/local/gromacs/lib   
 
 CFLAGS       = -O3
-CPPFLAGS     = -I/usr/local/gromacs/include/gromacs	
+#CPPFLAGS     = -I/usr/local/gromacs/include/gromacs	
 CC           = gcc
 CXX          = g++
 LD           = $(CXX)
