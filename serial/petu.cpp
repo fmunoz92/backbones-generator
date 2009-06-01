@@ -4,8 +4,10 @@
 
 #include "petu.h"
 #include <assert.h>
-#include <popt.h>
+#include <iostream>
+#include <stdlib.h>
 
+#include "getopt_pp_standalone.h"
 
 // Datos a compartir por todos los niveles:
 struct ArbolData
@@ -30,28 +32,25 @@ static void generar_nivel_intermedio(unsigned int nivel,
 bool procesar_ultimo_nivel(ArbolData* arbol_data); //bool void...?
 
 
-
+static void show_usage();
 
 int main (int argc , char **argv) 
 {
+    using namespace GetOpt;
 
-// the following code is used to parse arguments with popt...
+	 int    NivMax, //cantidad maxima de niveles 	
+            Nres,   //cantidad de aminoacidos
+            Ndat;   //cantidad de datos de entrada en el archivo data		
 
-	 int    NivMax, 		//cantidad maxima de niveles 	
-		Nres,		//cantidad de aminoacidos
-		Ndat;		//cantidad de datos de entrada en el archivo data		
 
-		
-	float 	RN,			// Radio de nitrogeno
-		RCa,			//Radio de carbono alfa
-		RC,			//Radio de carbono
-		Scal_1_4,		//
-		Scal_1_5,
-		DMax,   		//max distance
-		RgMax;			//Radio de giro maximo
+	float   RN,         // Radio de nitrogeno
+	        RCa,        // Radio de carbono alfa
+            RC,         // Radio de carbono
+            Scal_1_4,   // ??
+            Scal_1_5,
+            RgMax;      // Radio de giro maximo
 
-	int  argument;	    	/* argument passed by  line command*/
-	char *File_Name;		/*name of vectors file*/
+#if 0
 	struct poptOption options_table[] = {
 		{"nres",(char)'r',POPT_ARG_INT,(void*)&Nres,0,"total structures","Nres"},
 		{"ndat",(char)'t',POPT_ARG_INT,(void*)&Ndat,0,"total data in data file","Ndat"},
@@ -63,40 +62,49 @@ int main (int argc , char **argv)
 		{"scal_1_4",(char)'s',POPT_ARG_FLOAT,(void*)&Scal_1_4,0,"follow with scal_1_4 value","Scal_1_4"},
 		{"scal_1_5",(char)'l',POPT_ARG_FLOAT,(void*)&Scal_1_5,0,"follow with scal_1_5 value","Scal_1_5"},
 		POPT_AUTOHELP{ NULL, 0, 0, NULL, 0 }    };	/*options table for line commands*/
+#endif
 
- 	poptContext opt_con;   
+    GetOpt_pp ops(argc, argv);
 
-	opt_con = poptGetContext(NULL, argc, (const char **)argv,(struct poptOption* ) &options_table, 0);
-	argument = poptGetNextOpt(opt_con);
-	
-	
-	poptFreeContext(opt_con); /*frees memory destinated to context*/
+    if (ops >> Option('r', "nres", Nres))
+    {
+        ops
+            >> Option('t', "ndat", Ndat)    /* FIXME! Should be automatic */
+            >> Option('R', "rgmax", RgMax)
+            >> Option('n', "rn", RN)
+            >> Option('a', "rca", RCa)
+            >> Option('c', "rc", RC)
+            >> Option('c', "rc", RC)
+            >> Option('s', "scal_1_4", Scal_1_4)
+            >> Option('l', "scal_1_5", Scal_1_5);
 
-// till here.
+	        FILE *filer;
+         
+	        ArbolData arbol_data;
+          
 
+	        arbol_data.nres = Nres;
+	        arbol_data.ndat = Ndat;
+         
+	        arbol_data.cont = 0;
+	        arbol_data.hubo_algun_exito = false;
 
+	        arbol_data.rgmax= RgMax;
+	        setr(RN,RCa,RC,Scal_1_4,Scal_1_5);
 
-	FILE *filer,*filew,*fileras;
- 
-	ArbolData arbol_data;
-  
+	        arbol_data.xfp = xdrfile_open("traj.xtc","w");
+	        filer=fopen("data","r");
+	        readdata(arbol_data.ndat, filer, arbol_data.cosfi, arbol_data.sinfi, arbol_data.cossi, arbol_data.sinsi);
+	        generar_arbol(&arbol_data);
+	        printf("%li\n",arbol_data.cont);        
 
-	arbol_data.nres = Nres;
-	arbol_data.ndat = Ndat;
- 
-	arbol_data.cont = 0;
-	arbol_data.hubo_algun_exito = false;
-
-	arbol_data.rgmax= RgMax;
-	dmax2= DMax; dmax2 *= dmax2;
-	setr(RN,RCa,RC,Scal_1_4,Scal_1_5);
-
-	arbol_data.xfp = xdrfile_open("traj.xtc","w");
-	filer=fopen("data","r");
-	readdata(arbol_data.ndat, filer, arbol_data.cosfi, arbol_data.sinfi, arbol_data.cossi, arbol_data.sinsi);
-	generar_arbol(&arbol_data);
-	printf("%li\n",arbol_data.cont);        
-	return(0);   
+	        return EXIT_SUCCESS;
+    }
+    else
+    {
+        show_usage();
+        return EXIT_FAILURE;
+    }
 }
 
 
@@ -174,3 +182,9 @@ bool procesar_ultimo_nivel(ArbolData* arbol_data)
 	}
 	return exito;
 }
+
+void show_usage()
+{
+    std::cerr << "Invalid arguments." << std::endl;
+}
+
