@@ -1,7 +1,7 @@
 #include "petu.h"
 
 
-int islong(ATOM *patm, int at, int dmax2)
+int islong(ATOM *patm, int at, float dmax2)
 { 
 	int i;
 	float dx2,dy2,dz2,d2;

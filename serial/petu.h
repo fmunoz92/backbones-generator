@@ -1,9 +1,15 @@
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
 #include <stdlib.h>
 #include <stdarg.h>
+
+#if defined(__cplusplus) && !defined(CPLUSPLUS)
+#define CPLUSPLUS
+#endif
 #include <xdrfile/xdrfile_xtc.h>
+
+
+
 
 #define N  0
 #define CA 1
@@ -32,9 +38,6 @@
 #define MAL  0
 #define BIEN 1
 
-#define NRESMAX 50
-
-/*#define MAX(A,B)  ((A)>(B)?(A):(B))*/
 /*#define DEBUG*/
 
 typedef struct {
@@ -44,7 +47,14 @@ typedef struct {
   float z;
 } ATOM;
 
-#ifdef CPLUSPLUS
+
+// Datos a compartir por todos los niveles:
+
+
+#ifdef __cplusplus
+#include "includes_cplusplus.h"
+
+// Lo pongo aca porque afuera tiran error los .c
 extern "C" {
 #endif
 
@@ -54,23 +64,22 @@ extern float r[3][3][3];
 extern float dmax2;
 
 #ifdef DEBUG
-int   poneres( float *, float, float, float, float, ATOM *, int, FILE *);
+int   poneres( float *, float, float, float, float, ATOM *, int, FILE *, float dmax2);
 int   isclash(ATOM *, int, int , FILE *);
 #else
-int   poneres( float *, float, float, float, float, ATOM *, int);
+
 int   isclash(ATOM *, int, int);
 #endif
-int   islong(ATOM *, int , int );
+int   islong(ATOM *, int , float );
 int   calcRdG(ATOM *, int , float);
 void  setr(float , float, float, float, float);
 void  int2car(float *, float , float , float, float, float ,ATOM *, int , int );
 void  copymat(float *, float *); 
-void  semilla(ATOM *, float *);
 void  imprime(FILE *, ATOM *, int , int );
-void  readdata(int , FILE *, float *, float *, float *, float *); 
+
 void  clearatm(ATOM *, int);
 void  writextc (XDRFILE* xfp, int nres, int n, ATOM *patm);
 
-#ifdef CPLUSPLUS
+#ifdef __cplusplus
 };
 #endif

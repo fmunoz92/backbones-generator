@@ -1,24 +1,18 @@
-#ifndef CPLUSPLUS
-#define CPLUSPLUS
-#endif
+
 
 #include "petu.h"
 #include <assert.h>
 #include <iostream>
 #include <stdlib.h>
 
+#include <string>
+
+
+
+
 #include "getopt_pp_standalone.h"
 
-// Datos a compartir por todos los niveles:
-struct ArbolData
-{
-	float rgmax, cosfi[100], cossi[100], sinfi[100], sinsi[100];    // constantes
-	ATOM  atm[3*NRESMAX];       // estructura parcial
-	unsigned int nres, ndat;    // constantes
-	long int cont;              // cantidad de estructuras exitosas hasta el momento
-	XDRFILE* xfp;                    // file handler (constante)
-	bool hubo_algun_exito;      // si encendido, dice que hubo al menos una rama que llego al final
-};
+
 
 
 // La estructura del algoritmo esta dividida en tres funciones, que se llaman en este orden:
@@ -29,10 +23,15 @@ static void generar_nivel_intermedio(unsigned int nivel,
                                      unsigned int indice_nivel_anterior, 
                                      ArbolData* arbol_data);
 
-bool procesar_ultimo_nivel(ArbolData* arbol_data); //bool void...?
-
-
+static bool procesar_ultimo_nivel(ArbolData* arbol_data); //bool void...?
+static int volumen_en_rango(ArbolData * arbol_data);
+static int filtros_ultimo_nivel(ArbolData * arbol_data) ;
 static void show_usage();
+
+const float cota_maxima_volumen = 177.65f; // Volumen obtenido tambien a partir de las pruebas de un set de datos en Grillado.
+const float pendiente_empirica = -0.0882f ; // Pendiente obtenida a partir de las pruebas de un set de datos en Grillado.
+const float volumen_min_aa = 110.0f; // Volumen obtenido tambien a partir de las pruebas de un set de datos en Grillado.
+	
 
 int main (int argc , char **argv) 
 {
@@ -48,56 +47,71 @@ int main (int argc , char **argv)
             RC,         // Radio de carbono
             Scal_1_4,   // ??
             Scal_1_5,
-            RgMax;      // Radio de giro maximo
+            RgMax,      // Radio de giro maximo
+            DMax;       // Distancia maxima entre átomos
+	std::string data; // Nombre de archivo de input.
+	
+	size_t m; // Indican el tamano de cada dimension del grillado.
+	size_t n;
+	size_t z;
 
-#if 0
-	struct poptOption options_table[] = {
-		{"nres",(char)'r',POPT_ARG_INT,(void*)&Nres,0,"total structures","Nres"},
-		{"ndat",(char)'t',POPT_ARG_INT,(void*)&Ndat,0,"total data in data file","Ndat"},
-		{"rgmax",(char)'R',POPT_ARG_FLOAT,(void*)&RgMax,0,"max turn radius","RgMax"},
-		{"dmax",(char)'d',POPT_ARG_FLOAT,(void*)&DMax,0,"Max distance","DMax"},
-		{"rn",(char)'n',POPT_ARG_FLOAT,(void*)&RN,0,"nitrogen radius","RN"},
-		{"rca",(char)'a',POPT_ARG_FLOAT,(void*)&RCa,0,"alpha carbon radius","RCa"},
-		{"rc",(char)'c',POPT_ARG_FLOAT,(void*)&RC,0,"carbon radius","RC"},
-		{"scal_1_4",(char)'s',POPT_ARG_FLOAT,(void*)&Scal_1_4,0,"follow with scal_1_4 value","Scal_1_4"},
-		{"scal_1_5",(char)'l',POPT_ARG_FLOAT,(void*)&Scal_1_5,0,"follow with scal_1_5 value","Scal_1_5"},
-		POPT_AUTOHELP{ NULL, 0, 0, NULL, 0 }    };	/*options table for line commands*/
-#endif
 
-    GetOpt_pp ops(argc, argv);
-
-    if (ops >> Option('r', "nres", Nres))
+		 GetOpt_pp ops(argc, argv);
+		 float default_DMax = 50.0 + 0.1 * float(Nres);
+		 
+		 
+		 
+    if (ops >> Option('r', "Nres", Nres))
     {
         ops
-            >> Option('t', "ndat", Ndat)    /* FIXME! Should be automatic */
-            >> Option('R', "rgmax", RgMax)
-            >> Option('n', "rn", RN)
-            >> Option('a', "rca", RCa)
-            >> Option('c', "rc", RC)
-            >> Option('c', "rc", RC)
-            >> Option('s', "scal_1_4", Scal_1_4)
-            >> Option('l', "scal_1_5", Scal_1_5);
-
-	        FILE *filer;
+            //>> Option('R', "RgMax", RgMax,2.72 * (pow(Nres,0.33333)) + 5)
+            >> Option('n', "Rn", RN, 1.5f)
+            >> Option('a', "Rca", RCa, 1.7f)
+            >> Option('c', "Rc", RC, 1.6f)
+	    >> Option('d', "DMax", DMax, default_DMax ) 
+            >> Option('s', "Scal_1_4", Scal_1_4, 0.85f)
+            >> Option('l', "Scal_1_5", Scal_1_5, 1.0f)
+	    >> Option('i', "input_file", data, "ramachandran.dat")
+	    >> Option('N', "rows", n, static_cast<size_t>(100))
+            >> Option('M', "cols", m, static_cast<size_t>(100))
+	    >> Option('Z', "depth", z, static_cast<size_t>(100));
+		// Hay que decidir si efectivamente estos valores queremos que se puedan configurar desde
+		// la linea de comandos.	
+	
+		RgMax = 2.72 * cubic_root(float(Nres)) + 5;
+	        std::ifstream filer;
+		filer.open(data.c_str(), std::ifstream::in);
          
 	        ArbolData arbol_data;
-          
+		float radius = 1.0f;
+		float dist = 1.5f;
+		arbol_data.grilla = new Grillado(m, n , z, radius, dist);
+		arbol_data.nres = Nres;
+		// Se pide inicializa la matriz atm.
+		arbol_data.atm = new ATOM[(arbol_data.nres)*3+1];
+		// ATENCION: En clearatm se indexa la matriz a partir del 1 y la condicion del for es <=
+		// con lo cual el indice alcanza el valor nres*3. Nota a futuro: revisar todos los indices.
 
-	        arbol_data.nres = Nres;
-	        arbol_data.ndat = Ndat;
-         
+	        
 	        arbol_data.cont = 0;
 	        arbol_data.hubo_algun_exito = false;
 
 	        arbol_data.rgmax= RgMax;
+	        arbol_data.dmax2= DMax*DMax;
 	        setr(RN,RCa,RC,Scal_1_4,Scal_1_5);
 
 	        arbol_data.xfp = xdrfile_open("traj.xtc","w");
-	        filer=fopen("data","r");
+	        
 	        readdata(arbol_data.ndat, filer, arbol_data.cosfi, arbol_data.sinfi, arbol_data.cossi, arbol_data.sinsi);
+
+		arbol_data.ndat = arbol_data.cossi.size(); // Se podria eliminar ndat por completo. Tener en cuenta a futuro.
 	        generar_arbol(&arbol_data);
 	        printf("%li\n",arbol_data.cont);        
-
+		
+		// Se libera la memoria de la matriz atm.
+		delete [] arbol_data.atm;
+		delete arbol_data.grilla;
+		filer.close();
 	        return EXIT_SUCCESS;
     }
     else
@@ -114,14 +128,17 @@ void generar_arbol(ArbolData* arbol_data)
 {
 	float R_inicial[16];
 	unsigned int i;
-
+	Residuo residuo;// Va a ser el residuo que agregue semilla en cada iteracion y al terminar del ciclo
+			// se usa para sacar el residuo del grillado.
     //inicializar_arbol(arbol_data);  
 	i = 1;
 	while ( i <= arbol_data->ndat && !arbol_data->hubo_algun_exito )
 	{
 		clearatm( arbol_data->atm, arbol_data->nres);
-		semilla(arbol_data->atm,R_inicial);
+		semilla(arbol_data,R_inicial, &residuo);
+		
 		generar_nivel_intermedio(2, R_inicial, i, arbol_data);
+		sacar_residuo(arbol_data, residuo);
 		i++;
 	}
 }
@@ -133,9 +150,9 @@ void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned 
 	int resultado;
 	bool exito = false; // solo aplicable si somos anteultimo nivel
 	unsigned int i;
-
 	assert(nivel > 1);  // pre condicion
-
+	Residuo residuo;
+	
 	i = 1;
 	while (i <= arbol_data->ndat && !exito)
 	{
@@ -148,8 +165,12 @@ void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned 
                         arbol_data->cosfi[i],                       // idem
                         arbol_data->sinfi[i],                       // idem
                         arbol_data->atm,
-                        nivel);
+                        nivel,
+			arbol_data,
+			arbol_data->dmax2,
+			residuo);
 
+		
 		if ( resultado == BIEN )
 		{
 			if (nivel < arbol_data->nres)
@@ -160,27 +181,46 @@ void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned 
 			{
 				exito = procesar_ultimo_nivel(arbol_data);
 			}
+			sacar_residuo(arbol_data, residuo);
 		}
-        
-	i++;
+		
+		i++;
 	}
 }
 
-bool procesar_ultimo_nivel(ArbolData* arbol_data)
+
+
+static bool procesar_ultimo_nivel(ArbolData* arbol_data)
 {
 	bool exito = false;
     
-	if ( calcRdG(arbol_data->atm, arbol_data->nres, arbol_data->rgmax) == BIEN )        
+	if ( filtros_ultimo_nivel(arbol_data) )        
 	{
 		writextc(arbol_data->xfp, 
                  arbol_data->nres, 
                  arbol_data->cont, 
                  arbol_data->atm);
-        /*imprime(filew,atm,nres,cont);*/       
 		arbol_data->cont++;
 		arbol_data->hubo_algun_exito = exito = true;
 	}
 	return exito;
+}
+
+// Devuelve 1 si el volumen indicado por el grillado se encuentra en el rango aceptable, 0 si no.
+// Se usa int porque el resto de las funciones booleanas estan implementadas en C y por lo tanto devuelven int.
+
+
+static int volumen_en_rango(ArbolData * arbol_data) {
+	float volumen_max_aa = pendiente_empirica * float(arbol_data->nres) + cota_maxima_volumen;
+	return in_range(float(arbol_data->grilla->obtener_vol_parcial()), volumen_min_aa , volumen_max_aa);
+}
+
+
+
+// Devuelve 1 si arbol_data pasa todos los filtros.
+static int filtros_ultimo_nivel(ArbolData * arbol_data) {
+	return 	calcRdG(arbol_data->atm, arbol_data->nres, arbol_data->rgmax) == BIEN 
+		&& volumen_en_rango(arbol_data);
 }
 
 void show_usage()

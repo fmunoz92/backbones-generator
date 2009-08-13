@@ -11,12 +11,12 @@
 #
 
 # Variables set by the configuration script:
-OBJECTS      = calcrdg.o clearatm.o copymat.o imprime.o int2car.o islong.o petu.o \
+OBJECTS      = calcrdg.o clearatm.o copymat.o grillado.o imprime.o int2car.o islong.o petu.o \
                poneres.o readdata.o semilla.o setr.o writextc.o isclash.o
-FILES        = calcrdg.c clearatm.c copymat.c imprime.c int2car.c isclash.c islong.c \
-               petu.c poneres.c readdata.c semilla.c setr.c writextc.c 
+FILES        = calcrdg.c clearatm.c copymat.c grillado.cpp imprime.c int2car.c isclash.c islong.c \
+               petu.cpp poneres.cpp readdata.cpp semilla.cpp setr.c writextc.c 
 HEADERS      = petu.h
-LIBS         = -lxdrfile -lm
+LIBS         = -lxdrfile -lm 
 #LDFLAGS      = -L/usr/local/gromacs/lib   
 
 CFLAGS       = -O3

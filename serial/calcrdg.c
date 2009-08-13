@@ -1,4 +1,5 @@
 #include "petu.h"
+#include <math.h>
 
 int calcRdG(ATOM *patm, int nres, float rgmax)
 {  
