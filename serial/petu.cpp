@@ -57,12 +57,13 @@ int main (int argc , char **argv)
 
 
 		 GetOpt_pp ops(argc, argv);
-		 float default_DMax = 50.0 + 0.1 * float(Nres);
+		 
 		 
 		 
 		 
     if (ops >> Option('r', "Nres", Nres))
     {
+	float default_DMax = 50.0 + 0.1 * float(Nres);
         ops
             //>> Option('R', "RgMax", RgMax,2.72 * (pow(Nres,0.33333)) + 5)
             >> Option('n', "Rn", RN, 1.5f)
@@ -104,7 +105,8 @@ int main (int argc , char **argv)
 	        
 	        readdata(arbol_data.ndat, filer, arbol_data.cosfi, arbol_data.sinfi, arbol_data.cossi, arbol_data.sinsi);
 
-		arbol_data.ndat = arbol_data.cossi.size(); // Se podria eliminar ndat por completo. Tener en cuenta a futuro.
+		arbol_data.ndat = arbol_data.cossi.size()-1; // Se podria eliminar ndat por completo. Tener en cuenta a futuro.
+		// Se usa size()-1 porque en readdata se agrega un elemento inicial para respetar la convencion de usar los arrays desde 1.
 	        generar_arbol(&arbol_data);
 	        printf("%li\n",arbol_data.cont);        
 		
@@ -135,7 +137,7 @@ void generar_arbol(ArbolData* arbol_data)
 	while ( i <= arbol_data->ndat && !arbol_data->hubo_algun_exito )
 	{
 		clearatm( arbol_data->atm, arbol_data->nres);
-		semilla(arbol_data,R_inicial, &residuo);
+		semilla(arbol_data,R_inicial, residuo);
 		
 		generar_nivel_intermedio(2, R_inicial, i, arbol_data);
 		sacar_residuo(arbol_data, residuo);
@@ -189,7 +191,18 @@ void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned 
 }
 
 
-
+#ifdef COMBINATIONS_DEBUG
+// En el modo DEBUG se deshabilitan los chequeos.
+static bool procesar_ultimo_nivel(ArbolData* arbol_data) { 
+	writextc(arbol_data->xfp, 
+                 arbol_data->nres, 
+                 arbol_data->cont, 
+                 arbol_data->atm);
+		arbol_data->cont++;
+	//arbol_data->hubo_algun_exito  = true;
+	return true;
+}
+#else
 static bool procesar_ultimo_nivel(ArbolData* arbol_data)
 {
 	bool exito = false;
@@ -205,7 +218,7 @@ static bool procesar_ultimo_nivel(ArbolData* arbol_data)
 	}
 	return exito;
 }
-
+#endif
 // Devuelve 1 si el volumen indicado por el grillado se encuentra en el rango aceptable, 0 si no.
 // Se usa int porque el resto de las funciones booleanas estan implementadas en C y por lo tanto devuelven int.
 

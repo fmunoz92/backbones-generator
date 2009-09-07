@@ -28,7 +28,7 @@ struct Residuo
 			 
 int   poneres( float *, float, float, float, float, ATOM *, int, ArbolData *, float dmax2, Residuo &);
 void  readdata(int , std::ifstream &, std::vector<float> &, std::vector<float> &, std::vector<float> &, std::vector<float> &); 
-void  semilla(ArbolData *, float *, Residuo *);
+void  semilla(ArbolData *, float *, Residuo &);
 
 
 inline float cubic_root(float a) {

@@ -17,9 +17,11 @@ FILES        = calcrdg.c clearatm.c copymat.c grillado.cpp imprime.c int2car.c i
                petu.cpp poneres.cpp readdata.cpp semilla.cpp setr.c writextc.c 
 HEADERS      = petu.h
 LIBS         = -lxdrfile -lm 
+COMBINATIONS_DEBUG_FLAGS = -DCOMBINATIONS_DEBUG
 #LDFLAGS      = -L/usr/local/gromacs/lib   
 
 CFLAGS       = -O3
+CXXFLAGS     =  
 #CPPFLAGS     = -I/usr/local/gromacs/include/gromacs	
 CC           = gcc
 CXX          = g++
@@ -32,7 +34,13 @@ LD           = $(CXX)
 petu:	        $(HEADERS) $(OBJECTS) 
 		$(LD) $(LDFLAGS) -o $@ $(OBJECTS)   $(LIBS)
 
+# Si se habilita el modo debug se deshabilitan 
+# todos los chequeos por lo que no se descarta ninguna 
+# cadena.
 
+debug:  	CXXFLAGS= $(COMBINATIONS_DEBUG_FLAGS)
+debug:  	petu
+		
 clean:
 	    rm *.o  
 

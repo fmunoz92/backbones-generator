@@ -38,7 +38,8 @@
 #define MAL  0
 #define BIEN 1
 
-/*#define DEBUG*/
+
+//#define DEBUG
 
 typedef struct {
   int   vdw;
@@ -62,14 +63,14 @@ extern "C" {
 /* a esto se le pone extern, para decir que quien importe el .h va a ser usuario de estas variables */
 extern float r[3][3][3];
 extern float dmax2;
-
+/*
 #ifdef DEBUG
 int   poneres( float *, float, float, float, float, ATOM *, int, FILE *, float dmax2);
 int   isclash(ATOM *, int, int , FILE *);
 #else
-
+*/
 int   isclash(ATOM *, int, int);
-#endif
+//#endif
 int   islong(ATOM *, int , float );
 int   calcRdG(ATOM *, int , float);
 void  setr(float , float, float, float, float);

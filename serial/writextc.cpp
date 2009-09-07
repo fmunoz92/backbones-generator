@@ -33,7 +33,7 @@ void writextc (XDRFILE* xfp, int nres, int n, ATOM *patm)
 		cxtc[i][EjeY]=patm[i+1].y/10.0;
 		cxtc[i][EjeZ]=patm[i+1].z/10.0;	
 	}
-	write_xtc(xfp,natom,n,(float) n*1.0,box,cxtc,1000.0);
+	write_xtc(xfp,natom,n,(float) n*1.0,box,cxtc,10000.0);
 
 	delete[] cxtc;
 }

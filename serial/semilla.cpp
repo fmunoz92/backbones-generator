@@ -1,7 +1,7 @@
 #include "petu.h"
 
 
-void semilla(ArbolData *arbol_data, float *R, Residuo * residuo)
+void semilla(ArbolData *arbol_data, float *R, Residuo & residuo)
 {
   /* Los valores semilla */
 	arbol_data->atm[1].x=0.000; arbol_data->atm[1].y=0.000; arbol_data->atm[1].z=0.000;
@@ -17,8 +17,8 @@ void semilla(ArbolData *arbol_data, float *R, Residuo * residuo)
 	R[10] = 1.000000; R[11] = 0.000000;
 	R[12] = 0.000000; R[13] = 0.000000;
 	R[14] = 0.000000; R[15] = 1.000000;
-	residuo->at1 = arbol_data->grilla->agregar_esfera(arbol_data->atm[1].x,arbol_data->atm[1].y,arbol_data->atm[1].z);
-	residuo->at2 = arbol_data->grilla->agregar_esfera(arbol_data->atm[2].x,arbol_data->atm[2].y,arbol_data->atm[2].z);
-	residuo->at3 = arbol_data->grilla->agregar_esfera(arbol_data->atm[3].x,arbol_data->atm[3].y,arbol_data->atm[3].z);
+	residuo = Residuo(arbol_data->grilla->agregar_esfera(arbol_data->atm[1].x,arbol_data->atm[1].y,arbol_data->atm[1].z),
+	arbol_data->grilla->agregar_esfera(arbol_data->atm[2].x,arbol_data->atm[2].y,arbol_data->atm[2].z),
+	arbol_data->grilla->agregar_esfera(arbol_data->atm[3].x,arbol_data->atm[3].y,arbol_data->atm[3].z));
 	
 }
