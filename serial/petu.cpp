@@ -200,7 +200,7 @@ static bool procesar_ultimo_nivel(ArbolData* arbol_data) {
                  arbol_data->atm);
 		arbol_data->cont++;
 	//arbol_data->hubo_algun_exito  = true;
-	return true;
+	return false;
 }
 #else
 static bool procesar_ultimo_nivel(ArbolData* arbol_data)
