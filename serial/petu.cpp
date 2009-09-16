@@ -4,14 +4,8 @@
 #include <assert.h>
 #include <iostream>
 #include <stdlib.h>
-
 #include <string>
-
-
-
-
 #include "getopt_pp_standalone.h"
-
 
 
 
@@ -24,52 +18,47 @@ static void generar_nivel_intermedio(unsigned int nivel,
                                      ArbolData* arbol_data);
 
 static bool procesar_ultimo_nivel(ArbolData* arbol_data); //bool void...?
+
+
 static int volumen_en_rango(ArbolData * arbol_data);
 static int filtros_ultimo_nivel(ArbolData * arbol_data) ;
 static void show_usage();
 
 const float cota_maxima_volumen = 177.65f; // Volumen obtenido tambien a partir de las pruebas de un set de datos en Grillado.
 const float pendiente_empirica = -0.0882f ; // Pendiente obtenida a partir de las pruebas de un set de datos en Grillado.
-const float volumen_min_aa = 110.0f; // Volumen obtenido tambien a partir de las pruebas de un set de datos en Grillado.
+const float volumen_min_aa = 110.0f;
+//const float volumen_min_aa = 0.0f; // Volumen obtenido tambien a partir de las pruebas de un set de datos en Grillado.
 	
 
 int main (int argc , char **argv) 
 {
     using namespace GetOpt;
 
-	 int    NivMax, //cantidad maxima de niveles 	
-            Nres,   //cantidad de aminoacidos
-            Ndat;   //cantidad de datos de entrada en el archivo data		
+    int     Nres;   // Number of amino acids in the chains to build.
 
+    float   RN,         // Radius of the Nitrogen atom.
+            RCa,        // Radius of the Carbon atom.
+            RC,         // Radius of the Carbon atom.
+            Scal_1_4,   // Scaling factor for the radii. Used to check for 1-4 clashes.
+            Scal_1_5;   // Scaling factor for the radii. Used to check for 1-5 clashes.
 
-	float   RN,         // Radio de nitrogeno
-	        RCa,        // Radio de carbono alfa
-            RC,         // Radio de carbono
-            Scal_1_4,   // ??
-            Scal_1_5,
-            RgMax,      // Radio de giro maximo
-            DMax;       // Distancia maxima entre átomos
-	std::string data; // Nombre de archivo de input.
+    std::string data;   // Name of the input file.
 	
-	size_t m; // Indican el tamano de cada dimension del grillado.
-	size_t n;
-	size_t z;
+    size_t m; // They indicate the size of each dimention of the grid.
+    size_t n;
+    size_t z;
 
 
-		 GetOpt_pp ops(argc, argv);
-		 
-		 
-		 
+
+    GetOpt_pp ops(argc, argv);
 		 
     if (ops >> Option('r', "Nres", Nres))
     {
-	float default_DMax = 50.0 + 0.1 * float(Nres);
+	
         ops
-            //>> Option('R', "RgMax", RgMax,2.72 * (pow(Nres,0.33333)) + 5)
             >> Option('n', "Rn", RN, 1.5f)
             >> Option('a', "Rca", RCa, 1.7f)
             >> Option('c', "Rc", RC, 1.6f)
-	    >> Option('d', "DMax", DMax, default_DMax ) 
             >> Option('s', "Scal_1_4", Scal_1_4, 0.85f)
             >> Option('l', "Scal_1_5", Scal_1_5, 1.0f)
 	    >> Option('i', "input_file", data, "ramachandran.dat")
@@ -79,34 +68,38 @@ int main (int argc , char **argv)
 		// Hay que decidir si efectivamente estos valores queremos que se puedan configurar desde
 		// la linea de comandos.	
 	
-		RgMax = 2.72 * cubic_root(float(Nres)) + 5;
+
 	        std::ifstream filer;
 		filer.open(data.c_str(), std::ifstream::in);
          
 	        ArbolData arbol_data;
-		float radius = 1.0f;
-		float dist = 1.5f;
-		arbol_data.grilla = new Grillado(m, n , z, radius, dist);
-		arbol_data.nres = Nres;
-		// Se pide inicializa la matriz atm.
-		arbol_data.atm = new ATOM[(arbol_data.nres)*3+1];
-		// ATENCION: En clearatm se indexa la matriz a partir del 1 y la condicion del for es <=
-		// con lo cual el indice alcanza el valor nres*3. Nota a futuro: revisar todos los indices.
 
-	        
+		float radius = 4.0f;
+		float dist = 5.7f;
+		arbol_data.grilla = new Grillado(m, n , z, radius, dist);
+                // Maximun gyration radius and maximun CA-CA distance. 
+                // Both equations constructed from database analisys.
+		arbol_data.rgmax =  2.72 * cubic_root(float(Nres)) + 5.0;
+	        arbol_data.dmax2 =  (8.0 * cubic_root(float(Nres))+25.0) * (8.0 * cubic_root(float(Nres))+25.0);
+
+                // Number of residues
+		arbol_data.nres = Nres;
+		// Initialize the atm matrix.
+		arbol_data.atm = new ATOM[(arbol_data.nres)*3];
+	        // Initialize the chain counter
 	        arbol_data.cont = 0;
 	        arbol_data.hubo_algun_exito = false;
 
-	        arbol_data.rgmax= RgMax;
-	        arbol_data.dmax2= DMax*DMax;
+                // Fill r[][][] with the minimun squared distance between atoms
 	        setr(RN,RCa,RC,Scal_1_4,Scal_1_5);
-
+                //Default compressed output
 	        arbol_data.xfp = xdrfile_open("traj.xtc","w");
 	        
-	        readdata(arbol_data.ndat, filer, arbol_data.cosfi, arbol_data.sinfi, arbol_data.cossi, arbol_data.sinsi);
+	        readdata(filer, arbol_data.cosfi, arbol_data.sinfi, arbol_data.cossi, arbol_data.sinsi);
 
-		arbol_data.ndat = arbol_data.cossi.size()-1; // Se podria eliminar ndat por completo. Tener en cuenta a futuro.
-		// Se usa size()-1 porque en readdata se agrega un elemento inicial para respetar la convencion de usar los arrays desde 1.
+		arbol_data.ndat = arbol_data.cossi.size(); // Se podria eliminar ndat por completo. Tener en cuenta a futuro.
+                printf("%i\n",arbol_data.ndat);
+
 	        generar_arbol(&arbol_data);
 	        printf("%li\n",arbol_data.cont);        
 		
@@ -133,9 +126,10 @@ void generar_arbol(ArbolData* arbol_data)
 	Residuo residuo;// Va a ser el residuo que agregue semilla en cada iteracion y al terminar del ciclo
 			// se usa para sacar el residuo del grillado.
     //inicializar_arbol(arbol_data);  
-	i = 1;
-	while ( i <= arbol_data->ndat && !arbol_data->hubo_algun_exito )
+	i = 0;
+	while ( i < arbol_data->ndat && !arbol_data->hubo_algun_exito )
 	{
+		//printf("cleardata\n");
 		clearatm( arbol_data->atm, arbol_data->nres);
 		semilla(arbol_data,R_inicial, residuo);
 		
@@ -155,17 +149,17 @@ void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned 
 	assert(nivel > 1);  // pre condicion
 	Residuo residuo;
 	
-	i = 1;
-	while (i <= arbol_data->ndat && !exito)
+	i = 0;
+	while (i < arbol_data->ndat && !exito)
 	{
 		
 		copymat(R_local, R_inicial);
 
 		resultado = poneres(R_local,
-                        arbol_data->cossi[indice_nivel_anterior],   // OJO!!!!!!!!!!! i empieza de 1, esta bien eso??
-                        arbol_data->sinsi[indice_nivel_anterior],   // idem
-                        arbol_data->cosfi[i],                       // idem
-                        arbol_data->sinfi[i],                       // idem
+                        arbol_data->cossi[indice_nivel_anterior],   
+                        arbol_data->sinsi[indice_nivel_anterior],   
+                        arbol_data->cosfi[i],                       
+                        arbol_data->sinfi[i],                       
                         arbol_data->atm,
                         nivel,
 			arbol_data,
@@ -198,8 +192,8 @@ static bool procesar_ultimo_nivel(ArbolData* arbol_data) {
                  arbol_data->nres, 
                  arbol_data->cont, 
                  arbol_data->atm);
-		arbol_data->cont++;
-	//arbol_data->hubo_algun_exito  = true;
+
+	arbol_data->cont++;
 	return false;
 }
 #else
@@ -213,6 +207,7 @@ static bool procesar_ultimo_nivel(ArbolData* arbol_data)
                  arbol_data->nres, 
                  arbol_data->cont, 
                  arbol_data->atm);
+
 		arbol_data->cont++;
 		arbol_data->hubo_algun_exito = exito = true;
 	}
@@ -225,7 +220,8 @@ static bool procesar_ultimo_nivel(ArbolData* arbol_data)
 
 static int volumen_en_rango(ArbolData * arbol_data) {
 	float volumen_max_aa = pendiente_empirica * float(arbol_data->nres) + cota_maxima_volumen;
-	return in_range(float(arbol_data->grilla->obtener_vol_parcial()), volumen_min_aa , volumen_max_aa);
+        // printf("Volumen maximo=%f   Volumen=%f\n",volumen_max_aa,float(arbol_data->grilla->obtener_vol_parcial()) );
+	return in_range(float(arbol_data->grilla->obtener_vol_parcial())/float(arbol_data->nres), volumen_min_aa , volumen_max_aa);
 }
 
 

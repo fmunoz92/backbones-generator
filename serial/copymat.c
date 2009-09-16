@@ -1,5 +1,6 @@
 #include "petu.h"
 
+//This function copy de rotation matrix
 
 void copymat(float *A, float *B) 
 {

@@ -1,5 +1,6 @@
 #include "petu.h"
 
+//This performs the actual convertin of internal coordenates to cartesians
 
 void int2car( float *pT, float bon, float cosang, float sinang, 
               float costor, float sintor, ATOM *patm, int at, int tipo )

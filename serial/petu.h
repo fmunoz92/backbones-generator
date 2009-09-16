@@ -82,5 +82,5 @@ void  clearatm(ATOM *, int);
 void  writextc (XDRFILE* xfp, int nres, int n, ATOM *patm);
 
 #ifdef __cplusplus
-};
+}
 #endif

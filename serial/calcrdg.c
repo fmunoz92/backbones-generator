@@ -1,6 +1,9 @@
 #include "petu.h"
 #include <math.h>
 
+//This function calculates the gyration radius of the CA atoms
+//It was meant to filter long chains. Now it is replaced by the volume filter
+
 int calcRdG(ATOM *patm, int nres, float rgmax)
 {  
 	int i;
@@ -8,7 +11,7 @@ int calcRdG(ATOM *patm, int nres, float rgmax)
   
 	Rcm=xcm=ycm=zcm=dx2=dy2=dz2=0;
   
-	for (i=2;i<=(nres*3)-1;i+=3) 
+	for (i=1;i<=(nres*3)-2;i+=3) 
 	{
 		xcm += patm[i].x;
 		ycm += patm[i].y;
@@ -17,7 +20,7 @@ int calcRdG(ATOM *patm, int nres, float rgmax)
 	xcm /= nres;
 	ycm /= nres;
 	zcm /= nres;
-	for (i=2;i<=(nres*3)-1;i+=3) 
+	for (i=1;i<=(nres*3)-2;i+=3) 
 	{
 		dx2= (patm[i].x-xcm) * (patm[i].x-xcm);
 		dy2= (patm[i].y-ycm) * (patm[i].y-ycm);
@@ -25,7 +28,7 @@ int calcRdG(ATOM *patm, int nres, float rgmax)
 		Rcm += (dx2+dy2+dz2);
 	}
   
-  /*printf("radio de giro %f  %f\n",sqrt(Rcm/nres),rgmax);*/
+        // printf("radio de giro %f  %f\n",sqrt(Rcm/nres),rgmax);
   
 	if(sqrt(Rcm/nres) > rgmax)
 	{

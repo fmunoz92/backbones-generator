@@ -27,7 +27,7 @@ struct Residuo
 			 
 			 
 int   poneres( float *, float, float, float, float, ATOM *, int, ArbolData *, float dmax2, Residuo &);
-void  readdata(int , std::ifstream &, std::vector<float> &, std::vector<float> &, std::vector<float> &, std::vector<float> &); 
+void  readdata( std::ifstream &, std::vector<float> &, std::vector<float> &, std::vector<float> &, std::vector<float> &); 
 void  semilla(ArbolData *, float *, Residuo &);
 
 
@@ -43,9 +43,9 @@ inline bool in_range(float value, float min, float max) {
 }
 
 inline void sacar_residuo(ArbolData * arbol_data, Residuo & residuo) {
-	arbol_data->grilla->sacar_esfera(residuo.at1);
+	//arbol_data->grilla->sacar_esfera(residuo.at1);
 	arbol_data->grilla->sacar_esfera(residuo.at2);
-	arbol_data->grilla->sacar_esfera(residuo.at3);
+	//arbol_data->grilla->sacar_esfera(residuo.at3);
 }
 
 

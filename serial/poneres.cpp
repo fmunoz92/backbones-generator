@@ -10,14 +10,14 @@ int poneres(float *pR, float cossi, float sinsi, float cosfi, float sinfi, ATOM 
 	int at;
 	float T[16];
 
-	// Varios de los parametros pueden ser eliminados, ya que son todos campos de arbol_data, pero no entiendo bien que rol juega
-	// indice_nivel_anterior en generar_nivel_intermedio().
-	
+	/* Varios de los parametros pueden ser eliminados, ya que son todos campos de arbol_data,
+         pero no entiendo bien que rol juega indice_nivel_anterior en generar_nivel_intermedio().
+	*/
 	
 	/*Guardo la anterior*/
 	copymat(T,pR);
  
-	at = 3*(resN-1);
+	at = 3*(resN-1)-1;
 	at++;    
 	int2car(T, b_C_N, cos_a_CA_C_N, sin_a_CA_C_N, cossi, sinsi, patm, at, N);
 
@@ -29,8 +29,9 @@ int poneres(float *pR, float cossi, float sinsi, float cosfi, float sinfi, ATOM 
 	at++;    
 	int2car(T, b_CA_C, cos_a_N_CA_C, sin_a_N_CA_C, cosfi, sinfi, patm, at, C);
 
-	residuo = Residuo ( arbol_data->grilla->agregar_esfera(patm[at-2].x,patm[at-2].y,patm[at-2].z), arbol_data->grilla->agregar_esfera(patm[at-1].x,patm[at-1].y,patm[at-1].z), arbol_data->grilla->agregar_esfera(patm[at].x,patm[at].y,patm[at].z));
-	
+	//residuo = Residuo ( arbol_data->grilla->agregar_esfera(patm[at-2].x,patm[at-2].y,patm[at-2].z), arbol_data->grilla->agregar_esfera(patm[at-1].x,patm[at-1].y,patm[at-1].z), arbol_data->grilla->agregar_esfera(patm[at].x,patm[at].y,patm[at].z));
+	//
+residuo.at2 = arbol_data->grilla->agregar_esfera(patm[at-1].x,patm[at-1].y,patm[at-1].z);
 	
 	copymat(pR,T);
 	return BIEN;      
@@ -41,14 +42,15 @@ int poneres(float *pR, float cossi, float sinsi, float cosfi, float sinfi, ATOM 
 	int at;
 	float T[16];
 
-	// Varios de los parametros pueden ser eliminados, ya que son todos campos de arbol_data, pero no entiendo bien que rol juega
-	// indice_nivel_anterior en generar_nivel_intermedio().
-	
+	/* Varios de los parametros pueden ser eliminados, ya que son todos campos de arbol_data,
+         pero no entiendo bien que rol juega indice_nivel_anterior en generar_nivel_intermedio().
+	*/
+
 	
 	/*Guardo la anterior*/
 	copymat(T,pR);
  
-	at = 3*(resN-1);
+	at = 3*(resN-1)-1;
 	at++;    
 	int2car(T, b_C_N, cos_a_CA_C_N, sin_a_CA_C_N, cossi, sinsi, patm, at, N);
 	if(isclash(patm,at,resN) == MAL)
@@ -75,12 +77,14 @@ int poneres(float *pR, float cossi, float sinsi, float cosfi, float sinfi, ATOM 
 	{  
 		return MAL;
 	}
-
+	/*
 	residuo = Residuo ( arbol_data->grilla->agregar_esfera(patm[at-2].x,patm[at-2].y,patm[at-2].z), arbol_data->grilla->agregar_esfera(patm[at-1].x,patm[at-1].y,patm[at-1].z), arbol_data->grilla->agregar_esfera(patm[at].x,patm[at].y,patm[at].z));
-	
+	*/
+	residuo.at2 = arbol_data->grilla->agregar_esfera(patm[at-1].x,patm[at-1].y,patm[at-1].z);
 	
 	copymat(pR,T);
 	return BIEN;      
 }
 
 #endif
+
