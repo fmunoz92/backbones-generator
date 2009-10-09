@@ -5,7 +5,7 @@ float r[3][3][3];
 
 //This function detect colitions between atoms
 //The matrix r have the reference radius (actually the sum of the squares of the raduis)
-//The last index of r is 0 for 1-4 clash, 1 for 1-5 and 2 for the rest
+//The last index of r is 0 for 1-4 clashes, 1 for 1-5 and 2 for the rest
 
 int isclash(ATOM *patm, int at, int resN)
 {
@@ -21,7 +21,9 @@ int isclash(ATOM *patm, int at, int resN)
 	d2  = dx2+dy2+dz2;
 	if (d2< r[patm[at].vdw][patm[i].vdw][0])
 	{ 
+#ifdef VERBOSE
 	        printf("Clash 1-4 between atmom=%i and atom=%i distancia=%2.3f\n",at,i,sqrt(d2));
+#endif	        
 		return MAL;
 	}
         
@@ -40,7 +42,9 @@ int isclash(ATOM *patm, int at, int resN)
 	d2  = dx2+dy2+dz2;
 	if (d2< r[patm[at].vdw][patm[i].vdw][1]) 
 	{    
+#ifdef VERBOSE
 	        printf("Clash 1-5 between atmom=%i and atom=%i distancia=%2.3f\n",at,i,sqrt(d2));
+#endif
 		return MAL;
 	}
 
@@ -59,7 +63,9 @@ int isclash(ATOM *patm, int at, int resN)
 		d2  = dx2+dy2+dz2;
 		if (d2< r[patm[at].vdw][patm[i].vdw][2])
 		{ 
+#ifdef VERBOSE
 		        printf("Clash > 1-5 between atmom=%i and atom=%i distancia=%2.3f\n",at,i,sqrt(d2));
+#endif
 			return MAL;
 		}
 	}

@@ -81,7 +81,7 @@ int poneres(float *pR, float cossi, float sinsi, float cosfi, float sinfi, ATOM 
 	residuo = Residuo ( arbol_data->grilla->agregar_esfera(patm[at-2].x,patm[at-2].y,patm[at-2].z), arbol_data->grilla->agregar_esfera(patm[at-1].x,patm[at-1].y,patm[at-1].z), arbol_data->grilla->agregar_esfera(patm[at].x,patm[at].y,patm[at].z));
 	*/
 	residuo.at2 = arbol_data->grilla->agregar_esfera(patm[at-1].x,patm[at-1].y,patm[at-1].z);
-	
+
 	copymat(pR,T);
 	return BIEN;      
 }

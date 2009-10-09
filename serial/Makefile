@@ -18,6 +18,7 @@ FILES        = calcrdg.c clearatm.c copymat.c grillado.cpp imprime.c int2car.c i
 HEADERS      = petu.h
 LIBS         = -lxdrfile -lm 
 COMBINATIONS_DEBUG_FLAGS = -DCOMBINATIONS_DEBUG
+VERBOSE_FLAGS      = -DVERBOSE
 DEBUG = -ggdb3
 #LDFLAGS      = -L/usr/local/gromacs/lib   
 
@@ -47,8 +48,15 @@ gdb_debug:	CXXFLAGS+= $(DEBUG)
 gdb_debug:	CFLAGS+= $(DEBUG)
 gdb_debug:	debug
 
+
 debug:  	CXXFLAGS+= $(COMBINATIONS_DEBUG_FLAGS)
 debug:  	petu
+
+verbose:  	CXXFLAGS+= $(VERBOSE_FLAGS)
+verbose:  	CFLAGS+= $(VERBOSE_FLAGS)
+verbose:  	petu
+
+
 		
 clean:
 	    rm *.o  

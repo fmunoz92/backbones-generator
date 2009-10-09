@@ -98,10 +98,10 @@ int main (int argc , char **argv)
 	        readdata(filer, arbol_data.cosfi, arbol_data.sinfi, arbol_data.cossi, arbol_data.sinsi);
 
 		arbol_data.ndat = arbol_data.cossi.size(); // Se podria eliminar ndat por completo. Tener en cuenta a futuro.
-                printf("%i\n",arbol_data.ndat);
+                printf("Number of fi-si combinations in file=%i\n",arbol_data.ndat);
 
 	        generar_arbol(&arbol_data);
-	        printf("%li\n",arbol_data.cont);        
+	        printf("Number of chains generated=%li\n",arbol_data.cont);        
 		
 		// Se libera la memoria de la matriz atm.
 		delete [] arbol_data.atm;
@@ -126,6 +126,8 @@ void generar_arbol(ArbolData* arbol_data)
 	Residuo residuo;// Va a ser el residuo que agregue semilla en cada iteracion y al terminar del ciclo
 			// se usa para sacar el residuo del grillado.
     //inicializar_arbol(arbol_data);  
+
+
 	i = 0;
 	while ( i < arbol_data->ndat && !arbol_data->hubo_algun_exito )
 	{
@@ -148,7 +150,7 @@ void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned 
 	unsigned int i;
 	assert(nivel > 1);  // pre condicion
 	Residuo residuo;
-	
+
 	i = 0;
 	while (i < arbol_data->ndat && !exito)
 	{
@@ -211,6 +213,7 @@ static bool procesar_ultimo_nivel(ArbolData* arbol_data)
 		arbol_data->cont++;
 		arbol_data->hubo_algun_exito = exito = true;
 	}
+	
 	return exito;
 }
 #endif
@@ -220,7 +223,9 @@ static bool procesar_ultimo_nivel(ArbolData* arbol_data)
 
 static int volumen_en_rango(ArbolData * arbol_data) {
 	float volumen_max_aa = pendiente_empirica * float(arbol_data->nres) + cota_maxima_volumen;
-        // printf("Volumen maximo=%f   Volumen=%f\n",volumen_max_aa,float(arbol_data->grilla->obtener_vol_parcial()) );
+#ifdef VERBOSE
+        printf("Maximun Volume allowed per a.a  =%f.   Volumen in this chain=%f\n",volumen_max_aa,float(arbol_data->grilla->obtener_vol_parcial())/float(arbol_data->nres) );
+#endif
 	return in_range(float(arbol_data->grilla->obtener_vol_parcial())/float(arbol_data->nres), volumen_min_aa , volumen_max_aa);
 }
 

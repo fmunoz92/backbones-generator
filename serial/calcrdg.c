@@ -27,9 +27,10 @@ int calcRdG(ATOM *patm, int nres, float rgmax)
 		dz2= (patm[i].z-zcm) * (patm[i].z-zcm);
 		Rcm += (dx2+dy2+dz2);
 	}
-  
-        // printf("radio de giro %f  %f\n",sqrt(Rcm/nres),rgmax);
-  
+
+#ifdef VERBOSE 
+        printf("Raduis of gyration= %f. Maximun allowed=%f\n",sqrt(Rcm/nres),rgmax);
+#endif  
 	if(sqrt(Rcm/nres) > rgmax)
 	{
 		return MAL ;

@@ -1,4 +1,5 @@
 #include "petu.h"
+#include "math.h"
 
 //This function filter long chains.
 //Calculates the CA-CA distances of the recently added CA with the rest.
@@ -27,7 +28,9 @@ int islong(ATOM *patm, int at, float dmax2)
 		d2  = dx2+dy2+dz2;
 		if (d2>dmax2)
 		{ 
-		        printf("Largo=%f\n",d2);
+#ifdef VERBOSE
+		        printf("Chain length = %f, while Dmax is= %f \n",sqrt(d2),sqrt(dmax2));
+#endif		        
 			return MAL;
 		}
 	}
