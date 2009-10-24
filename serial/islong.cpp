@@ -1,12 +1,11 @@
-#include "petu.h"
-#include "math.h"
-
+#include "islong.h"
+#include <cmath>
 //This function filter long chains.
 //Calculates the CA-CA distances of the recently added CA with the rest.
 //Then compares this distances with dmax2, wich cames from the analisys of protein 
 //structures experimetally determined
 
-int islong(ATOM *patm, int at, float dmax2)
+FilterResultType islong(ATOM *patm, int at, float dmax2)
 { 
 	int i;
 	float dx2,dy2,dz2,d2;
@@ -15,7 +14,7 @@ int islong(ATOM *patm, int at, float dmax2)
         // at=13 is the CA of residue #5
 	if(at<13)
 	{
-		return BIEN;
+		return FILTER_OK;
 	}
    
         // at-12 is the CA atom that is four residues down the chain
@@ -29,11 +28,11 @@ int islong(ATOM *patm, int at, float dmax2)
 		if (d2>dmax2)
 		{ 
 #ifdef VERBOSE
-		        printf("Chain length = %f, while Dmax is= %f \n",sqrt(d2),sqrt(dmax2));
-#endif		        
-			return MAL;
+		         printf("Chain length = %f, while Dmax is= %f \n",sqrt(d2),sqrt(dmax2));
+#endif
+			return FILTER_FAIL;
 		}
 	}
-	return BIEN;
+	return FILTER_OK;
 }         	
 

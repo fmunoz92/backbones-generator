@@ -1,12 +1,46 @@
 
 
-#include "petu.h"
-#include <assert.h>
+
+
+
+#include <cassert>
 #include <iostream>
-#include <stdlib.h>
-#include <string>
+#include <fstream>
 #include "getopt_pp_standalone.h"
 
+#include <mili/mili.h>
+
+
+#include "poneres.h"
+#include "readdata.h"
+#include "semilla.h"
+#include "copymat.h"
+#include "calcrdg.h"
+#include "setr.h"
+
+
+#include "imprime.h"
+
+#include "clearatm.h"
+#include "writextc.h"
+
+
+
+inline float cubic_root(float a) {
+	return (pow(a, 1.0f/3.0f));
+}
+
+// Devuelve 1 si value esta entre min y max.
+// Se separo en una funcion distinta para mejorar el rendimiento de volumen_en_rango.
+inline bool in_range(float value, float min, float max) {
+	return min < bchain(value) < max;
+}
+
+inline void sacar_residuo(ArbolData * arbol_data, Residuo & residuo) {
+	//arbol_data->grilla->sacar_esfera(residuo.at1);
+	arbol_data->grilla->sacar_esfera(residuo.at2);
+	//arbol_data->grilla->sacar_esfera(residuo.at3);
+}
 
 
 // La estructura del algoritmo esta dividida en tres funciones, que se llaman en este orden:
@@ -20,9 +54,11 @@ static void generar_nivel_intermedio(unsigned int nivel,
 static bool procesar_ultimo_nivel(ArbolData* arbol_data); //bool void...?
 
 
-static int volumen_en_rango(ArbolData * arbol_data);
-static int filtros_ultimo_nivel(ArbolData * arbol_data) ;
+static FilterResultType volumen_en_rango(const ArbolData * arbol_data);
+static FilterResultType filtros_ultimo_nivel(const ArbolData * arbol_data) ;
 static void show_usage();
+
+
 
 const float cota_maxima_volumen = 177.65f; // Volumen obtenido tambien a partir de las pruebas de un set de datos en Grillado.
 const float pendiente_empirica = -0.0882f ; // Pendiente obtenida a partir de las pruebas de un set de datos en Grillado.
@@ -145,7 +181,7 @@ void generar_arbol(ArbolData* arbol_data)
 void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned int indice_nivel_anterior, ArbolData* arbol_data)
 {
 	float R_local[16];
-	int resultado;
+	FilterResultType resultado;
 	bool exito = false; // solo aplicable si somos anteultimo nivel
 	unsigned int i;
 	assert(nivel > 1);  // pre condicion
@@ -169,7 +205,7 @@ void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned 
 			residuo);
 
 		
-		if ( resultado == BIEN )
+		if ( resultado == FILTER_OK )
 		{
 			if (nivel < arbol_data->nres)
 			{              
@@ -203,7 +239,7 @@ static bool procesar_ultimo_nivel(ArbolData* arbol_data)
 {
 	bool exito = false;
     
-	if ( filtros_ultimo_nivel(arbol_data) )        
+	if ( filtros_ultimo_nivel(arbol_data) == FILTER_OK )        
 	{
 		writextc(arbol_data->xfp, 
                  arbol_data->nres, 
@@ -218,23 +254,30 @@ static bool procesar_ultimo_nivel(ArbolData* arbol_data)
 }
 #endif
 // Devuelve 1 si el volumen indicado por el grillado se encuentra en el rango aceptable, 0 si no.
-// Se usa int porque el resto de las funciones booleanas estan implementadas en C y por lo tanto devuelven int.
 
 
-static int volumen_en_rango(ArbolData * arbol_data) {
-	float volumen_max_aa = pendiente_empirica * float(arbol_data->nres) + cota_maxima_volumen;
+static FilterResultType volumen_en_rango(const ArbolData * arbol_data) {
+	const float volumen_max_aa = pendiente_empirica * float(arbol_data->nres) + cota_maxima_volumen;
 #ifdef VERBOSE
         printf("Maximun Volume allowed per a.a  =%f.   Volumen in this chain=%f\n",volumen_max_aa,float(arbol_data->grilla->obtener_vol_parcial())/float(arbol_data->nres) );
 #endif
-	return in_range(float(arbol_data->grilla->obtener_vol_parcial())/float(arbol_data->nres), volumen_min_aa , volumen_max_aa);
+  FilterResultType res = FILTER_FAIL;
+  if(in_range(float(arbol_data->grilla->obtener_vol_parcial())/float(arbol_data->nres), volumen_min_aa , volumen_max_aa)) {
+    res = FILTER_OK;
+  }
+	return res;
 }
 
 
 
 // Devuelve 1 si arbol_data pasa todos los filtros.
-static int filtros_ultimo_nivel(ArbolData * arbol_data) {
-	return 	calcRdG(arbol_data->atm, arbol_data->nres, arbol_data->rgmax) == BIEN 
-		&& volumen_en_rango(arbol_data);
+static FilterResultType filtros_ultimo_nivel(const ArbolData * arbol_data) {
+  FilterResultType res = FILTER_FAIL;
+	 	if(calcRdG(arbol_data->atm, arbol_data->nres, arbol_data->rgmax) == FILTER_OK 
+		&& volumen_en_rango(arbol_data) == FILTER_OK) {
+		  res = FILTER_OK;
+    }
+		return res;
 }
 
 void show_usage()

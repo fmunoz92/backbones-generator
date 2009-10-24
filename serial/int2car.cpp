@@ -1,9 +1,9 @@
-#include "petu.h"
-
+#include "int2car.h"
+#include "copymat.h"
 //This performs the actual convertin of internal coordenates to cartesians
 
 void int2car( float *pT, float bon, float cosang, float sinang, 
-              float costor, float sintor, ATOM *patm, int at, int tipo )
+              float costor, float sintor, ATOM *patm, int at, AtomType tipo )
 {
 	float A[16],rot[11];
 

@@ -1,4 +1,4 @@
-#include "petu.h"
+#include "imprime.h"
 
 //This function puts the cahin in a pdb file
 //It is an alternative to the xtc, mostly for debugging porpopuses

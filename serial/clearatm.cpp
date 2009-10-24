@@ -1,4 +1,4 @@
-#include "petu.h"
+#include "clearatm.h"
 
 //This function puts 0 in all the atoms coordinates
 

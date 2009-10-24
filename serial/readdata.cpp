@@ -1,6 +1,5 @@
 
-#include "petu.h"
-#include <sstream>
+#include "readdata.h"
 
 // Las pongo aca porque creo que no tiene utilidad en ningun otro lado. Esta bien?
 const float deg2rad_ratio = M_PI/180;

@@ -1,8 +1,6 @@
-#ifndef CPLUSPLUS
-#define CPLUSPLUS
-#endif
 
-#include "petu.h"
+
+#include "writextc.h"
 
 enum Ejes
 {

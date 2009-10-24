@@ -1,19 +1,15 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdarg.h>
+#ifndef PETU_H
+#define PETU_H
+#include <vector>
 
-#if defined(__cplusplus) && !defined(CPLUSPLUS)
+#include "grillado.h"
+
 #define CPLUSPLUS
-#endif
 #include <xdrfile/xdrfile_xtc.h>
+#undef CPLUSPLUS
 
 
-
-
-#define N  0
-#define CA 1
-#define C  2
+enum AtomType {N,CA,C};
 
 #define b_C_N  1.330
 #define b_N_CA 1.460
@@ -35,14 +31,14 @@
 #define cos_OMEGA -0.999847695
 #define sin_OMEGA 0.017452406
 
-#define MAL  0
-#define BIEN 1
 
+
+enum FilterResultType  {FILTER_FAIL, FILTER_OK};
 
 //#define DEBUG
 
 typedef struct {
-  int   vdw;
+  AtomType   vdw;
   float x;
   float y;
   float z;
@@ -52,35 +48,32 @@ typedef struct {
 // Datos a compartir por todos los niveles:
 
 
-#ifdef __cplusplus
-#include "includes_cplusplus.h"
 
-// Lo pongo aca porque afuera tiran error los .c
-extern "C" {
-#endif
-
+			 
+			 
+			 
+struct ArbolData
+{
+	float rgmax, dmax2;
+	std::vector<float> cosfi, cossi, sinfi, sinsi;    // constantes
+	ATOM  * atm;       // estructura parcial   
+	unsigned int nres, ndat;    // constantes
+	long int cont;              // cantidad de estructuras exitosas hasta el momento
+	XDRFILE* xfp;                    // file handler (constante)
+	bool hubo_algun_exito;      // si encendido, dice que hubo al menos una rama que llego al final
+	Grillado *grilla; 		// Utilizamos el grillado para aproximar el volumen parcial
+};
+struct Residuo 
+{		
+		Residuo(const esferaId &param_at1, const esferaId &param_at2, const esferaId &param_at3) : at1(param_at1), at2(param_at2), at3(param_at3){};
+		Residuo() {};
+		esferaId at1;
+		esferaId at2;
+		esferaId at3;
+}; 
 
 /* a esto se le pone extern, para decir que quien importe el .h va a ser usuario de estas variables */
 extern float r[3][3][3];
-extern float dmax2;
-/*
-#ifdef DEBUG
-int   poneres( float *, float, float, float, float, ATOM *, int, FILE *, float dmax2);
-int   isclash(ATOM *, int, int , FILE *);
-#else
-*/
-int   isclash(ATOM *, int, int);
-//#endif
-int   islong(ATOM *, int , float );
-int   calcRdG(ATOM *, int , float);
-void  setr(float , float, float, float, float);
-void  int2car(float *, float , float , float, float, float ,ATOM *, int , int );
-void  copymat(float *, float *); 
-void  imprime(FILE *, ATOM *, int , int );
 
-void  clearatm(ATOM *, int);
-void  writextc (XDRFILE* xfp, int nres, int n, ATOM *patm);
 
-#ifdef __cplusplus
-}
 #endif

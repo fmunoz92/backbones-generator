@@ -13,8 +13,8 @@
 # Variables set by the configuration script:
 OBJECTS      = calcrdg.o clearatm.o copymat.o grillado.o imprime.o int2car.o islong.o petu.o \
                poneres.o readdata.o semilla.o setr.o writextc.o isclash.o
-FILES        = calcrdg.c clearatm.c copymat.c grillado.cpp imprime.c int2car.c isclash.c islong.c \
-               petu.cpp poneres.cpp readdata.cpp semilla.cpp setr.c writextc.c 
+FILES        = calcrdg.cpp clearatm.cpp copymat.cpp grillado.cpp imprime.cpp int2car.cpp isclash.cpp islong.cpp \
+               petu.cpp poneres.cpp readdata.cpp semilla.cpp setr.cpp writextc.cpp 
 HEADERS      = petu.h
 LIBS         = -lxdrfile -lm 
 COMBINATIONS_DEBUG_FLAGS = -DCOMBINATIONS_DEBUG
@@ -22,10 +22,10 @@ VERBOSE_FLAGS      = -DVERBOSE
 DEBUG = -ggdb3
 #LDFLAGS      = -L/usr/local/gromacs/lib   
 
-CFLAGS       = -O3 -Wall
+
 CXXFLAGS     =  -Wall
 #CPPFLAGS     = -I/usr/local/gromacs/include/gromacs	
-CC           = gcc
+
 CXX          = g++
 LD           = $(CXX)
 
@@ -40,12 +40,10 @@ petu:	        $(HEADERS) $(OBJECTS)
 # todos los chequeos por lo que no se descarta ninguna 
 # cadena.
 gdb_petu:	CXXFLAGS+= $(DEBUG)
-gdb_petu:	CFLAGS+= $(DEBUG)
 gdb_petu:	petu
 
 
 gdb_debug:	CXXFLAGS+= $(DEBUG)
-gdb_debug:	CFLAGS+= $(DEBUG)
 gdb_debug:	debug
 
 

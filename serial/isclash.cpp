@@ -1,5 +1,5 @@
-#include "petu.h"
-#include <math.h>
+#include "isclash.h"
+#include <cmath>
 
 float r[3][3][3];
 
@@ -7,7 +7,7 @@ float r[3][3][3];
 //The matrix r have the reference radius (actually the sum of the squares of the raduis)
 //The last index of r is 0 for 1-4 clashes, 1 for 1-5 and 2 for the rest
 
-int isclash(ATOM *patm, int at, int resN)
+FilterResultType isclash(ATOM *patm, int at, int resN)
 {
 	int i;
 	float d2,dx2,dy2,dz2;
@@ -23,14 +23,14 @@ int isclash(ATOM *patm, int at, int resN)
 	{ 
 #ifdef VERBOSE
 	        printf("Clash 1-4 between atmom=%i and atom=%i distancia=%2.3f\n",at,i,sqrt(d2));
-#endif	        
-		return MAL;
+#endif
+		return FILTER_FAIL;
 	}
         
         //If this is atom #3 and passes the check for 1-4 clashes, then there is nothing else to check.
 	if(at ==  3)
 	{ 
-		return BIEN;
+		return FILTER_OK;
 	}
 
         //This is to check for the so-called 1-5 clashes; 
@@ -41,17 +41,17 @@ int isclash(ATOM *patm, int at, int resN)
 	dz2 = (patm[at].z - patm[i].z) * (patm[at].z - patm[i].z);
 	d2  = dx2+dy2+dz2;
 	if (d2< r[patm[at].vdw][patm[i].vdw][1]) 
-	{    
-#ifdef VERBOSE
+	{ 
+#ifdef VERBOSE   
 	        printf("Clash 1-5 between atmom=%i and atom=%i distancia=%2.3f\n",at,i,sqrt(d2));
 #endif
-		return MAL;
+		return FILTER_FAIL;
 	}
 
         //If this is atom #4 and passes check for 1-4 and 1-5 clashes, then there is nothing else to check.
 	if(at == 4) 
 	{
-		return BIEN;
+		return FILTER_OK;
 	}
 	
 	//The rest of the clashes until the end of the chain.
@@ -66,10 +66,10 @@ int isclash(ATOM *patm, int at, int resN)
 #ifdef VERBOSE
 		        printf("Clash > 1-5 between atmom=%i and atom=%i distancia=%2.3f\n",at,i,sqrt(d2));
 #endif
-			return MAL;
+			return FILTER_FAIL;
 		}
 	}
 
-	return BIEN;
+	return FILTER_OK;
 }         	
 
