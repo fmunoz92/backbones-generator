@@ -22,7 +22,6 @@
 #include "imprime.h"
 
 #include "clearatm.h"
-#include "writextc.h"
 
 
 
@@ -79,12 +78,13 @@ int main (int argc , char **argv)
             Scal_1_5;   // Scaling factor for the radii. Used to check for 1-5 clashes.
 
     std::string data;   // Name of the input file.
-	
+    std::string write_format;
+   
     size_t m; // They indicate the size of each dimention of the grid.
     size_t n;
     size_t z;
-
-
+    
+    FilerFactory * filer_factory = FilerFactory::get_instance();
 
     GetOpt_pp ops(argc, argv);
 		 
@@ -100,15 +100,17 @@ int main (int argc , char **argv)
 	    >> Option('i', "input_file", data, "ramachandran.dat")
 	    >> Option('N', "rows", n, static_cast<size_t>(100))
             >> Option('M', "cols", m, static_cast<size_t>(100))
-	    >> Option('Z', "depth", z, static_cast<size_t>(100));
+	    >> Option('Z', "depth", z, static_cast<size_t>(100))
+	    >> Option('w', "write_format", write_format, string("xtc"));
 		// Hay que decidir si efectivamente estos valores queremos que se puedan configurar desde
 		// la linea de comandos.	
 	
+      std::ifstream filer;
+		filer.open(data.c_str(), std::ifstream::in);            
+                                 
+	   ArbolData arbol_data;
+	   arbol_data.filer = filer_factory->create(write_format);
 
-	        std::ifstream filer;
-		filer.open(data.c_str(), std::ifstream::in);
-         
-	        ArbolData arbol_data;
 
 		float radius = 4.0f;
 		float dist = 5.7f;
@@ -117,7 +119,7 @@ int main (int argc , char **argv)
                 // Both equations constructed from database analisys.
 		arbol_data.rgmax =  2.72 * cubic_root(float(Nres)) + 5.0;
 	        arbol_data.dmax2 =  (8.0 * cubic_root(float(Nres))+25.0) * (8.0 * cubic_root(float(Nres))+25.0);
-
+      
                 // Number of residues
 		arbol_data.nres = Nres;
 		// Initialize the atm matrix.
@@ -129,9 +131,12 @@ int main (int argc , char **argv)
                 // Fill r[][][] with the minimun squared distance between atoms
 	        setr(RN,RCa,RC,Scal_1_4,Scal_1_5);
                 //Default compressed output
-	        arbol_data.xfp = xdrfile_open("traj.xtc","w");
+	        arbol_data.filer->open_write("traj.xtc");
+	        //arbol_data.filer->open_read("traj_compressed.xtc"); delete [] arbol_data.filer->read();
+	        arbol_data.angles_mapping = new AnglesMapping( arbol_data.nres);
 	        
-	        readdata(filer, arbol_data.cosfi, arbol_data.sinfi, arbol_data.cossi, arbol_data.sinsi);
+	        readdata(filer, arbol_data.cosfi, arbol_data.sinfi, arbol_data.cossi, arbol_data.sinsi, arbol_data.angles_mapping);
+	        arbol_data.angles_data = new AnglesData(arbol_data.nres, *arbol_data.angles_mapping);
 
 		arbol_data.ndat = arbol_data.cossi.size(); // Se podria eliminar ndat por completo. Tener en cuenta a futuro.
                 printf("Number of fi-si combinations in file=%i\n",arbol_data.ndat);
@@ -140,9 +145,14 @@ int main (int argc , char **argv)
 	        printf("Number of chains generated=%li\n",arbol_data.cont);        
 		
 		// Se libera la memoria de la matriz atm.
+		arbol_data.filer->close();
 		delete [] arbol_data.atm;
 		delete arbol_data.grilla;
+		delete arbol_data.filer;
+		delete arbol_data.angles_data;
+		delete arbol_data.angles_mapping;
 		filer.close();
+		delete filer_factory;
 	        return EXIT_SUCCESS;
     }
     else
@@ -200,9 +210,11 @@ void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned 
                         arbol_data->sinfi[i],                       
                         arbol_data->atm,
                         nivel,
-			arbol_data,
-			arbol_data->dmax2,
-			residuo);
+                        arbol_data,
+                        arbol_data->dmax2,
+                        residuo,
+                        indice_nivel_anterior,
+                        i);
 
 		
 		if ( resultado == FILTER_OK )
@@ -226,30 +238,25 @@ void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned 
 #ifdef COMBINATIONS_DEBUG
 // En el modo DEBUG se deshabilitan los chequeos.
 static bool procesar_ultimo_nivel(ArbolData* arbol_data) { 
-	writextc(arbol_data->xfp, 
-                 arbol_data->nres, 
-                 arbol_data->cont, 
-                 arbol_data->atm);
+	arbol_data->filer->write( arbol_data->atm, 
+                                 *arbol_data->angles_data);
 
 	arbol_data->cont++;
 	return false;
 }
 #else
+
 static bool procesar_ultimo_nivel(ArbolData* arbol_data)
 {
 	bool exito = false;
     
 	if ( filtros_ultimo_nivel(arbol_data) == FILTER_OK )        
 	{
-		writextc(arbol_data->xfp, 
-                 arbol_data->nres, 
-                 arbol_data->cont, 
-                 arbol_data->atm);
-
+      arbol_data->filer->write( arbol_data->atm, 
+                                 *arbol_data->angles_data);
 		arbol_data->cont++;
 		arbol_data->hubo_algun_exito = exito = true;
 	}
-	
 	return exito;
 }
 #endif

@@ -10,7 +10,7 @@
 // siempre devuelve FILTER_OK.
 #ifdef COMBINATIONS_DEBUG
 
-FilterResultType poneres(float *pR, float cossi, float sinsi, float cosfi, float sinfi, ATOM *patm, int resN, ArbolData *arbol_data, float dmax2, Residuo  &residuo)
+FilterResultType poneres(float *pR, float cossi, float sinsi, float cosfi, float sinfi, ATOM *patm, int resN, ArbolData *arbol_data, float dmax2, Residuo  &residuo, unsigned int si_index, unsigned int fi_index)
 {
 	int at;
 	float T[16];
@@ -18,6 +18,9 @@ FilterResultType poneres(float *pR, float cossi, float sinsi, float cosfi, float
 	/* Varios de los parametros pueden ser eliminados, ya que son todos campos de arbol_data,
          pero no entiendo bien que rol juega indice_nivel_anterior en generar_nivel_intermedio().
 	*/
+	
+	arbol_data->angles_data->angles[resN-2].si = si_index;
+	arbol_data->angles_data->angles[resN-2].fi = fi_index;
 	
 	/*Guardo la anterior*/
 	copymat(T,pR);
@@ -42,7 +45,7 @@ residuo.at2 = arbol_data->grilla->agregar_esfera(patm[at-1].x,patm[at-1].y,patm[
 	return FILTER_OK;      
 }
 #else
-FilterResultType poneres(float *pR, float cossi, float sinsi, float cosfi, float sinfi, ATOM *patm, int resN, ArbolData *arbol_data, float dmax2, Residuo  &residuo)
+FilterResultType poneres(float *pR, float cossi, float sinsi, float cosfi, float sinfi, ATOM *patm, int resN, ArbolData *arbol_data, float dmax2, Residuo  &residuo, unsigned int si_index, unsigned int fi_index)
 {
 	int at;
 	float T[16];
@@ -51,6 +54,8 @@ FilterResultType poneres(float *pR, float cossi, float sinsi, float cosfi, float
          pero no entiendo bien que rol juega indice_nivel_anterior en generar_nivel_intermedio().
 	*/
 
+	arbol_data->angles_data->angles[resN-2].si = si_index;
+	arbol_data->angles_data->angles[resN-2].fi = fi_index;
 	
 	/*Guardo la anterior*/
 	copymat(T,pR);

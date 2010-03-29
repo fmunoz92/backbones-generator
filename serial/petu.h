@@ -3,54 +3,17 @@
 #include <vector>
 
 #include "grillado.h"
-
-#define CPLUSPLUS
-#include <xdrfile/xdrfile_xtc.h>
-#undef CPLUSPLUS
-
-
-enum AtomType {N,CA,C};
-
-#define b_C_N  1.330
-#define b_N_CA 1.460
-#define b_CA_C 1.525
-
-#define a_CA_C_N 2.059454 
-#define cos_a_CA_C_N -0.469441085 
-#define sin_a_CA_C_N  0.882963797
-
-#define a_C_N_CA 2.111813
-#define cos_a_C_N_CA -0.515007735 
-#define sin_a_C_N_CA  0.85718553
-
-#define a_N_CA_C 2.024582156
-#define cos_a_N_CA_C -0.438371348
-#define sin_a_N_CA_C  0.898793948
-
-#define OMEGA 3.124087
-#define cos_OMEGA -0.999847695
-#define sin_OMEGA 0.017452406
-
-
+#include "prot-filer/definitions.h"
 
 enum FilterResultType  {FILTER_FAIL, FILTER_OK};
 
-//#define DEBUG
 
-typedef struct {
-  AtomType   vdw;
-  float x;
-  float y;
-  float z;
-} ATOM;
-
+#include "prot-filer/format_filer.h"
+#include "prot-filer/angles.h"
 
 // Datos a compartir por todos los niveles:
 
-
-
-			 
-			 
+class FormatFiler;
 			 
 struct ArbolData
 {
@@ -59,9 +22,11 @@ struct ArbolData
 	ATOM  * atm;       // estructura parcial   
 	unsigned int nres, ndat;    // constantes
 	long int cont;              // cantidad de estructuras exitosas hasta el momento
-	XDRFILE* xfp;                    // file handler (constante)
 	bool hubo_algun_exito;      // si encendido, dice que hubo al menos una rama que llego al final
 	Grillado *grilla; 		// Utilizamos el grillado para aproximar el volumen parcial
+	AnglesData *angles_data; // Used only when writing compressed data.
+	FormatFiler *filer;
+	AnglesMapping *angles_mapping;
 };
 struct Residuo 
 {		

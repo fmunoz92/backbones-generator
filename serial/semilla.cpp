@@ -1,5 +1,5 @@
 #include "semilla.h"
-
+#include "copyatm.h"
 
 void semilla(ArbolData *arbol_data, float *R, Residuo & residuo)
 {
@@ -8,7 +8,12 @@ void semilla(ArbolData *arbol_data, float *R, Residuo & residuo)
 	arbol_data->atm[1].x=1.460; arbol_data->atm[1].y=0.000; arbol_data->atm[1].z=0.000;
 	arbol_data->atm[2].x=2.011; arbol_data->atm[2].y=1.422; arbol_data->atm[2].z=0.000;
 	arbol_data->atm[0].vdw=N  ; arbol_data->atm[1].vdw=CA  ; arbol_data->atm[2].vdw=C;
-	  
+	
+	copyatm(&arbol_data->atm[0],&arbol_data->angles_data->seed[0]);
+	copyatm(&arbol_data->atm[1],&arbol_data->angles_data->seed[1]);
+	copyatm(&arbol_data->atm[2],&arbol_data->angles_data->seed[2]);
+	
+	
 	R[0]  = 0.361594; R[1]  =-0.932336;
 	R[2]  = 0.000000; R[3]  = 2.011431;
 	R[4]  = 0.932336; R[5]  = 0.361594;
