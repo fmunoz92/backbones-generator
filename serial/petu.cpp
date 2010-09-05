@@ -1,8 +1,3 @@
-
-
-
-
-
 #include <cassert>
 #include <iostream>
 #include <fstream>
@@ -10,62 +5,53 @@
 
 #include <mili/mili.h>
 
-
 #include "poneres.h"
 #include "readdata.h"
 #include "semilla.h"
 #include "copymat.h"
 #include "calcrdg.h"
 #include "setr.h"
-
-
 #include "imprime.h"
-
 #include "clearatm.h"
-
-
-
-inline float cubic_root(float a) {
-	return (pow(a, 1.0f/3.0f));
-}
-
-// Devuelve 1 si value esta entre min y max.
-// Se separo en una funcion distinta para mejorar el rendimiento de volumen_en_rango.
-inline bool in_range(float value, float min, float max) {
-	return min < bchain(value) < max;
-}
-
-inline void sacar_residuo(ArbolData * arbol_data, Residuo & residuo) {
-	//arbol_data->grilla->sacar_esfera(residuo.at1);
-	arbol_data->grilla->sacar_esfera(residuo.at2);
-	//arbol_data->grilla->sacar_esfera(residuo.at3);
-}
-
-
-// La estructura del algoritmo esta dividida en tres funciones, que se llaman en este orden:
-static void generar_arbol(ArbolData* arbol_data);
-
-static void generar_nivel_intermedio(unsigned int nivel, 
-                                     float R_inicial[16], 
-                                     unsigned int indice_nivel_anterior, 
-                                     ArbolData* arbol_data);
-
-static bool procesar_ultimo_nivel(ArbolData* arbol_data); //bool void...?
-
-
-static FilterResultType volumen_en_rango(const ArbolData * arbol_data);
-static FilterResultType filtros_ultimo_nivel(const ArbolData * arbol_data) ;
-static void show_usage();
-
-
 
 const float cota_maxima_volumen = 177.65f; // Volumen obtenido tambien a partir de las pruebas de un set de datos en Grillado.
 const float pendiente_empirica = -0.0882f ; // Pendiente obtenida a partir de las pruebas de un set de datos en Grillado.
 const float volumen_min_aa = 110.0f;
 //const float volumen_min_aa = 0.0f; // Volumen obtenido tambien a partir de las pruebas de un set de datos en Grillado.
-	
 
-int main (int argc , char **argv) 
+class TreeGenerator
+{
+    private:
+        TreeData* tree_data;
+    public:
+        void generate();
+        TreeGenerator(TreeData*); 
+    private:
+        void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned int indice_nivel_anterior);
+        bool procesar_ultimo_nivel();
+        FilterResultType filtros_ultimo_nivel();
+        FilterResultType volumen_en_rango();
+        inline void sacar_residuo(Residuo& residuo) 
+        {
+        	//tree_data->grilla->sacar_esfera(residuo.at1);
+        	tree_data->grilla->sacar_esfera(residuo.at2);
+        	//tree_data->grilla->sacar_esfera(residuo.at3);
+        }
+        // Devuelve 1 si value esta entre min y max.
+        // Se separo en una funcion distinta para mejorar el rendimiento de volumen_en_rango.
+        inline bool in_range(float value, float min, float max) 
+        {
+            return min < bchain(value) < max;
+        }
+};
+
+inline float cubic_root(float a) {
+	return (pow(a, 1.0f/3.0f));
+}
+
+static void show_usage();
+
+int main(int argc, char **argv) 
 {
     using namespace GetOpt;
 
@@ -108,52 +94,52 @@ int main (int argc , char **argv)
       std::ifstream filer;
 		filer.open(data.c_str(), std::ifstream::in);            
                                  
-	   ArbolData arbol_data;
-	   arbol_data.filer = filer_factory->create(write_format);
+	   TreeData tree_data;
+	   tree_data.filer = filer_factory->create(write_format);
 
 
 		float radius = 4.0f;
 		float dist = 5.7f;
-		arbol_data.grilla = new Grillado(m, n , z, radius, dist);
+		tree_data.grilla = new Grillado(m, n , z, radius, dist);
                 // Maximun gyration radius and maximun CA-CA distance. 
                 // Both equations constructed from database analisys.
-		arbol_data.rgmax =  2.72 * cubic_root(float(Nres)) + 5.0;
-	        arbol_data.dmax2 =  (8.0 * cubic_root(float(Nres))+25.0) * (8.0 * cubic_root(float(Nres))+25.0);
+		tree_data.rgmax =  2.72 * cubic_root(float(Nres)) + 5.0;
+	    tree_data.dmax2 =  (8.0 * cubic_root(float(Nres))+25.0) * (8.0 * cubic_root(float(Nres))+25.0);
       
-                // Number of residues
-		arbol_data.nres = Nres;
+        // Number of residues
+		tree_data.nres = Nres;
 		// Initialize the atm matrix.
-		arbol_data.atm = new ATOM[(arbol_data.nres)*3];
-	        // Initialize the chain counter
-	        arbol_data.cont = 0;
-	        arbol_data.hubo_algun_exito = false;
+		tree_data.atm = new ATOM[(tree_data.nres)*3];
+	    // Initialize the chain counter
+	    tree_data.cont = 0;
+	    tree_data.hubo_algun_exito = false;
 
-                // Fill r[][][] with the minimun squared distance between atoms
-	        setr(RN,RCa,RC,Scal_1_4,Scal_1_5);
-                //Default compressed output
-	        arbol_data.filer->open_write("traj.xtc");
-	        //arbol_data.filer->open_read("traj_compressed.xtc"); delete [] arbol_data.filer->read();
-	        arbol_data.angles_mapping = new AnglesMapping( arbol_data.nres);
-	        
-	        readdata(filer, arbol_data.cosfi, arbol_data.sinfi, arbol_data.cossi, arbol_data.sinsi, arbol_data.angles_mapping);
-	        arbol_data.angles_data = new AnglesData(arbol_data.nres, *arbol_data.angles_mapping);
+            // Fill r[][][] with the minimun squared distance between atoms
+	    setr(RN,RCa,RC,Scal_1_4,Scal_1_5);
+            //Default compressed output
+	    tree_data.filer->open_write("traj.xtc");
+	    //tree_data.filer->open_read("traj_compressed.xtc"); delete [] tree_data.filer->read();
+	    tree_data.angles_mapping = new AnglesMapping( tree_data.nres);
+	    
+	    readdata(filer, tree_data.cosfi, tree_data.sinfi, tree_data.cossi, tree_data.sinsi, tree_data.angles_mapping);
+	    tree_data.angles_data = new AnglesData(tree_data.nres, *tree_data.angles_mapping);
 
-		arbol_data.ndat = arbol_data.cossi.size(); // Se podria eliminar ndat por completo. Tener en cuenta a futuro.
-                printf("Number of fi-si combinations in file=%i\n",arbol_data.ndat);
+		tree_data.ndat = tree_data.cossi.size(); // Se podria eliminar ndat por completo. Tener en cuenta a futuro.
+        printf("Number of fi-si combinations in file=%i\n",tree_data.ndat);
 
-	        generar_arbol(&arbol_data);
-	        printf("Number of chains generated=%li\n",arbol_data.cont);        
+	    TreeGenerator(&tree_data).generate();
+	    printf("Number of chains generated=%li\n", tree_data.cont);        
 		
 		// Se libera la memoria de la matriz atm.
-		arbol_data.filer->close();
-		delete [] arbol_data.atm;
-		delete arbol_data.grilla;
-		delete arbol_data.filer;
-		delete arbol_data.angles_data;
-		delete arbol_data.angles_mapping;
+		tree_data.filer->close();
+		delete [] tree_data.atm;
+		delete tree_data.grilla;
+		delete tree_data.filer;
+		delete tree_data.angles_data;
+		delete tree_data.angles_mapping;
 		filer.close();
 		delete filer_factory;
-	        return EXIT_SUCCESS;
+	    return EXIT_SUCCESS;
     }
     else
     {
@@ -162,33 +148,36 @@ int main (int argc , char **argv)
     }
 }
 
+void show_usage()
+{
+    std::cerr << "Invalid arguments." << std::endl;
+}
 
-// =============================================== ALGORITMO ================================
+TreeGenerator::TreeGenerator(TreeData* data) : tree_data(data) {};
 
-void generar_arbol(ArbolData* arbol_data)
+void TreeGenerator::generate()
 {
 	float R_inicial[16];
 	unsigned int i;
 	Residuo residuo;// Va a ser el residuo que agregue semilla en cada iteracion y al terminar del ciclo
 			// se usa para sacar el residuo del grillado.
-    //inicializar_arbol(arbol_data);  
-
+    //inicializar_arbol(tree_data);  
 
 	i = 0;
-	while ( i < arbol_data->ndat && !arbol_data->hubo_algun_exito )
+	while ( i < tree_data->ndat && !tree_data->hubo_algun_exito )
 	{
 		//printf("cleardata\n");
-		clearatm( arbol_data->atm, arbol_data->nres);
-		semilla(arbol_data,R_inicial, residuo);
+		clearatm(tree_data->atm, tree_data->nres);
+		semilla(tree_data,R_inicial, residuo);
 		
-		generar_nivel_intermedio(2, R_inicial, i, arbol_data);
-		sacar_residuo(arbol_data, residuo);
+		generar_nivel_intermedio(2, R_inicial, i);
+		sacar_residuo(residuo);
 		i++;
 	}
 }
 
 // se asume que nivel > 1
-void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned int indice_nivel_anterior, ArbolData* arbol_data)
+void TreeGenerator::generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned int indice_nivel_anterior)
 {
 	float R_local[16];
 	FilterResultType resultado;
@@ -198,20 +187,20 @@ void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned 
 	Residuo residuo;
 
 	i = 0;
-	while (i < arbol_data->ndat && !exito)
+	while (i < tree_data->ndat && !exito)
 	{
 		
 		copymat(R_local, R_inicial);
 
 		resultado = poneres(R_local,
-                        arbol_data->cossi[indice_nivel_anterior],   
-                        arbol_data->sinsi[indice_nivel_anterior],   
-                        arbol_data->cosfi[i],                       
-                        arbol_data->sinfi[i],                       
-                        arbol_data->atm,
+                        tree_data->cossi[indice_nivel_anterior],   
+                        tree_data->sinsi[indice_nivel_anterior],   
+                        tree_data->cosfi[i],                       
+                        tree_data->sinfi[i],                       
+                        tree_data->atm,
                         nivel,
-                        arbol_data,
-                        arbol_data->dmax2,
+                        tree_data,
+                        tree_data->dmax2,
                         residuo,
                         indice_nivel_anterior,
                         i);
@@ -219,76 +208,62 @@ void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned 
 		
 		if ( resultado == FILTER_OK )
 		{
-			if (nivel < arbol_data->nres)
+			if (nivel < tree_data->nres)
 			{              
-				generar_nivel_intermedio(nivel+1, R_local, i, arbol_data);
+				generar_nivel_intermedio(nivel+1, R_local, i);
 			}
 			else
 			{
-				exito = procesar_ultimo_nivel(arbol_data);
+				exito = procesar_ultimo_nivel();
 			}
-			sacar_residuo(arbol_data, residuo);
+			sacar_residuo(residuo);
 		}
 		
 		i++;
 	}
 }
 
-
-#ifdef COMBINATIONS_DEBUG
+// True si el volumen indicado por el grillado se encuentra en el rango aceptable
+bool TreeGenerator::procesar_ultimo_nivel() 
+{ 
+#ifdef COMBINATIONS_DEBUG 
 // En el modo DEBUG se deshabilitan los chequeos.
-static bool procesar_ultimo_nivel(ArbolData* arbol_data) { 
-	arbol_data->filer->write( arbol_data->atm, 
-                                 *arbol_data->angles_data);
-
-	arbol_data->cont++;
+	tree_data->filer->write(tree_data->atm, *tree_data->angles_data);
+	tree_data->cont++;
 	return false;
-}
 #else
-
-static bool procesar_ultimo_nivel(ArbolData* arbol_data)
-{
 	bool exito = false;
     
-	if ( filtros_ultimo_nivel(arbol_data) == FILTER_OK )        
-	{
-      arbol_data->filer->write( arbol_data->atm, 
-                                 *arbol_data->angles_data);
-		arbol_data->cont++;
-		arbol_data->hubo_algun_exito = exito = true;
+	if (filtros_ultimo_nivel() == FILTER_OK)
+    {
+        tree_data->filer->write(tree_data->atm, *tree_data->angles_data);
+		tree_data->cont++;
+		tree_data->hubo_algun_exito = exito = true;
 	}
 	return exito;
+#endif
 }
-#endif
-// Devuelve 1 si el volumen indicado por el grillado se encuentra en el rango aceptable, 0 si no.
 
-
-static FilterResultType volumen_en_rango(const ArbolData * arbol_data) {
-	const float volumen_max_aa = pendiente_empirica * float(arbol_data->nres) + cota_maxima_volumen;
-#ifdef VERBOSE
-        printf("Maximun Volume allowed per a.a  =%f.   Volumen in this chain=%f\n",volumen_max_aa,float(arbol_data->grilla->obtener_vol_parcial())/float(arbol_data->nres) );
-#endif
-  FilterResultType res = FILTER_FAIL;
-  if(in_range(float(arbol_data->grilla->obtener_vol_parcial())/float(arbol_data->nres), volumen_min_aa , volumen_max_aa)) {
-    res = FILTER_OK;
-  }
+// Devuelve 1 si tree_data pasa todos los filtros.
+FilterResultType TreeGenerator::filtros_ultimo_nivel() 
+{
+    FilterResultType res = FILTER_FAIL;
+	if(calcRdG(tree_data->atm, tree_data->nres, tree_data->rgmax) == FILTER_OK 
+		&& volumen_en_rango() == FILTER_OK) {
+        res = FILTER_OK;
+    }
 	return res;
 }
 
-
-
-// Devuelve 1 si arbol_data pasa todos los filtros.
-static FilterResultType filtros_ultimo_nivel(const ArbolData * arbol_data) {
-  FilterResultType res = FILTER_FAIL;
-	 	if(calcRdG(arbol_data->atm, arbol_data->nres, arbol_data->rgmax) == FILTER_OK 
-		&& volumen_en_rango(arbol_data) == FILTER_OK) {
-		  res = FILTER_OK;
-    }
-		return res;
-}
-
-void show_usage()
+FilterResultType TreeGenerator::volumen_en_rango() 
 {
-    std::cerr << "Invalid arguments." << std::endl;
+	const float volumen_max_aa = pendiente_empirica * float(tree_data->nres) + cota_maxima_volumen;
+#ifdef VERBOSE
+    printf("Maximun Volume allowed per a.a  =%f.   Volumen in this chain=%f\n",volumen_max_aa,float(tree_data->grilla->obtener_vol_parcial())/float(tree_data->nres) );
+#endif
+    FilterResultType res = FILTER_FAIL;
+    if(in_range(float(tree_data->grilla->obtener_vol_parcial())/float(tree_data->nres), volumen_min_aa , volumen_max_aa)) {
+        res = FILTER_OK;
+    }
+	return res;
 }
-

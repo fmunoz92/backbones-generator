@@ -1,7 +1,7 @@
 #include "semilla.h"
 #include "copyatm.h"
 
-void semilla(ArbolData *arbol_data, float *R, Residuo & residuo)
+void semilla(TreeData *arbol_data, float *R, Residuo & residuo)
 {
   /* Los valores semilla */
 	arbol_data->atm[0].x=0.000; arbol_data->atm[0].y=0.000; arbol_data->atm[0].z=0.000;

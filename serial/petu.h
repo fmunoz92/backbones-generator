@@ -15,7 +15,7 @@ enum FilterResultType  {FILTER_FAIL, FILTER_OK};
 
 class FormatFiler;
 			 
-struct ArbolData
+struct TreeData
 {
 	float rgmax, dmax2;
 	std::vector<float> cosfi, cossi, sinfi, sinsi;    // constantes
