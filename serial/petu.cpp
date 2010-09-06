@@ -31,7 +31,7 @@ class TreeGenerator
         bool procesar_ultimo_nivel();
         FilterResultType filtros_ultimo_nivel();
         FilterResultType volumen_en_rango();
-        inline void sacar_residuo(Residuo& residuo) 
+        void sacar_residuo(Residuo& residuo) 
         {
         	//tree_data->grilla->sacar_esfera(residuo.at1);
         	tree_data->grilla->sacar_esfera(residuo.at2);
@@ -39,7 +39,7 @@ class TreeGenerator
         }
         // Devuelve 1 si value esta entre min y max.
         // Se separo en una funcion distinta para mejorar el rendimiento de volumen_en_rango.
-        inline bool in_range(float value, float min, float max) 
+        bool in_range(float value, float min, float max) 
         {
             return min < bchain(value) < max;
         }
