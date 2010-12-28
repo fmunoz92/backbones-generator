@@ -1,3 +1,3 @@
 #include "petu.h"
 
-FilterResultType isclash(ATOM *patm, int at, int resN);
+FilterResultType isclash(const ATOM* patm, int at);

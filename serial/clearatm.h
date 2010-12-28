@@ -1,3 +1,3 @@
 #include "petu.h"
 
-void  clearatm(ATOM *patm, int nres);
+void  clearatm(ATOM* patm, int nres);

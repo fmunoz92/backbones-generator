@@ -16,7 +16,7 @@ OBJECTS      = calcrdg.o clearatm.o copyatm.o copymat.o grillado.o imprime.o int
 FILES        = calcrdg.cpp clearatm.cpp copyatm.cpp copymat.cpp grillado.cpp \
                imprime.cpp int2car.cpp isclash.cpp islong.cpp petu.cpp poneres.cpp readdata.cpp semilla.cpp setr.cpp
 HEADERS      = petu.h
-LIBS         = -lprot-filer -lm 
+LIBS         = -lprot-filer -lm -lgetopt_pp
 COMBINATIONS_DEBUG_FLAGS = -DCOMBINATIONS_DEBUG
 VERBOSE_FLAGS      = -DVERBOSE
 DEBUG = -ggdb3

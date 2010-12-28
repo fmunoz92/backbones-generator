@@ -1,1 +1,1 @@
-void  copymat(float *A, float *B); 
+void  copymat(float* A, float* B);

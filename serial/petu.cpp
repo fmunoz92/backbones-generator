@@ -1,7 +1,7 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
-#include "getopt_pp_standalone.h"
+#include "getopt_pp.h"
 
 #include <mili/mili.h>
 
@@ -19,39 +19,84 @@ const float pendiente_empirica = -0.0882f ; // Pendiente obtenida a partir de la
 const float volumen_min_aa = 110.0f;
 //const float volumen_min_aa = 0.0f; // Volumen obtenido tambien a partir de las pruebas de un set de datos en Grillado.
 
+//TODO a mili
+inline float cubic_root(float a)
+{
+    return cbrtf(a);
+}
+
+TreeData::TreeData(int nRes, FormatFiler* filer, Grillado* grillado) :
+    nres(nRes),
+    // Maximun gyration radius and maximun CA-CA distance.
+    // Both equations constructed from database analisys.
+    //TODO: remover float cuando cubic_root este en mili y sea generico
+    rgmax(2.72 * cubic_root(float(nres)) + 5.0),
+    dmax2(mili::square(8.0 * cubic_root(float(nres)) + 25.0)),
+    atm(new ATOM[nres * 3]),
+    cont(0),
+    hubo_algun_exito(false),
+    grilla(grillado),
+    filer(filer),
+    angles_mapping(new AnglesMapping(nres))
+{
+    //Default compressed output
+    filer->open_write("traj.xtc");
+}
+
+TreeData::~TreeData()
+{
+    filer->close();
+    delete [] atm;
+    delete grilla;
+    delete filer;
+    delete angles_data;
+    delete angles_mapping;
+}
+
 class TreeGenerator
 {
-    private:
-        TreeData* tree_data;
-    public:
-        void generate();
-        TreeGenerator(TreeData*); 
-    private:
-        void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned int indice_nivel_anterior);
-        bool procesar_ultimo_nivel();
-        FilterResultType filtros_ultimo_nivel();
-        FilterResultType volumen_en_rango();
-        void sacar_residuo(Residuo& residuo) 
-        {
-        	//tree_data->grilla->sacar_esfera(residuo.at1);
-        	tree_data->grilla->sacar_esfera(residuo.at2);
-        	//tree_data->grilla->sacar_esfera(residuo.at3);
-        }
-        // Devuelve 1 si value esta entre min y max.
-        // Se separo en una funcion distinta para mejorar el rendimiento de volumen_en_rango.
-        bool in_range(float value, float min, float max) 
-        {
-            return min < bchain(value) < max;
-        }
-};
+private:
+    TreeData* tree_data;
+    AnglesDatabase* residue_chains;
+    const unsigned int size;
+    const bool with_residues_input;
+public:
+    void generate();
+    TreeGenerator(TreeData*, AnglesDatabase* residue_chain_database);
+    ~TreeGenerator()
+    {
+        delete residue_chains;
+    }
 
-inline float cubic_root(float a) {
-	return (pow(a, 1.0f/3.0f));
-}
+private:
+    void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned int indice_nivel_anterior);
+    bool procesar_ultimo_nivel();
+    FilterResultType filtros_ultimo_nivel();
+    FilterResultType volumen_en_rango();
+    void sacar_residuo(const Residuo& residuo)
+    {
+        //tree_data->grilla->sacar_esfera(residuo.at1);
+        tree_data->grilla->sacar_esfera(residuo.at2);
+        //tree_data->grilla->sacar_esfera(residuo.at3);
+    }
+    void sacar_residuos(const vector<Residuo>& residuos)
+    {
+        for (unsigned int i = 0; i < residuos.size(); ++i)
+        {
+            sacar_residuo(residuos[i]);
+        }
+    }
+    // Devuelve 1 si value esta entre min y max.
+    // Se separo en una funcion distinta para mejorar el rendimiento de volumen_en_rango.
+    bool in_range(float value, float min, float max)
+    {
+        return min < mili::bchain(value) < max;
+    }
+};
 
 static void show_usage();
 
-int main(int argc, char **argv) 
+int main(int argc, char** argv)
 {
     using namespace GetOpt;
 
@@ -65,81 +110,65 @@ int main(int argc, char **argv)
 
     std::string data;   // Name of the input file.
     std::string write_format;
-   
+    std::string residues_input; //Name of the residue chains file.
+
     size_t m; // They indicate the size of each dimention of the grid.
     size_t n;
     size_t z;
-    
-    FilerFactory * filer_factory = FilerFactory::get_instance();
+
+    FilerFactory* filer_factory = FilerFactory::get_instance();
 
     GetOpt_pp ops(argc, argv);
-		 
+
     if (ops >> Option('r', "Nres", Nres))
     {
-	
         ops
-            >> Option('n', "Rn", RN, 1.5f)
-            >> Option('a', "Rca", RCa, 1.7f)
-            >> Option('c', "Rc", RC, 1.6f)
-            >> Option('s', "Scal_1_4", Scal_1_4, 0.85f)
-            >> Option('l', "Scal_1_5", Scal_1_5, 1.0f)
-	    >> Option('i', "input_file", data, "ramachandran.dat")
-	    >> Option('N', "rows", n, static_cast<size_t>(100))
-            >> Option('M', "cols", m, static_cast<size_t>(100))
-	    >> Option('Z', "depth", z, static_cast<size_t>(100))
-	    >> Option('w', "write_format", write_format, string("xtc"));
-		// Hay que decidir si efectivamente estos valores queremos que se puedan configurar desde
-		// la linea de comandos.	
-	
-      std::ifstream filer;
-		filer.open(data.c_str(), std::ifstream::in);            
-                                 
-	   TreeData tree_data;
-	   tree_data.filer = filer_factory->create(write_format);
+                >> Option('n', "Rn", RN, 1.5f)
+                >> Option('a', "Rca", RCa, 1.7f)
+                >> Option('c', "Rc", RC, 1.6f)
+                >> Option('s', "Scal_1_4", Scal_1_4, 0.85f)
+                >> Option('l', "Scal_1_5", Scal_1_5, 1.0f)
+                >> Option('i', "input_file", data, "ramachandran.dat")
+                >> Option('N', "rows", n, static_cast<size_t>(100))
+                >> Option('M', "cols", m, static_cast<size_t>(100))
+                >> Option('Z', "depth", z, static_cast<size_t>(100))
+                >> Option('w', "write_format", write_format, string("xtc"))
+                >> Option("chains_input", residues_input);
+        //TODO:
+        // Hay que decidir si efectivamente estos valores queremos que se puedan configurar desde
+        // la linea de comandos.
+        std::ifstream filer;
+        filer.open(data.c_str());
+        FormatFiler* outFiler = filer_factory->create(write_format);
+        const float radius = 4.0f;
+        const float dist = 5.7f;
+        Grillado* grilla = new Grillado(m, n , z, radius, dist);
+        TreeData tree_data(Nres, outFiler, grilla);
 
+        // Fill r[][][] with the minimun squared distance between atoms
+        setr(RN, RCa, RC, Scal_1_4, Scal_1_5);
 
-		float radius = 4.0f;
-		float dist = 5.7f;
-		tree_data.grilla = new Grillado(m, n , z, radius, dist);
-                // Maximun gyration radius and maximun CA-CA distance. 
-                // Both equations constructed from database analisys.
-		tree_data.rgmax =  2.72 * cubic_root(float(Nres)) + 5.0;
-	    tree_data.dmax2 =  (8.0 * cubic_root(float(Nres))+25.0) * (8.0 * cubic_root(float(Nres))+25.0);
-      
-        // Number of residues
-		tree_data.nres = Nres;
-		// Initialize the atm matrix.
-		tree_data.atm = new ATOM[(tree_data.nres)*3];
-	    // Initialize the chain counter
-	    tree_data.cont = 0;
-	    tree_data.hubo_algun_exito = false;
+        readdata(filer, tree_data.cosfi, tree_data.sinfi, tree_data.cossi, tree_data.sinsi, tree_data.angles_mapping);
+        tree_data.angles_data = new AnglesData(tree_data.nres, *tree_data.angles_mapping);
 
-            // Fill r[][][] with the minimun squared distance between atoms
-	    setr(RN,RCa,RC,Scal_1_4,Scal_1_5);
-            //Default compressed output
-	    tree_data.filer->open_write("traj.xtc");
-	    //tree_data.filer->open_read("traj_compressed.xtc"); delete [] tree_data.filer->read();
-	    tree_data.angles_mapping = new AnglesMapping( tree_data.nres);
-	    
-	    readdata(filer, tree_data.cosfi, tree_data.sinfi, tree_data.cossi, tree_data.sinsi, tree_data.angles_mapping);
-	    tree_data.angles_data = new AnglesData(tree_data.nres, *tree_data.angles_mapping);
+        cout << "Number of fi-si combinations in file=" << tree_data.cossi.size() << endl;
 
-		tree_data.ndat = tree_data.cossi.size(); // Se podria eliminar ndat por completo. Tener en cuenta a futuro.
-        printf("Number of fi-si combinations in file=%i\n",tree_data.ndat);
+        AnglesDatabase* residue_chain_database = NULL;
 
-	    TreeGenerator(&tree_data).generate();
-	    printf("Number of chains generated=%li\n", tree_data.cont);        
-		
-		// Se libera la memoria de la matriz atm.
-		tree_data.filer->close();
-		delete [] tree_data.atm;
-		delete tree_data.grilla;
-		delete tree_data.filer;
-		delete tree_data.angles_data;
-		delete tree_data.angles_mapping;
-		filer.close();
-		delete filer_factory;
-	    return EXIT_SUCCESS;
+        if (!residues_input.empty())
+        {
+            residue_chain_database = read_chains(residues_input, "compressed", "full_cache");
+        }
+
+        TreeGenerator(&tree_data, residue_chain_database).generate();
+        cout << "Number of chains generated=" << tree_data.cont << endl;
+
+        FilerFactory::destroy_instance();
+        ProteinCacheFactory::destroy_instance();
+        AnglesCacheFactory::destroy_instance();
+        //residue_chain_database is deleted by TreeGenerator
+        filer.close();
+        return EXIT_SUCCESS;
     }
     else
     {
@@ -153,117 +182,119 @@ void show_usage()
     std::cerr << "Invalid arguments." << std::endl;
 }
 
-TreeGenerator::TreeGenerator(TreeData* data) : tree_data(data) {};
+TreeGenerator::TreeGenerator(TreeData* data, AnglesDatabase* residue_chain_database) :
+    tree_data(data),
+    residue_chains(residue_chain_database),
+    size(residue_chain_database != NULL ? (residue_chain_database->size() - 1) : tree_data->cossi.size()),
+    with_residues_input(residue_chain_database != NULL)
+{};
 
 void TreeGenerator::generate()
 {
-	float R_inicial[16];
-	unsigned int i;
-	Residuo residuo;// Va a ser el residuo que agregue semilla en cada iteracion y al terminar del ciclo
-			// se usa para sacar el residuo del grillado.
-    //inicializar_arbol(tree_data);  
+    float R_inicial[16];
+    unsigned int i;
+    Residuo residuo;// Va a ser el residuo que agregue semilla en cada iteracion y al terminar del ciclo
+    // se usa para sacar el residuo del grillado.
 
-	i = 0;
-	while ( i < tree_data->ndat && !tree_data->hubo_algun_exito )
-	{
-		//printf("cleardata\n");
-		clearatm(tree_data->atm, tree_data->nres);
-		semilla(tree_data,R_inicial, residuo);
-		
-		generar_nivel_intermedio(2, R_inicial, i);
-		sacar_residuo(residuo);
-		i++;
-	}
+    i = 0;
+    while (i < size && !tree_data->hubo_algun_exito)
+    {
+        clearatm(tree_data->atm, tree_data->nres);
+        semilla(tree_data, R_inicial, residuo);
+
+        generar_nivel_intermedio(2, R_inicial, i);
+        sacar_residuo(residuo);
+        i++;
+    }
 }
 
 // se asume que nivel > 1
-void TreeGenerator::generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned int indice_nivel_anterior)
+void TreeGenerator::generar_nivel_intermedio(const unsigned int nivel, float R_inicial[16], const unsigned int indice_nivel_anterior)
 {
-	float R_local[16];
-	FilterResultType resultado;
-	bool exito = false; // solo aplicable si somos anteultimo nivel
-	unsigned int i;
-	assert(nivel > 1);  // pre condicion
-	Residuo residuo;
+    float R_local[16];
+    FilterResultType resultado;
+    bool exito = false; // solo aplicable si somos anteultimo nivel
+    assert(nivel > 1);  // pre condicion
+    vector<Residuo> residuos;
+    IncompleteAnglesData data(1);
 
-	i = 0;
-	while (i < tree_data->ndat && !exito)
-	{
-		
-		copymat(R_local, R_inicial);
+    unsigned int i = 0;
+    while (i < size && !exito)
+    {
+        copymat(R_local, R_inicial);
 
-		resultado = poneres(R_local,
-                        tree_data->cossi[indice_nivel_anterior],   
-                        tree_data->sinsi[indice_nivel_anterior],   
-                        tree_data->cosfi[i],                       
-                        tree_data->sinfi[i],                       
-                        tree_data->atm,
-                        nivel,
-                        tree_data,
-                        tree_data->dmax2,
-                        residuo,
-                        indice_nivel_anterior,
-                        i);
+        if (!with_residues_input)
+        {
+            data.angles[0].si = indice_nivel_anterior;
+            data.angles[0].fi = i;
+        }
 
-		
-		if ( resultado == FILTER_OK )
-		{
-			if (nivel < tree_data->nres)
-			{              
-				generar_nivel_intermedio(nivel+1, R_local, i);
-			}
-			else
-			{
-				exito = procesar_ultimo_nivel();
-			}
-			sacar_residuo(residuo);
-		}
-		
-		i++;
-	}
+        resultado = addNRes(R_local,
+                            nivel,
+                            tree_data,
+                            residuos,
+                            with_residues_input ? (*residue_chains)[i] : data);
+
+        if (resultado == FILTER_OK)
+        {
+            if (nivel < tree_data->nres)
+            {
+                generar_nivel_intermedio(nivel + residuos.size(), R_local, i);
+            }
+            else
+            {
+                exito = procesar_ultimo_nivel();
+            }
+            sacar_residuos(residuos);
+        }
+        residuos.clear();
+        i++;
+    }
 }
 
 // True si el volumen indicado por el grillado se encuentra en el rango aceptable
-bool TreeGenerator::procesar_ultimo_nivel() 
-{ 
-#ifdef COMBINATIONS_DEBUG 
+bool TreeGenerator::procesar_ultimo_nivel()
+{
+#ifdef COMBINATIONS_DEBUG
 // En el modo DEBUG se deshabilitan los chequeos.
-	tree_data->filer->write(tree_data->atm, *tree_data->angles_data);
-	tree_data->cont++;
-	return false;
+    tree_data->filer->write(tree_data->atm, *tree_data->angles_data);
+    tree_data->cont++;
+    return false;
 #else
-	bool exito = false;
-    
-	if (filtros_ultimo_nivel() == FILTER_OK)
+    bool exito = false;
+
+    if (filtros_ultimo_nivel() == FILTER_OK)
     {
         tree_data->filer->write(tree_data->atm, *tree_data->angles_data);
-		tree_data->cont++;
-		tree_data->hubo_algun_exito = exito = true;
-	}
-	return exito;
+        tree_data->cont++;
+        tree_data->hubo_algun_exito = exito = true;
+    }
+    return exito;
 #endif
 }
 
 // Devuelve 1 si tree_data pasa todos los filtros.
-FilterResultType TreeGenerator::filtros_ultimo_nivel() 
+FilterResultType TreeGenerator::filtros_ultimo_nivel()
 {
     FilterResultType res = FILTER_FAIL;
-	if(calcRdG(tree_data->atm, tree_data->nres, tree_data->rgmax) == FILTER_OK 
-		&& volumen_en_rango() == FILTER_OK) {
+    if (calcRdG(tree_data->atm, tree_data->nres, tree_data->rgmax) == FILTER_OK
+            && volumen_en_rango() == FILTER_OK)
+    {
         res = FILTER_OK;
     }
-	return res;
+    return res;
 }
 
-FilterResultType TreeGenerator::volumen_en_rango() 
+FilterResultType TreeGenerator::volumen_en_rango()
 {
-	const float volumen_max_aa = pendiente_empirica * float(tree_data->nres) + cota_maxima_volumen;
+    const float volumen_max_aa = pendiente_empirica * float(tree_data->nres) + cota_maxima_volumen;
 #ifdef VERBOSE
-    printf("Maximun Volume allowed per a.a  =%f.   Volumen in this chain=%f\n",volumen_max_aa,float(tree_data->grilla->obtener_vol_parcial())/float(tree_data->nres) );
+    printf("Maximun Volume allowed per a.a  =%f.   Volumen in this chain=%f\n", volumen_max_aa, float(tree_data->grilla->obtener_vol_parcial()) / float(tree_data->nres));
 #endif
     FilterResultType res = FILTER_FAIL;
-    if(in_range(float(tree_data->grilla->obtener_vol_parcial())/float(tree_data->nres), volumen_min_aa , volumen_max_aa)) {
+    if (in_range(float(tree_data->grilla->obtener_vol_parcial()) / float(tree_data->nres), volumen_min_aa , volumen_max_aa))
+    {
         res = FILTER_OK;
     }
-	return res;
+    return res;
 }
