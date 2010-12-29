@@ -22,7 +22,6 @@ TreeData::TreeData(int nRes, FormatFiler* filer, Grillado* grillado) :
     nres(nRes),
     // Maximun gyration radius and maximun CA-CA distance.
     // Both equations constructed from database analisys.
-    //TODO: remover float cuando cubic_root este en mili y sea generico
     rgmax(2.72 * mili::cubic_root(nres) + 5.0),
     dmax2(mili::square(8.0 * mili::cubic_root(float(nres)) + 25.0)),
     atm(new ATOM[nres * 3]),
@@ -185,11 +184,13 @@ TreeGenerator::TreeGenerator(TreeData* data, AnglesDatabase* residue_chain_datab
 
 void TreeGenerator::semilla(float* R, Residuo& residuo)
 {
-    backbones_utils::semilla(tree_data->atm, R);
-
-    copyatm(&tree_data->atm[0], &tree_data->angles_data->seed[0]);
-    copyatm(&tree_data->atm[1], &tree_data->angles_data->seed[1]);
-    copyatm(&tree_data->atm[2], &tree_data->angles_data->seed[2]);
+    ATOM* atm = tree_data->atm;
+    backbones_utils::semilla(atm, R);
+    ATOM* seed = tree_data->angles_data->seed;
+    
+    copyatm(atm[0], seed[0]);
+    copyatm(atm[1], seed[1]);
+    copyatm(atm[2], seed[2]);
 
     residuo.at2 = tree_data->grilla->agregar_esfera(tree_data->atm[1].x, tree_data->atm[1].y, tree_data->atm[1].z);
 }

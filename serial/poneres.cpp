@@ -3,8 +3,6 @@
 #include "isclash.h"
 #include "islong.h"
 
-// En el modo DEBUG se deshabilitan los chequeos por lo que
-// siempre devuelve FILTER_OK.
 class ClashFilter
 {
 public:
@@ -70,6 +68,8 @@ FilterResultType poneres(float* pR, const unsigned int resN, TreeData* tree_data
     tree_data->angles_data->angles[i].fi = fi_index;
 
 #ifdef COMBINATIONS_DEBUG
+// En el modo DEBUG se deshabilitan los chequeos por lo que
+// siempre devuelve FILTER_OK.
     backbones_utils::DummyFilter filter;
 #else
     ClashFilter filter(tree_data);
