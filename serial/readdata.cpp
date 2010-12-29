@@ -1,12 +1,7 @@
 
 #include "readdata.h"
 
-//TODO: a mili
-const float deg2rad_ratio = M_PI / 180;
-inline float deg2rad(float deg)
-{
-    return deg * deg2rad_ratio;
-}
+using namespace mili;
 
 void readdata(std::ifstream& filer, std::vector<float> &cosfi, std::vector<float> &sinfi, std::vector<float> &cossi, std::vector<float> &sinsi, AnglesMapping* angles_mapping)
 {

@@ -1,2 +1,3 @@
 #include "petu.h"
-FilterResultType islong(ATOM* patm, int at, float dmax2);
+
+FilterResultType islong(const ATOM* patm, int at, float dmax2);

@@ -7,31 +7,24 @@
 
 #include "poneres.h"
 #include "readdata.h"
-#include "semilla.h"
-#include "copymat.h"
 #include "calcrdg.h"
 #include "setr.h"
 #include "imprime.h"
 #include "clearatm.h"
+#include "copyatm.h"
 
 const float cota_maxima_volumen = 177.65f; // Volumen obtenido tambien a partir de las pruebas de un set de datos en Grillado.
 const float pendiente_empirica = -0.0882f ; // Pendiente obtenida a partir de las pruebas de un set de datos en Grillado.
 const float volumen_min_aa = 110.0f;
 //const float volumen_min_aa = 0.0f; // Volumen obtenido tambien a partir de las pruebas de un set de datos en Grillado.
 
-//TODO a mili
-inline float cubic_root(float a)
-{
-    return cbrtf(a);
-}
-
 TreeData::TreeData(int nRes, FormatFiler* filer, Grillado* grillado) :
     nres(nRes),
     // Maximun gyration radius and maximun CA-CA distance.
     // Both equations constructed from database analisys.
     //TODO: remover float cuando cubic_root este en mili y sea generico
-    rgmax(2.72 * cubic_root(float(nres)) + 5.0),
-    dmax2(mili::square(8.0 * cubic_root(float(nres)) + 25.0)),
+    rgmax(2.72 * mili::cubic_root(nres) + 5.0),
+    dmax2(mili::square(8.0 * mili::cubic_root(float(nres)) + 25.0)),
     atm(new ATOM[nres * 3]),
     cont(0),
     hubo_algun_exito(false),
@@ -69,6 +62,7 @@ public:
     }
 
 private:
+    void semilla(float* R, Residuo& residuo);
     void generar_nivel_intermedio(unsigned int nivel, float R_inicial[16], unsigned int indice_nivel_anterior);
     bool procesar_ultimo_nivel();
     FilterResultType filtros_ultimo_nivel();
@@ -189,6 +183,17 @@ TreeGenerator::TreeGenerator(TreeData* data, AnglesDatabase* residue_chain_datab
     with_residues_input(residue_chain_database != NULL)
 {};
 
+void TreeGenerator::semilla(float* R, Residuo& residuo)
+{
+    backbones_utils::semilla(tree_data->atm, R);
+
+    copyatm(&tree_data->atm[0], &tree_data->angles_data->seed[0]);
+    copyatm(&tree_data->atm[1], &tree_data->angles_data->seed[1]);
+    copyatm(&tree_data->atm[2], &tree_data->angles_data->seed[2]);
+
+    residuo.at2 = tree_data->grilla->agregar_esfera(tree_data->atm[1].x, tree_data->atm[1].y, tree_data->atm[1].z);
+}
+
 void TreeGenerator::generate()
 {
     float R_inicial[16];
@@ -200,7 +205,7 @@ void TreeGenerator::generate()
     while (i < size && !tree_data->hubo_algun_exito)
     {
         clearatm(tree_data->atm, tree_data->nres);
-        semilla(tree_data, R_inicial, residuo);
+        semilla(R_inicial, residuo);
 
         generar_nivel_intermedio(2, R_inicial, i);
         sacar_residuo(residuo);
@@ -221,7 +226,7 @@ void TreeGenerator::generar_nivel_intermedio(const unsigned int nivel, float R_i
     unsigned int i = 0;
     while (i < size && !exito)
     {
-        copymat(R_local, R_inicial);
+        backbones_utils::copymat(R_local, R_inicial);
 
         if (!with_residues_input)
         {

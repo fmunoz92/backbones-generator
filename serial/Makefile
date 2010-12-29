@@ -11,10 +11,10 @@
 #
 
 # Variables set by the configuration script:
-OBJECTS      = calcrdg.o clearatm.o copyatm.o copymat.o grillado.o imprime.o int2car.o \
-               islong.o petu.o poneres.o readdata.o semilla.o setr.o  isclash.o
-FILES        = calcrdg.cpp clearatm.cpp copyatm.cpp copymat.cpp grillado.cpp \
-               imprime.cpp int2car.cpp isclash.cpp islong.cpp petu.cpp poneres.cpp readdata.cpp semilla.cpp setr.cpp
+OBJECTS      = calcrdg.o clearatm.o copyatm.o grillado.o imprime.o \
+               islong.o petu.o poneres.o readdata.o setr.o  isclash.o
+FILES        = calcrdg.cpp clearatm.cpp copyatm.cpp grillado.cpp \
+               imprime.cpp isclash.cpp islong.cpp petu.cpp poneres.cpp readdata.cpp setr.cpp
 HEADERS      = petu.h
 LIBS         = -lprot-filer -lm -lgetopt_pp
 COMBINATIONS_DEBUG_FLAGS = -DCOMBINATIONS_DEBUG

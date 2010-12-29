@@ -1,12 +1,61 @@
 #include "poneres.h"
 
-#include "copymat.h"
 #include "isclash.h"
-#include "int2car.h"
 #include "islong.h"
 
 // En el modo DEBUG se deshabilitan los chequeos por lo que
 // siempre devuelve FILTER_OK.
+class ClashFilter
+{
+public:
+    ClashFilter(TreeData* tree_data)
+        : tree_data(tree_data)
+    {}
+    bool operator()(unsigned int index, const ATOM* patm, int at) const
+    {
+        const bool clash = isclash(patm, at) == FILTER_FAIL;
+        return !clash && (index != 2 || (islong(patm, at, tree_data->dmax2) != FILTER_FAIL));
+    }
+private:
+    const TreeData* tree_data;
+};
+
+//TODO: temp, deberia utilizarse backbones_utils::poneres
+template <class F>
+bool poneres2(float* pR, float cossi, float sinsi, float cosfi, float sinfi, ATOM* patm, int resN, const F& filter)
+{
+    using namespace backbones_utils;
+    float T[16];
+
+    /*Guardo la anterior*/
+    copymat(T, pR);
+
+    int at = 3 * (resN - 1) - 1;
+
+    at++;
+    int2car(T, b_C_N, cos_a_CA_C_N, sin_a_CA_C_N, cossi, sinsi, patm, at, N);
+    if (!filter(1, patm, at))
+    {
+        return false;
+    }
+
+    at++;
+    int2car(T, b_N_CA, cos_a_C_N_CA, sin_a_C_N_CA, cos_OMEGA , sin_OMEGA, patm, at, CA);
+    if (!filter(2, patm, at))
+    {
+        return false;
+    }
+
+    at++;
+    int2car(T, b_CA_C, cos_a_N_CA_C, sin_a_N_CA_C, cosfi, sinfi, patm, at, C);
+    if (!filter(3, patm, at))
+    {
+        return false;
+    }
+
+    copymat(pR, T);
+    return true;
+}
 
 FilterResultType poneres(float* pR, const unsigned int resN, TreeData* tree_data, Residuo& residuo, unsigned int si_index, unsigned int fi_index)
 {
@@ -15,56 +64,26 @@ FilterResultType poneres(float* pR, const unsigned int resN, TreeData* tree_data
     float cosfi = tree_data->cosfi[fi_index];
     float sinfi = tree_data->sinfi[fi_index];
     ATOM* patm = tree_data->atm;
-    float T[16];
 
     const unsigned int i = resN - 2;
     tree_data->angles_data->angles[i].si = si_index;
     tree_data->angles_data->angles[i].fi = fi_index;
 
-    /*Guardo la anterior*/
-    copymat(T, pR);
-    unsigned int at = 3 * (resN - 1);
-
 #ifdef COMBINATIONS_DEBUG
-    int2car(T, b_C_N, cos_a_CA_C_N, sin_a_CA_C_N, cossi, sinsi, patm, at, N);
-
-    at++;
-    int2car(T, b_N_CA, cos_a_C_N_CA, sin_a_C_N_CA, cos_OMEGA, sin_OMEGA, patm, at, CA);
-
-    at++;
-    int2car(T, b_CA_C, cos_a_N_CA_C, sin_a_N_CA_C, cosfi, sinfi, patm, at, C);
+    backbones_utils::DummyFilter filter;
 #else
-    int2car(T, b_C_N, cos_a_CA_C_N, sin_a_CA_C_N, cossi, sinsi, patm, at, N);
-    if (isclash(patm, at) == FILTER_FAIL)
-    {
-        return FILTER_FAIL;
-    }
-
-    at++;
-    int2car(T, b_N_CA, cos_a_C_N_CA, sin_a_C_N_CA, cos_OMEGA, sin_OMEGA, patm, at, CA);
-    if (isclash(patm, at) == FILTER_FAIL)
-    {
-        return FILTER_FAIL;
-    }
-    if (islong(patm, at, tree_data->dmax2) == FILTER_FAIL)
-    {
-        return FILTER_FAIL;
-    }
-
-    at++;
-    int2car(T, b_CA_C, cos_a_N_CA_C, sin_a_N_CA_C, cosfi, sinfi, patm, at, C);
-    if (isclash(patm, at) == FILTER_FAIL)
-    {
-        return FILTER_FAIL;
-    }
+    ClashFilter filter(tree_data);
 #endif
-    /*
-    residuo = Residuo(tree_data->grilla->agregar_esfera(patm[at-2].x,patm[at-2].y,patm[at-2].z), tree_data->grilla->agregar_esfera(patm[at-1].x,patm[at-1].y,patm[at-1].z), tree_data->grilla->agregar_esfera(patm[at].x,patm[at].y,patm[at].z));
-    */
-    const ATOM atm = patm[at - 1];
-    residuo.at2 = tree_data->grilla->agregar_esfera(atm.x, atm.y, atm.z);
+    //bool success = backbones_utils::poneres(pR, cossi, sinsi, cosfi, sinfi, patm, resN, filter);
+    bool success = poneres2(pR, cossi, sinsi, cosfi, sinfi, patm, resN, filter);
 
-    copymat(pR, T);
+    if (!success)
+    {
+        return FILTER_FAIL;
+    }
+
+    const ATOM atm = patm[3 * (resN - 1) + 1];
+    residuo.at2 = tree_data->grilla->agregar_esfera(atm.x, atm.y, atm.z);
     return FILTER_OK;
 }
 

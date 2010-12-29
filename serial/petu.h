@@ -10,6 +10,7 @@ enum FilterResultType  {FILTER_FAIL, FILTER_OK};
 
 #include "prot-filer/format_filer.h"
 #include "prot-filer/angles.h"
+#include "prot-filer/backbones_utils.h"
 #include <prot-filer/protein_database.h>
 
 // Datos a compartir por todos los niveles:
