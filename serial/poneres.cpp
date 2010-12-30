@@ -18,42 +18,6 @@ private:
     const TreeData* tree_data;
 };
 
-//TODO: temp, deberia utilizarse backbones_utils::poneres
-template <class F>
-bool poneres2(float* pR, float cossi, float sinsi, float cosfi, float sinfi, ATOM* patm, int resN, const F& filter)
-{
-    using namespace backbones_utils;
-    float T[16];
-
-    /*Guardo la anterior*/
-    copymat(T, pR);
-
-    int at = 3 * (resN - 1) - 1;
-
-    at++;
-    int2car(T, b_C_N, cos_a_CA_C_N, sin_a_CA_C_N, cossi, sinsi, patm, at, N);
-    if (!filter(1, patm, at))
-    {
-        return false;
-    }
-
-    at++;
-    int2car(T, b_N_CA, cos_a_C_N_CA, sin_a_C_N_CA, cos_OMEGA , sin_OMEGA, patm, at, CA);
-    if (!filter(2, patm, at))
-    {
-        return false;
-    }
-
-    at++;
-    int2car(T, b_CA_C, cos_a_N_CA_C, sin_a_N_CA_C, cosfi, sinfi, patm, at, C);
-    if (!filter(3, patm, at))
-    {
-        return false;
-    }
-
-    copymat(pR, T);
-    return true;
-}
 
 FilterResultType poneres(float* pR, const unsigned int resN, TreeData* tree_data, Residuo& residuo, unsigned int si_index, unsigned int fi_index)
 {
@@ -74,8 +38,7 @@ FilterResultType poneres(float* pR, const unsigned int resN, TreeData* tree_data
 #else
     ClashFilter filter(tree_data);
 #endif
-    //bool success = backbones_utils::poneres(pR, cossi, sinsi, cosfi, sinfi, patm, resN, filter);
-    bool success = poneres2(pR, cossi, sinsi, cosfi, sinfi, patm, resN, filter);
+    bool success = backbones_utils::poneres(pR, cossi, sinsi, cosfi, sinfi, patm, resN, filter);
 
     if (!success)
     {

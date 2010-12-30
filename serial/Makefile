@@ -11,9 +11,9 @@
 #
 
 # Variables set by the configuration script:
-OBJECTS      = calcrdg.o clearatm.o copyatm.o grillado.o imprime.o \
+OBJECTS      = calcrdg.o clearatm.o grillado.o imprime.o \
                islong.o petu.o poneres.o readdata.o setr.o  isclash.o
-FILES        = calcrdg.cpp clearatm.cpp copyatm.cpp grillado.cpp \
+FILES        = calcrdg.cpp clearatm.cpp grillado.cpp \
                imprime.cpp isclash.cpp islong.cpp petu.cpp poneres.cpp readdata.cpp setr.cpp
 HEADERS      = petu.h
 LIBS         = -lprot-filer -lm -lgetopt_pp

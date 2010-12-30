@@ -11,7 +11,6 @@
 #include "setr.h"
 #include "imprime.h"
 #include "clearatm.h"
-#include "copyatm.h"
 
 const float cota_maxima_volumen = 177.65f; // Volumen obtenido tambien a partir de las pruebas de un set de datos en Grillado.
 const float pendiente_empirica = -0.0882f ; // Pendiente obtenida a partir de las pruebas de un set de datos en Grillado.
@@ -23,7 +22,7 @@ TreeData::TreeData(int nRes, FormatFiler* filer, Grillado* grillado) :
     // Maximun gyration radius and maximun CA-CA distance.
     // Both equations constructed from database analisys.
     rgmax(2.72 * mili::cubic_root(nres) + 5.0),
-    dmax2(mili::square(8.0 * mili::cubic_root(float(nres)) + 25.0)),
+    dmax2(mili::square(8.0 * mili::cubic_root(nres) + 25.0)),
     atm(new ATOM[nres * 3]),
     cont(0),
     hubo_algun_exito(false),
@@ -187,10 +186,10 @@ void TreeGenerator::semilla(float* R, Residuo& residuo)
     ATOM* atm = tree_data->atm;
     backbones_utils::semilla(atm, R);
     ATOM* seed = tree_data->angles_data->seed;
-    
-    copyatm(atm[0], seed[0]);
-    copyatm(atm[1], seed[1]);
-    copyatm(atm[2], seed[2]);
+
+    seed[0] = atm[0];
+    seed[1] = atm[1];
+    seed[2] = atm[2];
 
     residuo.at2 = tree_data->grilla->agregar_esfera(tree_data->atm[1].x, tree_data->atm[1].y, tree_data->atm[1].z);
 }
