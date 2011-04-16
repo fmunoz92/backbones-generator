@@ -39,12 +39,33 @@ using namespace std;
 class esferaId
 {
 public:
-    esferaId() {};
-    esferaId(GridCoord a, GridCoord b, GridCoord c);
-    esferaId(const esferaId& s);
-    inline GridCoord get_m() const;
-    inline GridCoord get_n() const;
-    inline GridCoord get_z() const;
+    esferaId() :
+        v(0),
+        w(0),
+        z(0)
+    {}
+    esferaId(GridCoord input_v, GridCoord input_w, GridCoord input_z) :
+        v(input_v),
+        w(input_w),
+        z(input_z)
+    {}
+    esferaId(const esferaId& s) :
+        v(s.get_m()),
+        w(s.get_n()),
+        z(s.get_z())
+    {}
+    GridCoord get_m() const
+    {
+        return v;
+    }
+    GridCoord get_n() const
+    {
+        return w;
+    }
+    GridCoord get_z() const
+    {
+        return z;
+    }
 private:
     GridCoord v;
     GridCoord w;
@@ -70,8 +91,8 @@ private:
 
     inline static Volume calc_int(Length radio, Length dist);
 
-    void reducir_vol_parcial(int coord_x, int coord_y, int coord_z) ;
-    void aumentar_vol_parcial(int coord_x, int coord_y, int coord_z) ;
+    void reducir_vol_parcial(int coord_x, int coord_y, int coord_z);
+    void aumentar_vol_parcial(int coord_x, int coord_y, int coord_z);
     void calcular_coord(Coord coord_x, Coord coord_y, Coord coord_z,
                         GridCoord& x, GridCoord& y, GridCoord& z) const;
     unsigned int calcular_intersecciones(GridCoord coord_x, GridCoord coord_y, GridCoord coord_z) const;
@@ -98,7 +119,7 @@ public:
 
     };
 
-    Grillado(size_t a, size_t b, size_t c, Length R, Length D) throw
+    Grillado(size_t a, size_t b, size_t c, Length R = 4.0f, Length D = 5.7f) throw
     (radiusOrDistanceParamException, sizeParamException, bad_alloc);
 
     ~Grillado() ;
@@ -151,23 +172,6 @@ inline Volume Grillado::calc_int(Length radio, Length dist)
     return (2.0f) * PI * (((2.0f) * radio * radio * radio / (3.0f)) - (dist * radio * radio / (2.0f)) + (dist * dist * dist / (24.0f)));
 }
 
-
-
-
-
-inline GridCoord esferaId::get_m() const
-{
-    return v;
-}
-inline GridCoord esferaId::get_n() const
-{
-    return w;
-}
-inline GridCoord esferaId::get_z() const
-{
-    return z;
-}
-
 // obtener_id debe estar antes que agregar_esfera y sacar_esfera, para que se pueda satisfacer que sea inline.
 inline esferaId Grillado::obtener_id(Coord x, Coord y, Coord z) const
 {
@@ -187,9 +191,5 @@ inline void Grillado::sacar_esfera(Coord x, Coord y, Coord Z) throw(gridPosition
 {
     sacar_esfera(obtener_id(x, y, Z));
 }
-
-inline esferaId::esferaId(GridCoord input_v, GridCoord input_w, GridCoord input_z) : v(input_v), w(input_w), z(input_z) {}
-
-inline esferaId::esferaId(const esferaId& s) : v(s.get_m()), w(s.get_n()), z(s.get_z()) {}
 
 #endif // GRILLADO_H
