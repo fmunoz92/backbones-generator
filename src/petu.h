@@ -8,16 +8,14 @@
 enum FilterResultType  {FILTER_FAIL, FILTER_OK};
 
 #include "prot-filer/format_filer.h"
+#include "prot-filer/fragments_filer.h"
 #include "prot-filer/cached_reader.h"
 #include "prot-filer/angles.h"
 #include "prot-filer/backbones_utils.h"
 
 // Datos a compartir por todos los niveles:
 using namespace prot_filer;
-typedef CachedReader<FullCache, AnglesReader, IncompleteAnglesData> FullCachedAnglesSeqReader;
-
-//TODO: a prot-filer
-typedef vector<unsigned int> ChainIndexs;
+typedef CachedReader<FullCache, SimpleAnglesReader, IncompleteAnglesData> FullCachedAnglesSeqReader;
 
 struct TreeData
 {
@@ -30,7 +28,7 @@ struct TreeData
     Grillado* grilla;       // Utilizamos el grillado para aproximar el volumen parcial
     AnglesData* angles_data; // Used only when writing compressed data.
     AnglesMapping* angles_mapping;
-    ChainIndexs chain_indexs;
+    FragmentIds fragment_ids;
     TreeData(int nRes, Grillado* grillado) :
         nres(nRes),
         // Maximun gyration radius and maximun CA-CA distance.

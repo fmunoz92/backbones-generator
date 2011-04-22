@@ -7,7 +7,6 @@
 #include "tree_generator.h"
 #include "utils.h"
 #include "readdata.h"
-#include "angles_data_matcher.h"
 
 using namespace std;
 using namespace prot_filer;
@@ -17,15 +16,32 @@ using testing::A;
 using testing::_;
 using ::testing::Expectation;
 
-class MockWriteAdapter : public WriterAdapter
+class MockWriteHelper : public WriterHelper<SimpleTreeGenerator, XtcWriter>
 {
 public:
-    MOCK_METHOD1(open, bool(const string&));
-    MOCK_METHOD2(write, void(BasicProtein& protein, const AnglesData& angles_data));
+    MOCK_METHOD0(open, void(void));
+    MOCK_METHOD1(write, void(SimpleTreeGenerator<XtcWriter>& g));
     MOCK_METHOD0(close, void(void));
-    virtual ~MockWriteAdapter()
+    virtual ~MockWriteHelper()
     {};
 };
+
+bool eq(const IncompleteAnglesData& d1, const AnglesData& d2)
+{
+    AngleIdPair* expected_pair = d1.angles;
+    AngleIdPair* data_pair = d2.angles;
+    unsigned int i = 0;
+    bool match;
+    do
+    {
+        match = (expected_pair[i].fi == data_pair[i].fi) && (expected_pair[i].si == data_pair[i].si);
+        ++i;
+    }
+    while ((i < d1.nres - 1) && match);
+    return match;
+}
+
+MATCHER_P(CheckData, d, "") { return eq(d, *(arg.get_tree_data().angles_data)); }
 
 TEST(Test, simple_generator)
 {
@@ -43,15 +59,15 @@ TEST(Test, simple_generator)
     istringstream f("-60  -40\n-60  140\n-130 140\n60   30");
     readdata(f, tree_data);
     tree_data.angles_data = new AnglesData(tree_data.nres, *tree_data.angles_mapping);
-    MockWriteAdapter* mock_writer = new MockWriteAdapter();
+    MockWriteHelper mock_helper;
 
-    EXPECT_CALL(*mock_writer, open(A<const string&>())).Times(1);
-    Expectation e1 = EXPECT_CALL(*mock_writer, write(_, IncompleteAnglesDataEq(d1))).Times(1);
-    EXPECT_CALL(*mock_writer, write(_, IncompleteAnglesDataEq(d2))).Times(1).After(e1);
-    EXPECT_CALL(*mock_writer, close()).Times(1);
+    EXPECT_CALL(mock_helper, open()).Times(1);
 
-    SimpleTreeGenerator generator(tree_data, mock_writer);
-    generator.generate();
+    Expectation e1 = EXPECT_CALL(mock_helper, write(CheckData(d1))).Times(1);
+    EXPECT_CALL(mock_helper, write(CheckData(d2))).Times(1).After(e1);
+
+    EXPECT_CALL(mock_helper, close()).Times(1);
+    SimpleTreeGenerator<XtcWriter> g(tree_data, mock_helper);
+    g.generate();
     ASSERT_EQ(2, tree_data.cont);
 }
-

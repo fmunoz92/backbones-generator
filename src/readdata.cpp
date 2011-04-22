@@ -22,10 +22,27 @@ void readdata(std::istream& filer, TreeData& tree_data)
     // Nota a futuro: se deberia lanzar una Excepcion si el formato del archivo fuera equivocado.
 }
 
-FullCachedAnglesSeqReader* read_chains(const string& input_file)
+FullCachedAnglesSeqReader* read_chains(const string& format, const string& input_file, const string& fragments_file)
 {
-    AnglesReader* r = AnglesReaderFactory::get_instance()->create("compressed");
-    FullCachedAnglesSeqReader* reader = new FullCachedAnglesSeqReader(r);
-    reader->open(input_file);
-    return reader;
+    if (format == "compressed")
+    {
+        AnglesReader* r = AnglesReaderFactory::get_instance()->create(format);
+        r->open(input_file);
+        return new FullCachedAnglesSeqReader(r);
+    }
+    else if (format == "fragments")
+    {
+        AnglesReader* r = AnglesReaderFactory::get_instance()->create("compressed");
+        FragmentsFromReader* fragments = new FragmentsFromReader(r);
+        r->open(fragments_file);
+
+        FragmentsAnglesReader* ar = FragmentsAnglesReaderFactory::get_instance()->create(format);
+        ar->open(fragments, input_file);
+        FullCachedAnglesSeqReader* reader = new FullCachedAnglesSeqReader(ar);
+        return reader;
+    }
+    else 
+    {
+        throw runtime_error("wrong input format");
+    }
 }

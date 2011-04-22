@@ -1,75 +1,140 @@
 #include "petu.h"
-#include "filer.h"
 
-class TreeGenerator
+template<template <class> class Generator, class Writer>
+class WriterHelper;
+
+template<class Writer>
+class SimpleTreeGenerator
 {
-protected:
-    TreeData& tree_data;
-    WriterAdapter* const writer;
 public:
-    virtual void generate() = 0;
-    TreeGenerator(TreeData& tree_data, WriterAdapter* writer) :
+    SimpleTreeGenerator(TreeData& tree_data, WriterHelper<SimpleTreeGenerator, Writer>& helper) :
         tree_data(tree_data),
-        writer(writer)
+        writer_helper(helper)
     {
-        writer->open("traj.xtc");
+        writer_helper.open();
     };
-    virtual ~TreeGenerator()
+    ~SimpleTreeGenerator() 
     {
-        writer->close();
-        delete writer;
-    };
-protected:
-    void semilla(float* R, Residuo& residuo);
-    inline FilterResultType filtros_ultimo_nivel();
-    void sacar_residuo(const Residuo& residuo)
-    {
-        tree_data.grilla->sacar_esfera(residuo.at2);
+        writer_helper.close();
     }
-    void sacar_residuos(const vector<Residuo>& residuos)
+    void generate();
+    TreeData& get_tree_data()
     {
-        for (unsigned int i = 0; i < residuos.size(); ++i)
-        {
-            sacar_residuo(residuos[i]);
-        }
+        return tree_data;
     }
-    static WriterAdapter* createWriter(const string& write_format);
-};
-
-class SimpleTreeGenerator : public TreeGenerator
-{
-public:
-    SimpleTreeGenerator(TreeData& tree_data, string write_format) :
-        TreeGenerator(tree_data, createWriter(write_format))
-    {};
-    //Just for debugging purposes:
-    SimpleTreeGenerator(TreeData& tree_data, WriterAdapter* w) :
-        TreeGenerator(tree_data, w)
-    {};
-    virtual void generate();
 private:
     void generar_nivel_intermedio(unsigned int nivel, const float R_inicial[16], unsigned int indice_nivel_anterior);
     bool procesar_ultimo_nivel();
+    TreeData& tree_data;
+    WriterHelper<SimpleTreeGenerator, Writer>& writer_helper;
 };
 
-class ChainsTreeGenerator : public TreeGenerator
+template<class Writer>
+class ChainsTreeGenerator
 {
-private:
-    FullCachedAnglesSeqReader* const reader;
 public:
-    ChainsTreeGenerator(TreeData& tree_data, string write_format, FullCachedAnglesSeqReader* reader_) :
-        TreeGenerator(tree_data, createWriter(write_format)),
-        reader(reader_)
-    {};
-
+    ChainsTreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* reader_, 
+            WriterHelper<ChainsTreeGenerator, Writer>& helper) :
+        tree_data(tree_data),
+        reader(reader_),
+        writer_helper(helper)
+    {
+        writer_helper.open();
+    };
     ~ChainsTreeGenerator()
     {
+        writer_helper.close();
         reader->close();
         delete reader;
     }
-    virtual void generate();
+    void generate();
+    TreeData& get_tree_data()
+    {
+        return tree_data;
+    }
+    size_t get_fragment_nres() const
+    {
+        return reader->get_reader().get_atom_number() / 3;
+    }
 private:
     void generar_nivel_intermedio(unsigned int nivel, const float R_inicial[16], unsigned int indice_nivel_anterior);
     bool procesar_ultimo_nivel();
+    TreeData& tree_data;
+    FullCachedAnglesSeqReader* const reader;
+    WriterHelper<ChainsTreeGenerator, Writer>& writer_helper;
 };
 
+template <template <class> class Generator, class Writer>
+struct GenerateW;
+
+template<class W>
+struct GenerateW<SimpleTreeGenerator, W>
+{
+    void operator()(TreeData& tree_data, FullCachedAnglesSeqReader* reader)
+    {
+        WriterHelper<SimpleTreeGenerator, W> helper;
+        SimpleTreeGenerator<W> g(tree_data, helper);
+        g.generate();
+    }
+};
+
+template<class W>
+struct GenerateW<ChainsTreeGenerator, W>
+{
+    void operator()(TreeData& tree_data, FullCachedAnglesSeqReader* reader)
+    {
+        WriterHelper<ChainsTreeGenerator, W> helper;
+        ChainsTreeGenerator<W> g(tree_data, reader, helper);
+        g.generate();
+    }
+};
+
+template <template <class> class Generator>
+struct Generate
+{
+    void operator()(const string& format, TreeData& tree_data, FullCachedAnglesSeqReader* reader)
+    {
+        if (format == "xtc")
+        {
+            GenerateW<Generator, XtcWriter> g;
+            g(tree_data, reader);
+        } 
+        else if (format == "compressed")
+        {
+            GenerateW<Generator, CompressedWriter> g;
+            g(tree_data, reader);
+        }
+        else
+        {
+            throw runtime_error("wrong format");
+        }
+    }
+};
+
+template <>
+struct Generate<ChainsTreeGenerator>
+{
+    void operator()(const string& format, TreeData& tree_data, FullCachedAnglesSeqReader* reader)
+    {
+        if (format == "xtc")
+        {
+            GenerateW<ChainsTreeGenerator, XtcWriter> g;
+            g(tree_data, reader);
+        } 
+        else if (format == "compressed")
+        {
+            GenerateW<ChainsTreeGenerator, CompressedWriter> g;
+            g(tree_data, reader);
+        }
+        else if (format == "fragments")
+        {
+            GenerateW<ChainsTreeGenerator, FragmentsWriter> g;
+            g(tree_data, reader);
+        }
+        else
+        {
+            throw runtime_error("wrong format");
+        }
+    }
+};
+#include "filer.h"

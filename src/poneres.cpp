@@ -49,7 +49,7 @@ FilterResultType addChain(float* pR, unsigned int resN, TreeData& tree_data, vec
 {
     FilterResultType result = FILTER_OK;
     unsigned int i = 0;
-    while (result == FILTER_OK  && i < (chain.nres - 1) && ((resN + i) <= tree_data.nres))
+    while (result == FILTER_OK  && i < (chain.nres - 1) && ((resN + i - 1) < (tree_data.nres - 1)))
     {
         Residuo residuo;
         const unsigned int si = chain.angles[i].si;
@@ -63,7 +63,7 @@ FilterResultType addChain(float* pR, unsigned int resN, TreeData& tree_data, vec
     }
     if (result == FILTER_OK)
     {
-        tree_data.chain_indexs.push_back(chain_index);
+        tree_data.fragment_ids.push_back(chain_index);
     }
     return result;
 }
