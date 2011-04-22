@@ -13,7 +13,7 @@ public:
     {
         writer_helper.open();
     };
-    ~SimpleTreeGenerator() 
+    ~SimpleTreeGenerator()
     {
         writer_helper.close();
     }
@@ -33,8 +33,8 @@ template<class Writer>
 class ChainsTreeGenerator
 {
 public:
-    ChainsTreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* reader_, 
-            WriterHelper<ChainsTreeGenerator, Writer>& helper) :
+    ChainsTreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* reader_,
+                        WriterHelper<ChainsTreeGenerator, Writer>& helper) :
         tree_data(tree_data),
         reader(reader_),
         writer_helper(helper)
@@ -98,7 +98,7 @@ struct Generate
         {
             GenerateW<Generator, XtcWriter> g;
             g(tree_data, reader);
-        } 
+        }
         else if (format == "compressed")
         {
             GenerateW<Generator, CompressedWriter> g;
@@ -120,7 +120,7 @@ struct Generate<ChainsTreeGenerator>
         {
             GenerateW<ChainsTreeGenerator, XtcWriter> g;
             g(tree_data, reader);
-        } 
+        }
         else if (format == "compressed")
         {
             GenerateW<ChainsTreeGenerator, CompressedWriter> g;

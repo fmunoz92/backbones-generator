@@ -41,7 +41,7 @@ FullCachedAnglesSeqReader* read_chains(const string& format, const string& input
         FullCachedAnglesSeqReader* reader = new FullCachedAnglesSeqReader(ar);
         return reader;
     }
-    else 
+    else
     {
         throw runtime_error("wrong input format");
     }

@@ -41,7 +41,10 @@ bool eq(const IncompleteAnglesData& d1, const AnglesData& d2)
     return match;
 }
 
-MATCHER_P(CheckData, d, "") { return eq(d, *(arg.get_tree_data().angles_data)); }
+MATCHER_P(CheckData, d, "")
+{
+    return eq(d, *(arg.get_tree_data().angles_data));
+}
 
 TEST(Test, simple_generator)
 {

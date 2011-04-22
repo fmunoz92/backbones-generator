@@ -101,16 +101,16 @@ bool CommandLineOptions::parse(int argc, char** argv)
     if (ops >> Option('r', "Nres", Nres))
     {
         ops
-            >> Option('n', "Rn", RN, 1.5f)
-            >> Option('a', "Rca", RCa, 1.7f)
-            >> Option('c', "Rc", RC, 1.6f)
-            >> Option('s', "Scal_1_4", Scal_1_4, 0.85f)
-            >> Option('l', "Scal_1_5", Scal_1_5, 1.0f)
-            >> Option('i', "input_file", data)
-            >> Option('N', "rows", n, static_cast<size_t>(100))
-            >> Option('M', "cols", m, static_cast<size_t>(100))
-            >> Option('Z', "depth", z, static_cast<size_t>(100))
-            >> Option('w', "write_format", write_format, string("xtc"));
+                >> Option('n', "Rn", RN, 1.5f)
+                >> Option('a', "Rca", RCa, 1.7f)
+                >> Option('c', "Rc", RC, 1.6f)
+                >> Option('s', "Scal_1_4", Scal_1_4, 0.85f)
+                >> Option('l', "Scal_1_5", Scal_1_5, 1.0f)
+                >> Option('i', "input_file", data)
+                >> Option('N', "rows", n, static_cast<size_t>(100))
+                >> Option('M', "cols", m, static_cast<size_t>(100))
+                >> Option('Z', "depth", z, static_cast<size_t>(100))
+                >> Option('w', "write_format", write_format, string("xtc"));
 
         bool chains = ops >> Option("chains_input", input_files);
 
@@ -133,7 +133,7 @@ bool CommandLineOptions::parse(int argc, char** argv)
                 {
                     residues_input = input_files[0];
                 }
-            } 
+            }
             else if (input_format == "fragments")
             {
                 if (input_files.size() < 2)
@@ -150,7 +150,7 @@ bool CommandLineOptions::parse(int argc, char** argv)
         }
         return true;
     }
-    else 
+    else
     {
         return false;
     }
