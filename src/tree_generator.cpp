@@ -2,6 +2,8 @@
 #include "poneres.h"
 #include "utils.h"
 
+const std::string output_file = "traj.xtc";
+
 class TreeHelper
 {
 public:

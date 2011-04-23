@@ -137,4 +137,7 @@ struct Generate<ChainsTreeGenerator>
         }
     }
 };
+
+#define INTERNAL_FILER_H
 #include "filer.h"
+#undef INTERNAL_FILER_H
