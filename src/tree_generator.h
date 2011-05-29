@@ -6,8 +6,9 @@ class WriterHelper;
 template<class Writer>
 class SimpleTreeGenerator
 {
+    typedef WriterHelper< ::SimpleTreeGenerator, Writer> Helper;
 public:
-    SimpleTreeGenerator(TreeData& tree_data, WriterHelper<SimpleTreeGenerator, Writer>& helper) :
+    SimpleTreeGenerator(TreeData& tree_data, Helper& helper) :
         tree_data(tree_data),
         writer_helper(helper)
     {
@@ -26,15 +27,16 @@ private:
     void generar_nivel_intermedio(unsigned int nivel, const float R_inicial[16], unsigned int indice_nivel_anterior);
     bool procesar_ultimo_nivel();
     TreeData& tree_data;
-    WriterHelper<SimpleTreeGenerator, Writer>& writer_helper;
+    Helper& writer_helper;
 };
 
 template<class Writer>
 class ChainsTreeGenerator
 {
+    typedef WriterHelper< ::ChainsTreeGenerator, Writer> Helper;
 public:
     ChainsTreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* reader_,
-                        WriterHelper<ChainsTreeGenerator, Writer>& helper) :
+                        Helper& helper) :
         tree_data(tree_data),
         reader(reader_),
         writer_helper(helper)
@@ -61,7 +63,7 @@ private:
     bool procesar_ultimo_nivel();
     TreeData& tree_data;
     FullCachedAnglesSeqReader* const reader;
-    WriterHelper<ChainsTreeGenerator, Writer>& writer_helper;
+    Helper& writer_helper;
 };
 
 template <template <class> class Generator, class Writer>
