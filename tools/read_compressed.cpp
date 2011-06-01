@@ -7,6 +7,9 @@
 using namespace std;
 using namespace prot_filer;
 
+void readAsAngles(const string& file);
+void readAsProtein(const string& file);
+
 int main(int argc, char* argv[])
 {
     if (argc != 2)
@@ -16,19 +19,52 @@ int main(int argc, char* argv[])
     else
     {
         string file = string(argv[1]);
-        AnglesReader* reader = AnglesReaderFactory::get_instance()->create("compressed");
-        reader->open(file);
-        CachedReader<FullCache, AnglesReader, IncompleteAnglesData> cached_reader(reader);
+        readAsProtein(file);
+        //readAsAngles(file);
+    }
+    return 0;
+}
 
-        IncompleteAnglesData* angles_data = NULL;
+void readAsAngles(const string& file)
+{
+    AnglesReader* reader = AnglesReaderFactory::get_instance()->create("compressed");
+    reader->open(file);
+    CachedReader<FullCache, AnglesReader, IncompleteAnglesData> cached_reader(reader);
+
+    IncompleteAnglesData* angles_data = NULL;
+
+    unsigned int i = 0;
+    while ((angles_data = cached_reader.read(i)) != NULL)
+    {
+        for (unsigned int c = 0; c < angles_data->nres - 1; ++c)
+        {
+            AngleIdPair p = angles_data->angles[c];
+            cout << p.fi << " " << p.si  << endl;
+        }
+        cout << "--------------------------------------" << endl;
+        ++i;
+    }
+    cout << "residue size: " << cached_reader.get_reader().get_atom_number() / 3 << endl;
+    cout << "size: " << i << endl;
+    cached_reader.close();
+    AnglesReaderFactory::destroy_instance();
+}
+
+void readAsProtein(const string& file)
+{
+        Coord3DReader* reader = Coord3DReaderFactory::get_instance()->create("compressed");
+        reader->open(file);
+        CachedReader<FullCache, Coord3DReader, Protein> cached_reader(reader);
+
+        Protein* p = NULL;
 
         unsigned int i = 0;
-        while ((angles_data = cached_reader.read(i)) != NULL)
+        while ((p = cached_reader.read(i)) != NULL)
         {
-            for (unsigned int c = 0; c < angles_data->nres - 1; ++c)
+            for (unsigned int c = 0; c < p->items(); ++c)
             {
-                AngleIdPair p = angles_data->angles[c];
-                cout << p.fi << " " << p.si  << endl;
+                Coord3d cr = (*p)[c];
+                cout << cr.x << " " << cr.y << " " << cr.z << endl;
             }
             cout << "--------------------------------------" << endl;
             ++i;
@@ -36,7 +72,5 @@ int main(int argc, char* argv[])
         cout << "residue size: " << cached_reader.get_reader().get_atom_number() / 3 << endl;
         cout << "size: " << i << endl;
         cached_reader.close();
-        AnglesReaderFactory::destroy_instance();
-    }
-    return 0;
+        Coord3DReaderFactory::destroy_instance();
 }
