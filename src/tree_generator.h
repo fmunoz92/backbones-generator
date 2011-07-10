@@ -72,7 +72,7 @@ struct GenerateW;
 template<class W>
 struct GenerateW<SimpleTreeGenerator, W>
 {
-    void operator()(TreeData& tree_data, FullCachedAnglesSeqReader* reader)
+    void operator()(TreeData& tree_data, FullCachedAnglesSeqReader* /*reader*/)
     {
         WriterHelper<SimpleTreeGenerator, W> helper;
         SimpleTreeGenerator<W> g(tree_data, helper);

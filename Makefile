@@ -21,7 +21,7 @@ DEBUG = -ggdb3
 #LDFLAGS      = -L/usr/local/gromacs/lib   
 
 
-CXXFLAGS     =-DMILI_NAMESPACE -Wall
+CXXFLAGS     =-DMILI_NAMESPACE -Wall -Wextra -pedantic
 #CPPFLAGS     = -I/usr/local/gromacs/include/gromacs	
 
 CXX          = g++

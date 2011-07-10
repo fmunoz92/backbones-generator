@@ -52,25 +52,25 @@ void readAsAngles(const string& file)
 
 void readAsProtein(const string& file)
 {
-        Coord3DReader* reader = Coord3DReaderFactory::get_instance()->create("compressed");
-        reader->open(file);
-        CachedReader<FullCache, Coord3DReader, Protein> cached_reader(reader);
+    Coord3DReader* reader = Coord3DReaderFactory::get_instance()->create("compressed");
+    reader->open(file);
+    CachedReader<FullCache, Coord3DReader, Protein> cached_reader(reader);
 
-        Protein* p = NULL;
+    Protein* p = NULL;
 
-        unsigned int i = 0;
-        while ((p = cached_reader.read(i)) != NULL)
+    unsigned int i = 0;
+    while ((p = cached_reader.read(i)) != NULL)
+    {
+        for (unsigned int c = 0; c < p->items(); ++c)
         {
-            for (unsigned int c = 0; c < p->items(); ++c)
-            {
-                Coord3d cr = (*p)[c];
-                cout << cr.x << " " << cr.y << " " << cr.z << endl;
-            }
-            cout << "--------------------------------------" << endl;
-            ++i;
+            Coord3d cr = (*p)[c];
+            cout << cr.x << " " << cr.y << " " << cr.z << endl;
         }
-        cout << "residue size: " << cached_reader.get_reader().get_atom_number() / 3 << endl;
-        cout << "size: " << i << endl;
-        cached_reader.close();
-        Coord3DReaderFactory::destroy_instance();
+        cout << "--------------------------------------" << endl;
+        ++i;
+    }
+    cout << "residue size: " << cached_reader.get_reader().get_atom_number() / 3 << endl;
+    cout << "size: " << i << endl;
+    cached_reader.close();
+    Coord3DReaderFactory::destroy_instance();
 }
