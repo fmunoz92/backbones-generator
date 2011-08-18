@@ -1,7 +1,7 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
-#include "getopt_pp.h"
+#include "getoptpp/getopt_pp.h"
 
 #include <mili/mili.h>
 #include "tree_generator.h"
