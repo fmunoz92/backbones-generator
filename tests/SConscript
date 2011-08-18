@@ -1,0 +1,11 @@
+Import ('env')
+
+name = 'backbones-generator'
+inc = env.Dir('../src')
+src = env.Glob('*.cpp'), env.File('../src/grillado.cpp'), env.File('../src/poneres.cpp'), env.File('../src/readdata.cpp'), env.File('../src/tree_generator.cpp'), env.File('../src/utils.cpp')
+deps = ['backbones-generator', 'gmock','gtest_main']
+
+CXXFLAGS=['-Wall', '-Wextra', '-Wno-sign-compare']
+env.Replace(CXXFLAGS=CXXFLAGS, CFLAGS=CXXFLAGS)
+
+env.CreateTest(name, inc, src, deps)

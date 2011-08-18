@@ -31,14 +31,10 @@ LD           = $(CXX)
 # the shortcut $^ instead of listing all object files a second
 # time, but we cannot count on it...
 
-.PHONY: clean install tools
+.PHONY: clean install
 
 petu:	$(HEADERS) $(OBJECTS) src/petu.o
 	$(LD) $(LDFLAGS) -o $@ $(OBJECTS) src/petu.o  $(LIBS)
-
-tools: 
-	$(CXX) $(CXXFLAGS) $(LIBS) tools/read_xtc.cpp -o read_xtc
-	$(CXX) $(CXXFLAGS) $(LIBS) tools/read_compressed.cpp -o read_compressed
 
 # Si se habilita el modo debug se deshabilitan 
 # todos los chequeos por lo que no se descarta ninguna 
