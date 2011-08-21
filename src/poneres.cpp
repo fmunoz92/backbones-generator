@@ -4,10 +4,10 @@
 class ClashFilter
 {
 public:
-    ClashFilter(TreeData& tree_data)
-        : tree_data(tree_data)
+    ClashFilter(TreeData& tree_data) :
+        tree_data(tree_data)
     {}
-    bool operator()(unsigned int index, const ATOM* patm, int at) const
+    bool operator()(unsigned int index, const Atoms& patm, int at) const
     {
         const bool clash = isclash(patm, at) == FILTER_FAIL;
         return !clash && (index != 2 || (islong(patm, at, tree_data.dmax2) != FILTER_FAIL));
@@ -22,7 +22,7 @@ FilterResultType poneres(float* pR, const unsigned int resN, TreeData& tree_data
     float sinsi = tree_data.sinsi[si_index];
     float cosfi = tree_data.cosfi[fi_index];
     float sinfi = tree_data.sinfi[fi_index];
-    ATOM* patm = tree_data.atm;
+    Atoms patm = tree_data.atm;
 
     const unsigned int i = resN - 2;
     tree_data.angles_data->angles[i].si = si_index;

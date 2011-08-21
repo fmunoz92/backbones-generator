@@ -1,9 +1,9 @@
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include <vector>
 #include <iostream>
 #include <sstream>
 #include <mili/mili.h>
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include "prot-filer/angles.h"
 #include "petu.h"
 #include "readdata.h"

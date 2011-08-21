@@ -16,13 +16,14 @@ enum FilterResultType  {FILTER_FAIL, FILTER_OK};
 // Datos a compartir por todos los niveles:
 using namespace prot_filer;
 typedef CachedReader<FullCache, SimpleAnglesReader, IncompleteAnglesData> FullCachedAnglesSeqReader;
+typedef BasicProtein Atoms;
 
 struct TreeData
 {
     unsigned int nres;
     float rgmax, dmax2;
     std::vector<float> cosfi, cossi, sinfi, sinsi;    // constantes
-    ATOM*   atm;       // estructura parcial
+    Atoms atm;       // estructura parcial
     long int cont;              // cantidad de estructuras exitosas hasta el momento
     bool hubo_algun_exito;      // si encendido, dice que hubo al menos una rama que llego al final
     Grillado* grilla;       // Utilizamos el grillado para aproximar el volumen parcial
@@ -35,7 +36,7 @@ struct TreeData
         // Both equations constructed from database analisys.
         rgmax(2.72 * mili::cubic_root(nres) + 5.0),
         dmax2(mili::square(8.0 * mili::cubic_root(nres) + 25.0)),
-        atm(new ATOM[nres * 3]),
+        atm(Atoms(nres * 3)),
         cont(0),
         hubo_algun_exito(false),
         grilla(grillado),
@@ -43,7 +44,6 @@ struct TreeData
     {}
     ~TreeData()
     {
-        delete [] atm;
         delete grilla;
         delete angles_data;
         delete angles_mapping;

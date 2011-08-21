@@ -28,7 +28,7 @@ void TreeHelper::sacar_residuos(TreeData& tree_data, const vector<Residuo>& resi
 
 void TreeHelper::semilla(TreeData& tree_data, float* R, Residuo& residuo)
 {
-    ATOM* atm = tree_data.atm;
+    Atoms& atm = tree_data.atm;
     backbones_utils::semilla(atm, R);
     ATOM* seed = tree_data.angles_data->seed;
 

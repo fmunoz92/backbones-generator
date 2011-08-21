@@ -4,7 +4,7 @@
 using mili::square;
 using mili::in_range;
 
-void clearatm(ATOM* patm, int nres)
+void clearatm(Atoms& patm, int nres)
 {
     for (int i = 0; i < 3 * nres; i++)
     {
@@ -36,7 +36,7 @@ void setr(float rn, float rca, float rc, float scal_1_4, float scal_1_5)
     }
 }
 
-FilterResultType calcRdG(ATOM* patm, int nres, float rgmax)
+FilterResultType calcRdG(Atoms& patm, int nres, float rgmax)
 {
     float Rcm, xcm, ycm, zcm;
 
@@ -73,7 +73,7 @@ FilterResultType calcRdG(ATOM* patm, int nres, float rgmax)
     }
 }
 
-FilterResultType islong(const ATOM* patm, int at, float dmax2)
+FilterResultType islong(const Atoms& patm, int at, float dmax2)
 {
     // Until we reach residue #5, the check for long chain is meaningless
     // at=13 is the CA of residue #5
@@ -104,7 +104,7 @@ FilterResultType islong(const ATOM* patm, int at, float dmax2)
 //This function detect colitions between atoms
 //The matrix r have the reference radius (actually the sum of the squares of the raduis)
 //The last index of r is 0 for 1-4 clashes, 1 for 1-5 and 2 for the rest
-static inline float distance(const ATOM* patm, const int at, const int i)
+static inline float distance(const Atoms& patm, const int at, const int i)
 {
     const float dx2 = square(patm[at].x - patm[i].x);
     const float dy2 = square(patm[at].y - patm[i].y);
@@ -112,7 +112,7 @@ static inline float distance(const ATOM* patm, const int at, const int i)
     return dx2 + dy2 + dz2;
 }
 
-FilterResultType isclash(const ATOM* patm, int at)
+FilterResultType isclash(const Atoms& patm, int at)
 {
     //This is to check for the so-called 1-4 clashes,
     //i.e. a clash between atom at position i with atom at position i+3
