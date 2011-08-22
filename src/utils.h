@@ -7,7 +7,7 @@ void setr(float rn, float rca, float rc, float scal_1_4, float scal_1_5);
 
 //This function calculates the gyration radius of the CA atoms
 //It was meant to filter long chains. Now it is replaced by the volume filter
-FilterResultType calcRdG(Atoms& patm, int nres, float rgmax);
+FilterResultType calcRdG(const Atoms& patm, int nres, float rgmax);
 
 //This function filter long chains.
 //Calculates the CA-CA distances of the recently added CA with the rest.

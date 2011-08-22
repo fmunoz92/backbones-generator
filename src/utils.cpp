@@ -36,7 +36,7 @@ void setr(float rn, float rca, float rc, float scal_1_4, float scal_1_5)
     }
 }
 
-FilterResultType calcRdG(Atoms& patm, int nres, float rgmax)
+FilterResultType calcRdG(const Atoms& patm, int nres, float rgmax)
 {
     float Rcm, xcm, ycm, zcm;
 

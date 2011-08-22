@@ -22,7 +22,7 @@ FilterResultType poneres(float* pR, const unsigned int resN, TreeData& tree_data
     float sinsi = tree_data.sinsi[si_index];
     float cosfi = tree_data.cosfi[fi_index];
     float sinfi = tree_data.sinfi[fi_index];
-    Atoms patm = tree_data.atm;
+    Atoms& patm = tree_data.atm;
 
     const unsigned int i = resN - 2;
     tree_data.angles_data->angles[i].si = si_index;
@@ -40,7 +40,7 @@ FilterResultType poneres(float* pR, const unsigned int resN, TreeData& tree_data
         return FILTER_FAIL;
     }
 
-    const ATOM atm = patm[3 * (resN - 1) + 1];
+    const ATOM& atm = patm[3 * (resN - 1) + 1];
     residuo.at2 = tree_data.grilla->agregar_esfera(atm.x, atm.y, atm.z);
     return FILTER_OK;
 }
