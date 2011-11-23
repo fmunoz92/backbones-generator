@@ -15,7 +15,7 @@ enum FilterResultType  {FILTER_FAIL, FILTER_OK};
 
 // Datos a compartir por todos los niveles:
 using namespace prot_filer;
-typedef CachedReader<FullCache, SimpleAnglesReader, IncompleteAnglesData> FullCachedAnglesSeqReader;
+typedef CachedReader<FullCache, SimpleAnglesReader, AnglesData> FullCachedAnglesSeqReader;
 typedef BasicProtein Atoms;
 
 struct TreeData

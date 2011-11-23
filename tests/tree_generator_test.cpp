@@ -26,7 +26,7 @@ public:
     {};
 };
 
-bool eq(const IncompleteAnglesData& d1, const AnglesData& d2)
+bool eq(const AnglesData& d1, const AnglesData& d2)
 {
     AngleIdPair* expected_pair = d1.angles;
     AngleIdPair* data_pair = d2.angles;
@@ -50,10 +50,10 @@ TEST(Test, simple_generator)
 {
     const unsigned int nres = 3;
 
-    IncompleteAnglesData d1(nres);
+    AnglesData d1(nres);
     d1.angles[0] = AngleIdPair(0, 0);
     d1.angles[1] = AngleIdPair(0, 0);
-    IncompleteAnglesData d2(nres);
+    AnglesData d2(nres);
     d2.angles[0] = AngleIdPair(2, 0);
     d2.angles[1] = AngleIdPair(0, 2);
 
@@ -61,7 +61,7 @@ TEST(Test, simple_generator)
     TreeData tree_data(nres, grilla);
     istringstream f("-60  -40\n-60  140\n-130 140\n60   30");
     readdata(f, tree_data);
-    tree_data.angles_data = new AnglesData(tree_data.nres, *tree_data.angles_mapping);
+    tree_data.angles_data = new AnglesData(tree_data.nres, tree_data.angles_mapping);
     MockWriteHelper mock_helper;
 
     EXPECT_CALL(mock_helper, open()).Times(1);

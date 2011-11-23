@@ -45,7 +45,7 @@ FilterResultType poneres(float* pR, const unsigned int resN, TreeData& tree_data
     return FILTER_OK;
 }
 
-FilterResultType addChain(float* pR, unsigned int resN, TreeData& tree_data, vector<Residuo> &residuos, const IncompleteAnglesData& chain, unsigned int chain_index)
+FilterResultType addChain(float* pR, unsigned int resN, TreeData& tree_data, vector<Residuo> &residuos, const AnglesData& chain, unsigned int chain_index)
 {
     FilterResultType result = FILTER_OK;
     unsigned int i = 0;

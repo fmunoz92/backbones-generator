@@ -129,7 +129,7 @@ void ChainsTreeGenerator<Writer>::generate()
     vector<Residuo> residuos;
 
     unsigned int i = 0;
-    IncompleteAnglesData* chain;
+    AnglesData* chain;
     while ((chain = reader->read(i)) != NULL)
     {
         clearatm(tree_data.atm, tree_data.nres);
@@ -174,7 +174,7 @@ void ChainsTreeGenerator<Writer>::generar_nivel_intermedio(const unsigned int ni
             if (nivel < (tree_data.nres - 1))
             {
                 unsigned int c = 0;
-                IncompleteAnglesData* chain;
+                AnglesData* chain;
                 while ((chain = reader->read(c)) != NULL)
                 {
                     vector<Residuo> residuos;
