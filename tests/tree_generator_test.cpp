@@ -16,12 +16,10 @@ using testing::A;
 using testing::_;
 using ::testing::Expectation;
 
-class MockWriteHelper : public WriterHelper<SimpleTreeGenerator, XtcWriter>
+class MockWriteHelper : public XtcWriterHelper
 {
 public:
-    MOCK_METHOD0(open, void(void));
-    MOCK_METHOD1(write, void(SimpleTreeGenerator<XtcWriter>& g));
-    MOCK_METHOD0(close, void(void));
+    MOCK_METHOD1(write, void(TreeData& tree_data));
     virtual ~MockWriteHelper()
     {};
 };
@@ -43,7 +41,7 @@ bool eq(const AnglesData& d1, const AnglesData& d2)
 
 MATCHER_P(CheckData, d, "")
 {
-    return eq(d, *(arg.get_tree_data().angles_data));
+    return eq(d, *(arg.angles_data));
 }
 
 TEST(Test, simple_generator)
@@ -64,13 +62,11 @@ TEST(Test, simple_generator)
     tree_data.angles_data = new AnglesData(tree_data.nres, tree_data.angles_mapping);
     MockWriteHelper mock_helper;
 
-    EXPECT_CALL(mock_helper, open()).Times(1);
-
     Expectation e1 = EXPECT_CALL(mock_helper, write(CheckData(d1))).Times(1);
     EXPECT_CALL(mock_helper, write(CheckData(d2))).Times(1).After(e1);
 
-    EXPECT_CALL(mock_helper, close()).Times(1);
-    SimpleTreeGenerator<XtcWriter> g(tree_data, mock_helper);
+    SimpleTreeOperator st(tree_data);
+    TreeGenerator g(tree_data, mock_helper, st);
     g.generate();
     ASSERT_EQ(2, tree_data.cont);
 }
