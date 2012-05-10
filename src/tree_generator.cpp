@@ -53,16 +53,11 @@ void SimpleTreeGenerator<Writer>::generate()
     // Va a ser el residuo que agregue semilla en cada iteracion y al terminar
     // del ciclo se usa para sacar el residuo del grillado.
     Residuo residuo;
-    unsigned int i = 0;
-    while (i < tree_data.cossi.size() && !tree_data.hubo_algun_exito)
-    {
-        clearatm(tree_data.atm, tree_data.nres);
-        TreeHelper::semilla(tree_data, R_inicial, residuo);
+    clearatm(tree_data.atm, tree_data.nres);
 
-        generar_nivel_intermedio(2, R_inicial, i);
-        TreeHelper::sacar_residuo(tree_data, residuo);
-        ++i;
-    }
+    TreeHelper::semilla(tree_data, R_inicial, residuo);
+    generar_nivel_intermedio(2, R_inicial, 0);
+    TreeHelper::sacar_residuo(tree_data, residuo);
 }
 
 template<class Writer>
