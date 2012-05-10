@@ -2,71 +2,36 @@
 #error Internal header file, DO NOT include this.
 #endif
 
-extern const string output_file;
+const string output_f = "traj.xtc";
 
-template<template <class> class Generator, class Writer>
-class WriterHelper
-{};
-
-template<template <class> class Generator>
-class WriterHelper<Generator, XtcWriter>
+inline XtcWriterHelper::XtcWriterHelper() :
+    output_file(output_f)
 {
-public:
-    virtual void open()
-    {
-        writer.open(output_file);
-    }
-    virtual void write(Generator<XtcWriter>& g)
-    {
-        TreeData& tree_data = g.get_tree_data();
-        writer.write(tree_data.atm, *tree_data.angles_data);
-    }
-    virtual void close()
-    {
-        writer.close();
-    }
-private:
-    XtcWriter writer;
-};
+    writer.open(output_file);
+}
 
-template<template <class> class Generator>
-class WriterHelper<Generator, CompressedWriter>
+inline XtcWriterHelper::~XtcWriterHelper()
 {
-public:
-    virtual void open()
-    {
-        writer.open(output_file);
-    }
-    virtual void write(Generator<CompressedWriter>& g)
-    {
-        TreeData& tree_data = g.get_tree_data();
-        writer.write(*tree_data.angles_data);
-    }
-    virtual void close()
-    {
-        writer.close();
-    }
-private:
-    CompressedWriter writer;
-};
+    writer.close();
+}
 
-template<>
-class WriterHelper<ChainsTreeGenerator, FragmentsWriter>
+inline void XtcWriterHelper::write(TreeData& tree_data)
 {
-public:
-    virtual void open()
-    {
-        writer.open(output_file);
-    }
-    virtual void write(ChainsTreeGenerator<FragmentsWriter>& g)
-    {
-        TreeData& tree_data = g.get_tree_data();
-        writer.write(g.get_fragment_nres(), tree_data.fragment_ids, *tree_data.angles_data);
-    }
-    virtual void close()
-    {
-        writer.close();
-    }
-private:
-    FragmentsWriter writer;
-};
+    writer.write(tree_data.atm, *tree_data.angles_data);
+}
+
+inline CompressedWriterHelper::~CompressedWriterHelper()
+{
+    writer.close();
+}
+
+inline CompressedWriterHelper::CompressedWriterHelper() :
+    output_file(output_f)
+{
+    writer.open(output_file);
+}
+
+inline void CompressedWriterHelper::write(TreeData& tree_data)
+{
+    writer.write(*tree_data.angles_data);
+}

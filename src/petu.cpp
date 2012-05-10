@@ -15,13 +15,13 @@ using std::string;
 
 struct CommandLineOptions
 {
-    int Nres;   // Number of amino acids in the chains to build.
+    int Nres;         // Number of amino acids in the chains to build.
     float RN;         // Radius of the Nitrogen atom.
     float RCa;        // Radius of the Carbon atom.
     float RC;         // Radius of the Carbon atom.
     float Scal_1_4;   // Scaling factor for the radii. Used to check for 1-4 clashes.
     float Scal_1_5;   // Scaling factor for the radii. Used to check for 1-5 clashes.
-    string data;   // Name of the input file.
+    string data;      // Name of the input file.
     string write_format;
     string residues_input; //Name of the residue chains file.
     string input_format;
@@ -54,14 +54,8 @@ int main(int argc, char** argv)
 
         if (o.residues_input.empty())
         {
-            Generate<SimpleTreeGenerator> g;
-            g(o.write_format, tree_data, NULL);
-        }
-        else
-        {
-            FullCachedAnglesSeqReader* db = read_chains(o.input_format, o.residues_input, o.fragments_file);
-            Generate<ChainsTreeGenerator> g;
-            g(o.write_format, tree_data, db);
+            Generate g;
+            g(o.write_format, tree_data);
         }
 
         cout << "Number of chains generated=" << tree_data.cont << endl;
