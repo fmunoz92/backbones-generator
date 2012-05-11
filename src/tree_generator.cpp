@@ -148,7 +148,7 @@ void SimpleTreeOperator::initMatrix(float newR[16])
     yaPuseUnResiduo = false;
 }
 
-bool SimpleTreeOperator::putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& resultRecursion)
+bool SimpleTreeOperator::putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, Result& resultRecursion)
 {
     bool result = false;
     resultRecursion = stopRecursion;
@@ -157,7 +157,7 @@ bool SimpleTreeOperator::putNext(unsigned int& nivel, unsigned int  i, unsigned 
     {
         yaPuseUnResiduo = true;
         Residuo residuo;
-        FilterResultType filerResult = poneres(R, nivel, tree_data, residuo, indice_nivel_anterior, i);
+        FilterResultType filerResult = poneres(R, nivel, tree_data, residuo, si_index, fi_index);
 
         if (filerResult == FILTER_OK)
         {

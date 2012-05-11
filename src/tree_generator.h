@@ -15,7 +15,7 @@ struct TreeOperator
     virtual void putFirstWithSeed(float R[16]) = 0;
     virtual void initMatrix(float R[16])       = 0;
     virtual void remove()                      = 0;
-    virtual bool putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& doRecursion) = 0;
+    virtual bool putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, Result& doRecursion) = 0;
     virtual ~TreeOperator() {}
 };
 
