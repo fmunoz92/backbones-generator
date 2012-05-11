@@ -37,7 +37,7 @@ class XtcWriterHelper : public WriterHelper
 {
 public:
     inline XtcWriterHelper();
-    virtual ~XtcWriterHelper();
+    inline virtual ~XtcWriterHelper();
 private:
     inline virtual void write(TreeData& tree_data);
 
@@ -50,7 +50,7 @@ class CompressedWriterHelper : public WriterHelper
 {
 public:
     inline CompressedWriterHelper();
-    virtual ~CompressedWriterHelper();
+    inline virtual ~CompressedWriterHelper();
 private:
     inline virtual void write(TreeData& tree_data);
 

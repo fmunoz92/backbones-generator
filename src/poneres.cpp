@@ -4,7 +4,7 @@
 class ClashFilter
 {
 public:
-    ClashFilter(TreeData& tree_data) :
+    ClashFilter(const TreeData& tree_data) :
         tree_data(tree_data)
     {}
     bool operator()(unsigned int index, const Atoms& patm, int at) const
