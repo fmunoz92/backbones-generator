@@ -60,9 +60,8 @@ void TreeGenerator::generate()
     if (tree_data.nres > 1)
     {
         generar_nivel_intermedio(2, R_inicial, 0);
-        g.remove();
     }
-
+    g.remove();
 }
 
 /*
