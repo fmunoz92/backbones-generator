@@ -5,6 +5,7 @@
 struct WriterHelper
 {
     virtual void write(TreeData& tree_data) = 0;
+    virtual ~WriterHelper() {}
 };
 
 struct TreeOperator
@@ -15,6 +16,7 @@ struct TreeOperator
     virtual void initMatrix(float R[16])       = 0;
     virtual void remove()                      = 0;
     virtual bool putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& doRecursion) = 0;
+    virtual ~TreeOperator() {}
 };
 
 class TreeGenerator
@@ -60,6 +62,7 @@ class SimpleTreeOperator : public TreeOperator
 {
 public:
     SimpleTreeOperator(TreeData& t);
+    virtual ~SimpleTreeOperator();
 private:
     virtual void putFirstWithSeed(float R[16]);
     virtual void initMatrix(float R[16]);

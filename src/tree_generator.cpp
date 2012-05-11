@@ -125,6 +125,9 @@ SimpleTreeOperator::SimpleTreeOperator(TreeData& t) :
     yaPuseUnResiduo(false)
 {}
 
+SimpleTreeOperator::~SimpleTreeOperator()
+{}
+
 void SimpleTreeOperator::putFirstWithSeed(float R_inicial[16])
 {
     Residuo residuo;
