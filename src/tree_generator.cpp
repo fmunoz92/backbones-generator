@@ -54,5 +54,4 @@ bool SimpleTreeOperator::putNext(unsigned int& nivel, unsigned int fi_index, uns
     return result;
 }
 
-
 #endif

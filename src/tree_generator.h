@@ -17,7 +17,6 @@ public:
     TreeGenerator(TreeData& tree_data);
     ~TreeGenerator() {}
     void generate();
-    static unsigned int recursion;
 private:
     void generar_nivel_intermedio(unsigned int nivel, const float R_inicial[16], unsigned int indice_nivel_anterior);
     bool procesar_ultimo_nivel();
