@@ -1,3 +1,6 @@
+#ifndef PETU_CPP
+#define PETU_CPP
+
 #include <cassert>
 #include <iostream>
 #include <fstream>
@@ -149,3 +152,5 @@ bool CommandLineOptions::parse(int argc, char** argv)
         return false;
     }
 }
+
+#endif

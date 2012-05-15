@@ -1,100 +1,96 @@
+#ifndef TREE_GENERATOR_H
+#define TREE_GENERATOR_H
+
 #include <string>
 #include <vector>
-#include "petu.h"
+#include "poneres.h"
+#include "utils.h"
 
-struct WriterHelper
-{
-    virtual void write(TreeData& tree_data) = 0;
-    virtual ~WriterHelper() {}
-};
+const string output_f = "traj.xtc";
 
-struct TreeOperator
-{
-    typedef enum {doRecursion, stopRecursion} Result;
+typedef enum {doRecursion, stopRecursion} Result;
 
-    virtual void putFirstWithSeed(float R[16]) = 0;
-    virtual void initMatrix(float R[16])       = 0;
-    virtual void remove()                      = 0;
-    virtual bool putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, Result& doRecursion) = 0;
-    virtual ~TreeOperator() {}
-};
-
+template <class TreeOperator, class WriterHelper>
 class TreeGenerator
 {
 public:
-    TreeGenerator(TreeData& tree_data, WriterHelper& helper, TreeOperator& g);
-    ~TreeGenerator();
+    TreeGenerator(TreeData& tree_data);
+    ~TreeGenerator() {}
     void generate();
+    static unsigned int recursion;
 private:
     void generar_nivel_intermedio(unsigned int nivel, const float R_inicial[16], unsigned int indice_nivel_anterior);
     bool procesar_ultimo_nivel();
     TreeData& tree_data;
-    WriterHelper& writer_helper;
-    TreeOperator& g;
+    WriterHelper writer_helper;
+    TreeOperator g;
 };
 
-class XtcWriterHelper : public WriterHelper
-{
-public:
-    inline XtcWriterHelper();
-    inline virtual ~XtcWriterHelper();
-private:
-    inline virtual void write(TreeData& tree_data);
-
-    const string output_file;
-    XtcWriter writer;
-};
-
-
-class CompressedWriterHelper : public WriterHelper
-{
-public:
-    inline CompressedWriterHelper();
-    inline virtual ~CompressedWriterHelper();
-private:
-    inline virtual void write(TreeData& tree_data);
-
-    const string output_file;
-    CompressedWriter writer;
-};
-
-class SimpleTreeOperator : public TreeOperator
+class SimpleTreeOperator
 {
 public:
     SimpleTreeOperator(TreeData& t);
-    virtual ~SimpleTreeOperator();
+    ~SimpleTreeOperator();
+    void putFirstWithSeed(float R[16]);
+    void initMatrix(float R[16]);
+    bool putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& doRecursion);
+    void remove();
 private:
-    virtual void putFirstWithSeed(float R[16]);
-    virtual void initMatrix(float R[16]);
-    virtual bool putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& doRecursion);
-    virtual void remove();
-
     float* R;
     TreeData& tree_data;
     vector<Residuo> paraBorrar;
     bool yaPuseUnResiduo;
 };
 
+struct TreeHelper
+{
+    static inline void semilla(TreeData& tree_data, float* R, Residuo& residuo);
+    static inline FilterResultType filtros_ultimo_nivel(TreeData& tree_data);
+    static inline void sacar_residuo(TreeData& tree_data, const Residuo& residuo);
+    static inline void sacar_residuos(TreeData& tree_data, const vector<Residuo>& residuos);
+};
+
+class XtcWriterHelper
+{
+public:
+    inline XtcWriterHelper();
+    inline ~XtcWriterHelper();
+    inline void write(TreeData& tree_data);
+private:
+    const string output_file;
+    XtcWriter writer;
+};
+
+class CompressedWriterHelper
+{
+public:
+    inline CompressedWriterHelper();
+    inline ~CompressedWriterHelper();
+    inline void write(TreeData& tree_data);
+private:
+    const string output_file;
+    CompressedWriter writer;
+};
 
 struct Generate
 {
     void operator()(const string& format, TreeData& tree_data)
     {
-        WriterHelper* wh;
-
         if (format == "xtc")
-            wh = new XtcWriterHelper();
+        {
+            TreeGenerator<SimpleTreeOperator, XtcWriterHelper> g(tree_data);
+            g.generate();
+        }
         else if (format == "compressed")
-            wh = new CompressedWriterHelper();
-
-        SimpleTreeOperator st(tree_data);
-        TreeGenerator g(tree_data, *wh, st);
-        g.generate();
-
-        delete wh;
+        {
+            TreeGenerator<SimpleTreeOperator, CompressedWriterHelper> g(tree_data);
+            g.generate();
+        }
     }
 };
 
-#define INTERNAL_FILER_H
-#include "filer.h"
+#define TREE_GENERATOR_INLINE_H
+#include "tree_generator_inline.h"
 #undef INTERNAL_FILER_H
+
+#endif

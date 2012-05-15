@@ -1,3 +1,6 @@
+#ifndef UTILS_H
+#define UTILS_H
+
 #include "petu.h"
 
 //This function puts 0 in all the atoms coordinates
@@ -19,3 +22,4 @@ FilterResultType isclash(const Atoms& patm, int at);
 
 FilterResultType volumen_en_rango(int nres, Volume vol_parcial);
 
+#endif

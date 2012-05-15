@@ -1,8 +1,3 @@
-
-
-
-
-
 /*
     Spherical Grid Volume Approximation: An algorithm for approximating the
     volume of a compound object by keeping track of its members' positions in space.
@@ -24,11 +19,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef GRILLADO_CPP
+#define GRILLADO_CPP
 
 #include "grillado.h"
-
-
-
 
 // Se asigna memoria a la matriz y se inicializa con 0s.
 // Para que no hayan intersecciones diagonales
@@ -66,7 +60,6 @@ Grillado::Grillado(size_t M, size_t N, size_t Z, Length R, Length D) throw(radiu
 }
 
 
-
 /*  Se muestra el volumen de las esferas, el volumen de las intersecciones
     y la cantidad de elementos en cada posicion del grillado.
 */
@@ -91,8 +84,6 @@ void Grillado::info_grillado() const
     cerr << "Intersection volume: " << vol_int << endl;
 }
 
-
-
 // Se libera la memoria correspondiente a la matriz
 // All memory resources are released.
 Grillado::~Grillado()
@@ -112,8 +103,6 @@ Grillado::~Grillado()
 // Se agrega un elemento a la esfera correspondiente a las coordenadas ingresadas
 // como argumento.
 // Adds an element to the sphere determined by coordinates x, y, z.
-
-
 void Grillado::agregar_esfera(const esferaId& id)
 {
     const GridCoord coord_x = id.get_m();
@@ -129,8 +118,6 @@ void Grillado::agregar_esfera(const esferaId& id)
 // Se quita un elemento de la esfera correspondiente a las coordenadas ingresadas
 // como argumento.
 // Removes an element from the sphere determined by coordinates x, y, z.
-
-
 void Grillado::sacar_esfera(const esferaId& id) throw(gridPositionException)
 {
     const GridCoord coord_x = id.get_m();
@@ -146,9 +133,6 @@ void Grillado::sacar_esfera(const esferaId& id) throw(gridPositionException)
         reducir_vol_parcial(coord_x, coord_y, coord_z);
     }
 }
-
-
-
 
 // Reduce el volumen parcial del grillado, se encapsula parte del comportamiento
 // de sacar_esfera.
@@ -170,11 +154,9 @@ void Grillado::aumentar_vol_parcial(int coord_x, int coord_y, int coord_z)
     intersecciones += calcular_intersecciones(coord_x, coord_y, coord_z);
 }
 
-
 // Asigna a coord_x, coord_y, coord_z los indices del grillado correspondientes a las
 // coordenadas x, y, z.
 // Sets coord_x, coord_y, coord_z with the grid coordinates corresponding to x, y, z.
-
 void Grillado::calcular_coord(Coord x, Coord y, Coord Z, GridCoord& coord_x, GridCoord& coord_y, GridCoord& coord_z) const
 {
     coord_x = modulo(static_cast<int>(round(x / d)), static_cast<int>(v));
@@ -214,7 +196,6 @@ unsigned int Grillado::calcular_intersecciones(GridCoord coord_x, GridCoord coor
     return inters;
 }
 
-
 // Sets every grid position to zero. Sets the partial volume to zero.
 // Asigna cero a cada posicion del grillado y al volumen parcial.
 void Grillado::reset()
@@ -233,4 +214,4 @@ void Grillado::reset()
     intersecciones = 0;
 }
 
-
+#endif

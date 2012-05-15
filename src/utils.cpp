@@ -1,3 +1,6 @@
+#ifndef UTILS_CPP
+#define UTILS_CPP
+
 #include <cmath>
 #include "utils.h"
 
@@ -180,3 +183,5 @@ FilterResultType volumen_en_rango(int nres, Volume vol_parcial)
 #endif
     return in_range(chain_volumen, volumen_min_aa, volumen_max_aa) ? FILTER_OK : FILTER_FAIL;
 }
+
+#endif
