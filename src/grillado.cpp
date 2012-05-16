@@ -19,9 +19,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef GRILLADO_CPP
-#define GRILLADO_CPP
-
 #include "grillado.h"
 
 // Se asigna memoria a la matriz y se inicializa con 0s.
@@ -213,5 +210,3 @@ void Grillado::reset()
     esferas = 0;
     intersecciones = 0;
 }
-
-#endif

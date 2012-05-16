@@ -1,6 +1,3 @@
-#ifndef READDATA_CPP
-#define READDATA_CPP
-
 #include "readdata.h"
 
 using namespace mili;
@@ -49,5 +46,3 @@ FullCachedAnglesSeqReader* read_chains(const string& format, const string& input
         throw runtime_error("wrong input format");
     }
 }
-
-#endif

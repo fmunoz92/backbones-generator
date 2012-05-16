@@ -1,6 +1,3 @@
-#ifndef TREE_GENERATOR_CPP
-#define TREE_GENERATOR_CPP
-
 #include "tree_generator.h"
 
 SimpleTreeOperator::SimpleTreeOperator(TreeData& t) :
@@ -53,5 +50,3 @@ bool SimpleTreeOperator::putNext(unsigned int& nivel, unsigned int fi_index, uns
 
     return result;
 }
-
-#endif

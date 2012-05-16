@@ -1,6 +1,3 @@
-#ifndef PONERES_CPP
-#define PONERES_CPP
-
 #include "utils.h"
 #include "poneres.h"
 
@@ -70,5 +67,3 @@ FilterResultType addChain(float* pR, unsigned int resN, TreeData& tree_data, vec
     }
     return result;
 }
-
-#endif
