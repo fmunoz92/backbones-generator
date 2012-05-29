@@ -126,9 +126,15 @@ bool ChainsTreeOperator::putNext(unsigned int& nivel, unsigned int  i, unsigned 
 
 void ChainsTreeOperator::remove()
 {
-    TreeHelper::sacar_residuo(tree_data, residuosParaBorrar.back());
-    TreeHelper::sacar_residuos(tree_data, vectoresParaBorrar.back());
+    if (!residuosParaBorrar.empty())
+    {
+        TreeHelper::sacar_residuo(tree_data, residuosParaBorrar.back());
+        residuosParaBorrar.pop_back();
+    }
+    if (!vectoresParaBorrar.empty())
+    {
+        TreeHelper::sacar_residuos(tree_data, vectoresParaBorrar.back());
+        vectoresParaBorrar.pop_back();
+    }
     tree_data.fragment_ids.pop_back();
-    residuosParaBorrar.pop_back();
-    vectoresParaBorrar.pop_back();
 }
