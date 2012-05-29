@@ -13,10 +13,9 @@ void TreeGenerator<TreeOperator, WriterHelper>::generate()
 {
     float R_inicial[16];
     unsigned int nivel = 0;
-    unsigned int c = 0;
 
     g.initMatrix(R_inicial);
-    while (g.putFirstWithSeed(nivel, c))
+    while (g.putFirstWithSeed(nivel))
     {
         if (nivel < tree_data.nres)
         {
@@ -25,7 +24,6 @@ void TreeGenerator<TreeOperator, WriterHelper>::generate()
         else
             procesar_ultimo_nivel();
         g.remove();
-        c++;
     }
 }
 
@@ -52,8 +50,7 @@ void TreeGenerator<TreeOperator, WriterHelper>::generar_nivel_intermedio(unsigne
         backbones_utils::copymat(R_local, R_inicial);
         g.initMatrix(R_local);
 
-        unsigned int c = 0;
-        while (g.putNext(nivelAux, i, indice_nivel_anterior, result, c))
+        while (g.putNext(nivelAux, i, indice_nivel_anterior, result))
         {
             if (result == doRecursion)
             {
@@ -63,7 +60,6 @@ void TreeGenerator<TreeOperator, WriterHelper>::generar_nivel_intermedio(unsigne
                     ultimo_nivel_exitoso = procesar_ultimo_nivel();
                 g.remove();
             }
-            c++;
         }
         i++;
     }
@@ -94,19 +90,9 @@ inline XtcWriterHelper::XtcWriterHelper() :
     writer.open(output_file);
 }
 
-inline XtcWriterHelper::~XtcWriterHelper()
-{
-    writer.close();
-}
-
 inline void XtcWriterHelper::write(TreeData& tree_data)
 {
     writer.write(tree_data.atm, *tree_data.angles_data);
-}
-
-inline CompressedWriterHelper::~CompressedWriterHelper()
-{
-    writer.close();
 }
 
 inline CompressedWriterHelper::CompressedWriterHelper() :
@@ -128,11 +114,6 @@ inline FragmentsWriterHelper::FragmentsWriterHelper() :
 
 inline void FragmentsWriterHelper::write(TreeData& /*tree_data*/)
 {
-}
-
-inline FragmentsWriterHelper::~FragmentsWriterHelper()
-{
-    writer.close();
 }
 
 inline void TreeHelper::semilla(TreeData& tree_data, float* R, Residuo& residuo)

@@ -4,17 +4,17 @@ SimpleTreeOperator::SimpleTreeOperator(TreeData& t, FullCachedAnglesSeqReader* c
     tree_data(t)
 {}
 
-bool SimpleTreeOperator::putFirstWithSeed(unsigned int& nivel, unsigned int c)
+bool SimpleTreeOperator::putFirstWithSeed(unsigned int& nivel)
 {
     bool result = false;
 
-    if (c == 0) //TODO: use mili::FirstTimeFlag
+    if (firstTime)
     {
         Residuo residuo;
         clearatm(tree_data.atm, tree_data.nres);
         TreeHelper::semilla(tree_data, R, residuo);
         mili::insert_into(paraBorrar, residuo);
-        nivel = 2;
+        nivel = 2; //semilla is level 1 then next level is 2
         result = true;
     }
 
@@ -29,15 +29,16 @@ void SimpleTreeOperator::remove()
 
 void SimpleTreeOperator::initMatrix(float newR[16])
 {
+    firstTime.reset();
     R = newR;
 }
 
-bool SimpleTreeOperator::putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, Result& resultRecursion, unsigned int c)
+bool SimpleTreeOperator::putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, Result& resultRecursion)
 {
     bool result = false;
     resultRecursion = stopRecursion;
 
-    if (c == 0) //TODO: use mili::FirstTimeFlag
+    if (firstTime)
     {
         Residuo residuo;
         FilterResultType filerResult = poneres(R, nivel, tree_data, residuo, si_index, fi_index);
@@ -62,20 +63,25 @@ ChainsTreeOperator::ChainsTreeOperator(TreeData& t, FullCachedAnglesSeqReader* c
 void ChainsTreeOperator::initMatrix(float newR[16])
 {
     R = newR;
+    firstTime.reset();
+    currentPosInChain = 0;
 }
 
-bool ChainsTreeOperator::putFirstWithSeed(unsigned int& nivel, unsigned int c)
+bool ChainsTreeOperator::putFirstWithSeed(unsigned int& nivel)
 {
     bool result = true;
     AnglesData* chain;
     Residuo residuo;
     vector<Residuo> residuos;
-    if ((chain = reader->read(c)) != NULL)
+    if ((chain = reader->read(currentPosInChain)) != NULL)
     {
+        const unsigned int nextLevel = 2; //semilla is "level 1"
         clearatm(tree_data.atm, tree_data.nres);
         TreeHelper::semilla(tree_data, R, residuo);
-        addChain(R, 2, tree_data, residuos, *chain, c);
-        nivel = residuos.size() + 2;
+        addChain(R, nextLevel, tree_data, residuos, *chain, currentPosInChain);
+
+        nivel = residuos.size() + nextLevel;
+        currentPosInChain++;
         residuosParaBorrar.push_back(residuo);
         vectoresParaBorrar.push_back(residuos);
     }
@@ -85,7 +91,7 @@ bool ChainsTreeOperator::putFirstWithSeed(unsigned int& nivel, unsigned int c)
     return result;
 }
 
-bool ChainsTreeOperator::putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& recursion, unsigned int c)
+bool ChainsTreeOperator::putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& recursion)
 {
     bool result = true;
     FilterResultType filterResult;
@@ -94,7 +100,7 @@ bool ChainsTreeOperator::putNext(unsigned int& nivel, unsigned int  i, unsigned 
     Residuo residuo;
     vector<Residuo> residuos;
 
-    if (c == 0)//TODO: use mili::FirstTimeFlag and modularize
+    if (firstTime)//or currentPosInChain == 0
     {
         if (poneres(R, nivel, tree_data, residuo, indice_nivel_anterior, i) == FILTER_OK)
         {
@@ -105,9 +111,9 @@ bool ChainsTreeOperator::putNext(unsigned int& nivel, unsigned int  i, unsigned 
             result = false;
     }
 
-    if (result && (chain = reader->read(c)) != NULL) //TODO: instead c using class attribute
+    if (result && (chain = reader->read(currentPosInChain)) != NULL)
     {
-        filterResult = addChain(R, nivel, tree_data, residuos, *chain, c);
+        filterResult = addChain(R, nivel, tree_data, residuos, *chain, currentPosInChain);
         nivel += residuos.size();
         if (filterResult == FILTER_OK)
         {
@@ -117,6 +123,7 @@ bool ChainsTreeOperator::putNext(unsigned int& nivel, unsigned int  i, unsigned 
         else
             //saco residuos apendeados antes del primer residuo que genero FILTER_FAIL
             TreeHelper::sacar_residuos(tree_data, residuos);
+        currentPosInChain++;
     }
     else
         result = false;
@@ -126,15 +133,10 @@ bool ChainsTreeOperator::putNext(unsigned int& nivel, unsigned int  i, unsigned 
 
 void ChainsTreeOperator::remove()
 {
-    if (!residuosParaBorrar.empty())
-    {
-        TreeHelper::sacar_residuo(tree_data, residuosParaBorrar.back());
-        residuosParaBorrar.pop_back();
-    }
-    if (!vectoresParaBorrar.empty())
-    {
-        TreeHelper::sacar_residuos(tree_data, vectoresParaBorrar.back());
-        vectoresParaBorrar.pop_back();
-    }
+    TreeHelper::sacar_residuo(tree_data, residuosParaBorrar.back());
+    TreeHelper::sacar_residuos(tree_data, vectoresParaBorrar.back());
+
+    residuosParaBorrar.pop_back();
+    vectoresParaBorrar.pop_back();
     tree_data.fragment_ids.pop_back();
 }

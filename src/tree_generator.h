@@ -32,11 +32,12 @@ public:
     ~SimpleTreeOperator()
     {}
 
-    bool putFirstWithSeed(unsigned int& nivel, unsigned int c);
+    bool putFirstWithSeed(unsigned int& nivel);
     void initMatrix(float R[16]);
-    bool putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& doRecursion, unsigned int c);
+    bool putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& doRecursion);
     void remove();
 private:
+    mili::FirstTimeFlag firstTime;
     float* R;
     TreeData& tree_data;
     vector<Residuo> paraBorrar;
@@ -46,15 +47,17 @@ class ChainsTreeOperator
 {
 public:
 
-    ChainsTreeOperator(TreeData& t, FullCachedAnglesSeqReader* const reader);
+    ChainsTreeOperator(TreeData& t, FullCachedAnglesSeqReader* reader);
     ~ChainsTreeOperator()
     {}
 
-    bool putFirstWithSeed(unsigned int& nivel, unsigned int c);
+    bool putFirstWithSeed(unsigned int& nivel);
     void initMatrix(float R[16]);
-    bool putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& doRecursion, unsigned int c);
+    bool putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& doRecursion);
     void remove();
 private:
+    mili::FirstTimeFlag firstTime;
+    unsigned int currentPosInChain;
     float* R;
     TreeData& tree_data;
     vector<Residuo> residuosParaBorrar;
@@ -75,7 +78,6 @@ class XtcWriterHelper
 {
 public:
     inline XtcWriterHelper();
-    inline ~XtcWriterHelper();
     inline void write(TreeData& tree_data);
 private:
     const string output_file;
@@ -86,7 +88,6 @@ class CompressedWriterHelper
 {
 public:
     inline CompressedWriterHelper();
-    inline ~CompressedWriterHelper();
     inline void write(TreeData& tree_data);
 private:
     const string output_file;
@@ -97,7 +98,6 @@ class FragmentsWriterHelper
 {
 public:
     inline FragmentsWriterHelper();
-    inline ~FragmentsWriterHelper();
     inline void write(TreeData& tree_data);
 private:
     const string output_file;
