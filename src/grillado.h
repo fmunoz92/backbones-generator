@@ -120,7 +120,7 @@ public:
     Grillado(size_t a, size_t b, size_t c, Length R = 4.0f, Length D = 5.7f) throw
     (radiusOrDistanceParamException, sizeParamException, bad_alloc);
 
-    ~Grillado() ;
+    ~Grillado();
 
     void info_grillado() const;
 

@@ -3,21 +3,30 @@
 #endif
 
 template <class TreeOperator, class WriterHelper>
-TreeGenerator<TreeOperator, WriterHelper>::TreeGenerator(TreeData& tree_data) :
+TreeGenerator<TreeOperator, WriterHelper>::TreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* const reader) :
     tree_data(tree_data),
-    g(tree_data)
+    g(tree_data, reader)
 {}
 
 template <class TreeOperator, class WriterHelper>
 void TreeGenerator<TreeOperator, WriterHelper>::generate()
 {
     float R_inicial[16];
-    g.putFirstWithSeed(R_inicial);
-    if (tree_data.nres > 1)
+    unsigned int nivel = 0;
+    unsigned int c = 0;
+
+    g.initMatrix(R_inicial);
+    while (g.putFirstWithSeed(nivel, c))
     {
-        generar_nivel_intermedio(2, R_inicial, 0);
+        if (nivel < tree_data.nres)
+        {
+            generar_nivel_intermedio(nivel, R_inicial, 0);
+        }
+        else
+            procesar_ultimo_nivel();
+        g.remove();
+        c++;
     }
-    g.remove();
 }
 
 /*
@@ -43,7 +52,8 @@ void TreeGenerator<TreeOperator, WriterHelper>::generar_nivel_intermedio(unsigne
         backbones_utils::copymat(R_local, R_inicial);
         g.initMatrix(R_local);
 
-        while (g.putNext(nivelAux, i, indice_nivel_anterior, result))
+        unsigned int c = 0;
+        while (g.putNext(nivelAux, i, indice_nivel_anterior, result, c))
         {
             if (result == doRecursion)
             {
@@ -53,6 +63,7 @@ void TreeGenerator<TreeOperator, WriterHelper>::generar_nivel_intermedio(unsigne
                     ultimo_nivel_exitoso = procesar_ultimo_nivel();
                 g.remove();
             }
+            c++;
         }
         i++;
     }
@@ -107,6 +118,21 @@ inline CompressedWriterHelper::CompressedWriterHelper() :
 inline void CompressedWriterHelper::write(TreeData& tree_data)
 {
     writer.write(*tree_data.angles_data);
+}
+
+inline FragmentsWriterHelper::FragmentsWriterHelper() :
+    output_file(output_file)
+{
+    writer.open(output_file);
+}
+
+inline void FragmentsWriterHelper::write(TreeData& /*tree_data*/)
+{
+}
+
+inline FragmentsWriterHelper::~FragmentsWriterHelper()
+{
+    writer.close();
 }
 
 inline void TreeHelper::semilla(TreeData& tree_data, float* R, Residuo& residuo)

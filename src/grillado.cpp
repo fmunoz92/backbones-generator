@@ -177,11 +177,11 @@ void Grillado::calcular_coord(Coord x, Coord y, Coord Z, GridCoord& coord_x, Gri
 */
 unsigned int Grillado::calcular_intersecciones(GridCoord coord_x, GridCoord coord_y, GridCoord coord_z) const
 {
-    const GridCoord x_plus = modulo((static_cast<int>(coord_x) + 1) , v);
+    const GridCoord x_plus  = modulo((static_cast<int>(coord_x) + 1) , v);
     const GridCoord x_minus = modulo((static_cast<int>(coord_x) - 1) , v);
     const GridCoord y_minus = modulo((static_cast<int>(coord_y) - 1) , w);
-    const GridCoord y_plus = modulo((static_cast<int>(coord_y) + 1) , w);
-    const GridCoord z_plus = modulo((static_cast<int>(coord_z) + 1) , z);
+    const GridCoord y_plus  = modulo((static_cast<int>(coord_y) + 1) , w);
+    const GridCoord z_plus  = modulo((static_cast<int>(coord_z) + 1) , z);
     const GridCoord z_minus = modulo((static_cast<int>(coord_z) - 1) , z);
 
     unsigned int inters = matriz[coord_x][coord_y][z_plus] != 0;

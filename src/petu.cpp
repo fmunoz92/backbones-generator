@@ -54,8 +54,14 @@ int main(int argc, char** argv)
 
         if (o.residues_input.empty())
         {
-            Generate g;
-            g(o.write_format, tree_data);
+            Generate<SimpleTreeOperator> g;
+            g(o.write_format, tree_data, NULL);
+        }
+        else
+        {
+            FullCachedAnglesSeqReader* db = read_chains(o.input_format, o.residues_input, o.fragments_file);
+            Generate<ChainsTreeOperator> g;
+            g(o.write_format, tree_data, db);
         }
 
         cout << "Number of chains generated=" << tree_data.cont << endl;

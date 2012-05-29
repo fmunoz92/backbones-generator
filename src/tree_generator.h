@@ -14,7 +14,7 @@ template <class TreeOperator, class WriterHelper>
 class TreeGenerator
 {
 public:
-    TreeGenerator(TreeData& tree_data);
+    TreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* const reader);
     ~TreeGenerator() {}
     void generate();
 private:
@@ -28,18 +28,40 @@ private:
 class SimpleTreeOperator
 {
 public:
-    SimpleTreeOperator(TreeData& t);
-    ~SimpleTreeOperator();
-    void putFirstWithSeed(float R[16]);
+    SimpleTreeOperator(TreeData& t, FullCachedAnglesSeqReader* const);
+    ~SimpleTreeOperator()
+    {}
+
+    bool putFirstWithSeed(unsigned int& nivel, unsigned int c);
     void initMatrix(float R[16]);
-    bool putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& doRecursion);
+    bool putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& doRecursion, unsigned int c);
     void remove();
 private:
     float* R;
     TreeData& tree_data;
     vector<Residuo> paraBorrar;
-    bool yaPuseUnResiduo;
 };
+
+class ChainsTreeOperator
+{
+public:
+
+    ChainsTreeOperator(TreeData& t, FullCachedAnglesSeqReader* const reader);
+    ~ChainsTreeOperator()
+    {}
+
+    bool putFirstWithSeed(unsigned int& nivel, unsigned int c);
+    void initMatrix(float R[16]);
+    bool putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& doRecursion, unsigned int c);
+    void remove();
+private:
+    float* R;
+    TreeData& tree_data;
+    vector<Residuo> residuosParaBorrar;
+    vector<vector<Residuo> > vectoresParaBorrar;
+    FullCachedAnglesSeqReader* const reader;
+};
+
 
 struct TreeHelper
 {
@@ -71,20 +93,63 @@ private:
     CompressedWriter writer;
 };
 
-struct Generate
+class FragmentsWriterHelper
 {
-    void operator()(const string& format, TreeData& tree_data)
+public:
+    inline FragmentsWriterHelper();
+    inline ~FragmentsWriterHelper();
+    inline void write(TreeData& tree_data);
+private:
+    const string output_file;
+    FragmentsWriter writer;
+};
+
+template<class T>
+struct Generate
+{};
+
+template<>
+struct Generate<SimpleTreeOperator>
+{
+    void operator()(const string& format, TreeData& tree_data, FullCachedAnglesSeqReader* const)
     {
         if (format == "xtc")
         {
-            TreeGenerator<SimpleTreeOperator, XtcWriterHelper> g(tree_data);
+            TreeGenerator<SimpleTreeOperator, XtcWriterHelper> g(tree_data, NULL);
             g.generate();
         }
         else if (format == "compressed")
         {
-            TreeGenerator<SimpleTreeOperator, CompressedWriterHelper> g(tree_data);
+            TreeGenerator<SimpleTreeOperator, CompressedWriterHelper> g(tree_data, NULL);
             g.generate();
         }
+        else
+            throw runtime_error("wrong format");
+    }
+};
+
+template<>
+struct Generate<ChainsTreeOperator>
+{
+    void operator()(const string& format, TreeData& tree_data, FullCachedAnglesSeqReader* const reader)
+    {
+        if (format == "xtc")
+        {
+            TreeGenerator<ChainsTreeOperator, XtcWriterHelper> g(tree_data, reader);
+            g.generate();
+        }
+        else if (format == "compressed")
+        {
+            TreeGenerator<ChainsTreeOperator, CompressedWriterHelper> g(tree_data, reader);
+            g.generate();
+        }
+        else if (format == "fragments")
+        {
+            TreeGenerator<ChainsTreeOperator, FragmentsWriterHelper> g(tree_data, reader);
+            g.generate();
+        }
+        else
+            throw runtime_error("wrong format");
     }
 };
 
