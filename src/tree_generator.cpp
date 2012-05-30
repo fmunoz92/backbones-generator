@@ -4,7 +4,7 @@ SimpleTreeOperator::SimpleTreeOperator(TreeData& t, FullCachedAnglesSeqReader* c
     tree_data(t)
 {}
 
-bool SimpleTreeOperator::putFirstWithSeed(unsigned int& nivel)
+bool SimpleTreeOperator::putNextSeed(unsigned int& nivel)
 {
     bool result = false;
 
@@ -67,7 +67,7 @@ void ChainsTreeOperator::initMatrix(float newR[16])
     currentPosInChain = 0;
 }
 
-bool ChainsTreeOperator::putFirstWithSeed(unsigned int& nivel)
+bool ChainsTreeOperator::putNextSeed(unsigned int& nivel)
 {
     bool result = true;
     AnglesData* chain;

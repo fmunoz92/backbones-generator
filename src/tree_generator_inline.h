@@ -15,7 +15,7 @@ void TreeGenerator<TreeOperator, WriterHelper>::generate()
     unsigned int nivel = 0;
 
     g.initMatrix(R_inicial);
-    while (g.putFirstWithSeed(nivel))
+    while (g.putNextSeed(nivel))
     {
         if (nivel < tree_data.nres)
         {
@@ -70,7 +70,7 @@ bool TreeGenerator<TreeOperator, WriterHelper>::procesar_ultimo_nivel()
 {
     bool exito = false;
 #ifdef COMBINATIONS_DEBUG // En el modo DEBUG se deshabilitan los chequeos.
-    writer_helper.write(*this);
+    writer_helper.write(tree_data);
     tree_data.cont++;
 #else
     if (TreeHelper::filtros_ultimo_nivel(tree_data) == FILTER_OK)
@@ -90,6 +90,11 @@ inline XtcWriterHelper::XtcWriterHelper() :
     writer.open(output_file);
 }
 
+inline XtcWriterHelper::~XtcWriterHelper()
+{
+    writer.close();
+}
+
 inline void XtcWriterHelper::write(TreeData& tree_data)
 {
     writer.write(tree_data.atm, *tree_data.angles_data);
@@ -99,6 +104,10 @@ inline CompressedWriterHelper::CompressedWriterHelper() :
     output_file(output_f)
 {
     writer.open(output_file);
+}
+inline CompressedWriterHelper::~CompressedWriterHelper()
+{
+    writer.close();
 }
 
 inline void CompressedWriterHelper::write(TreeData& tree_data)
@@ -110,6 +119,11 @@ inline FragmentsWriterHelper::FragmentsWriterHelper() :
     output_file(output_file)
 {
     writer.open(output_file);
+}
+
+inline FragmentsWriterHelper::~FragmentsWriterHelper()
+{
+    writer.close();
 }
 
 inline void FragmentsWriterHelper::write(TreeData& /*tree_data*/)

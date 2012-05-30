@@ -32,7 +32,7 @@ public:
     ~SimpleTreeOperator()
     {}
 
-    bool putFirstWithSeed(unsigned int& nivel);
+    bool putNextSeed(unsigned int& nivel);
     void initMatrix(float R[16]);
     bool putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& doRecursion);
     void remove();
@@ -51,7 +51,7 @@ public:
     ~ChainsTreeOperator()
     {}
 
-    bool putFirstWithSeed(unsigned int& nivel);
+    bool putNextSeed(unsigned int& nivel);
     void initMatrix(float R[16]);
     bool putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& doRecursion);
     void remove();
@@ -78,6 +78,7 @@ class XtcWriterHelper
 {
 public:
     inline XtcWriterHelper();
+    inline ~XtcWriterHelper();
     inline void write(TreeData& tree_data);
 private:
     const string output_file;
@@ -88,6 +89,7 @@ class CompressedWriterHelper
 {
 public:
     inline CompressedWriterHelper();
+    inline ~CompressedWriterHelper();
     inline void write(TreeData& tree_data);
 private:
     const string output_file;
@@ -98,6 +100,7 @@ class FragmentsWriterHelper
 {
 public:
     inline FragmentsWriterHelper();
+    inline ~FragmentsWriterHelper();
     inline void write(TreeData& tree_data);
 private:
     const string output_file;
