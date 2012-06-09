@@ -48,7 +48,7 @@ int main(int argc, char** argv)
         setr(o.RN, o.RCa, o.RC, o.Scal_1_4, o.Scal_1_5);
 
         readdata(filer, tree_data);
-        tree_data.angles_data = new AnglesData(tree_data.nres, *tree_data.angles_mapping);
+        tree_data.angles_data = new AnglesData(tree_data.nres, tree_data.angles_mapping);
 
         cout << "Number of fi-si combinations in file=" << tree_data.cossi.size() << endl;
 
