@@ -53,7 +53,7 @@ inline void TreeGenerator<TOperator>::generar_nivel_intermedio(unsigned int nive
 {
     bool ultimo_nivel_exitoso = false;//solo interesa si somos el anteultimo nivel
     float R_local[16];
-    KeepRecursion result;
+    typename TOperator::KeepRecursion result;
     unsigned int i = 0;
     unsigned int nivelAux = nivel;
     const unsigned int angles = tree_data.cossi.size();
@@ -65,7 +65,7 @@ inline void TreeGenerator<TOperator>::generar_nivel_intermedio(unsigned int nive
 
         while (treeOperator.putNext(nivelAux, i, indice_nivel_anterior, result))
         {
-            if (result == DoRecursion)
+            if (result == TOperator::DoRecursion)
             {
                 // hay inconsistencia en implementacion vieja, el simple le resta uno
                 // a lo que seria nivel aux y el de chains lo deja como esta

@@ -3,11 +3,9 @@
 
 #include <string>
 #include <vector>
+#include <mili/mili.h>
 #include "poneres.h"
 #include "utils.h"
-#include <mili/mili.h>
-
-enum KeepRecursion {DoRecursion, StopRecursion}; //TODO: llevar a TreeOperator o TreeGenerator
 
 template <class TOperator>
 class TreeGenerator
@@ -22,8 +20,21 @@ private:
     TOperator treeOperator;
 };
 
+struct TreeOperator
+{
+    enum KeepRecursion {DoRecursion, StopRecursion};
+    /*
+    interfaz no utilizada, por razones de eficacia?
+    virtual bool putNextSeed(unsigned int& nivel) = 0;
+    virtual void initMatrix(float R[16]) = 0;
+    virtual bool putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion) = 0;
+    virtual void remove() = 0;
+    virtual void write() = 0;
+    */
+};
+
 template <class WriterHelper>
-class SimpleTreeOperator
+class SimpleTreeOperator : public TreeOperator
 {
 public:
     inline SimpleTreeOperator(TreeData& t, FullCachedAnglesSeqReader* reader);
@@ -42,7 +53,7 @@ private:
 };
 
 template <class WriterHelper>
-class ChainsTreeOperator
+class ChainsTreeOperator : public TreeOperator
 {
 public:
     inline ChainsTreeOperator(TreeData& t, FullCachedAnglesSeqReader* reader);
