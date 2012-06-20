@@ -35,8 +35,7 @@ inline void TreeGenerator<TOperator>::generate()
             generar_nivel_intermedio(nivel, R_inicial, 0);
         else
             procesar_ultimo_nivel();
-        treeOperator.remove();
-        nivel = 0;
+        treeOperator.remove(nivel);
     }
 }
 
@@ -55,7 +54,6 @@ inline void TreeGenerator<TOperator>::generar_nivel_intermedio(unsigned int nive
     float R_local[16];
     typename TOperator::KeepRecursion result;
     unsigned int i = 0;
-    unsigned int nivelAux = nivel;
     const unsigned int angles = tree_data.cossi.size();
 
     while (i < angles && !ultimo_nivel_exitoso)
@@ -63,21 +61,20 @@ inline void TreeGenerator<TOperator>::generar_nivel_intermedio(unsigned int nive
         backbones_utils::copymat(R_local, R_inicial);
         treeOperator.initMatrix(R_local);
 
-        while (treeOperator.putNext(nivelAux, i, indice_nivel_anterior, result))
+        while (treeOperator.putNext(nivel, i, indice_nivel_anterior, result))
         {
             if (result == TOperator::DoRecursion)
             {
                 // hay inconsistencia en implementacion vieja, el simple le resta uno
                 // a lo que seria nivel aux y el de chains lo deja como esta
-                if (nivelAux - 1 < tree_data.nres)
-                    generar_nivel_intermedio(nivelAux, R_local, i);
+                if (nivel - 1 < tree_data.nres)
+                    generar_nivel_intermedio(nivel, R_local, i);
                 else
                     ultimo_nivel_exitoso = procesar_ultimo_nivel();
-                treeOperator.remove();
+                treeOperator.remove(nivel);
             }
         }
         i++;
-        nivelAux = nivel;
     }
 }
 
@@ -125,9 +122,10 @@ inline bool SimpleTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel)
 }
 
 template <class WriterHelper>
-inline void SimpleTreeOperator<WriterHelper>::remove()
+inline void SimpleTreeOperator<WriterHelper>::remove(unsigned int& nivel)
 {
     TreeHelper::sacar_residuo(tree_data, paraBorrar.back());
+    nivel--;
     paraBorrar.pop_back();
 }
 
@@ -257,14 +255,17 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
 }
 
 template <class WriterHelper>
-inline void ChainsTreeOperator<WriterHelper>::remove()
+inline void ChainsTreeOperator<WriterHelper>::remove(unsigned int& nivel)
 {
+    const unsigned int nivelesRetrocedidos = vectoresParaBorrar.back().size() + 1;// +1 for residuosParaBorrar
     TreeHelper::sacar_residuo(tree_data, residuosParaBorrar.back());
     TreeHelper::sacar_residuos(tree_data, vectoresParaBorrar.back());
 
     residuosParaBorrar.pop_back();
     vectoresParaBorrar.pop_back();
     tree_data.fragment_ids.pop_back();
+
+    nivel -= nivelesRetrocedidos;
 }
 
 template <class WriterHelper>

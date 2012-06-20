@@ -28,7 +28,7 @@ struct TreeOperator
     virtual bool putNextSeed(unsigned int& nivel) = 0;
     virtual void initMatrix(float R[16]) = 0;
     virtual bool putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion) = 0;
-    virtual void remove() = 0;
+    virtual void remove(unsigned int& nivel) = 0;
     virtual void write() = 0;
     */
 };
@@ -42,7 +42,7 @@ public:
     inline bool putNextSeed(unsigned int& nivel);
     inline void initMatrix(float R[16]);
     inline bool putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion);
-    inline void remove();
+    inline void remove(unsigned int& nivel);
     inline void write();
 private:
     mili::FirstTimeFlag firstTime;
@@ -61,7 +61,7 @@ public:
     inline bool putNextSeed(unsigned int& nivel);
     inline void initMatrix(float R[16]);
     inline bool putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion);
-    inline void remove();
+    inline void remove(unsigned int& nivel);
     inline void write();
 private:
     mili::FirstTimeFlag firstTime;
