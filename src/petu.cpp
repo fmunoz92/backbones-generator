@@ -16,16 +16,13 @@ int main(int argc, char** argv)
 
     if (o.parse(argc, argv))
     {
-        std::ifstream filer;
-        filer.open(o.data.c_str());
-        Grillado* grilla = new Grillado(o.m, o.n, o.z);
-        TreeData tree_data(o.Nres, grilla);
+        std::ifstream filer(o.data.c_str());
+
+        std::auto_ptr<Grillado> grilla(new Grillado(o.m, o.n, o.z));
+        TreeData tree_data(o.Nres, grilla, filer);
 
         // Fill r[][][] with the minimun squared distance between atoms
         setr(o.RN, o.RCa, o.RC, o.Scal_1_4, o.Scal_1_5);
-
-        readdata(filer, tree_data);
-        tree_data.angles_data = new prot_filer::AnglesData(tree_data.nres, tree_data.angles_mapping);
 
         cout << "Number of fi-si combinations in file=" << tree_data.cossi.size() << endl;
 

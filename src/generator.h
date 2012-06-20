@@ -1,6 +1,8 @@
 #ifndef GENERATOR_H
 #define GENERATOR_H
 
+#include <mili/mili.h>
+
 #include "tree_data.h"
 
 struct IGeneratorSimple

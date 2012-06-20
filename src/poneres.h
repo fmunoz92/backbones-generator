@@ -1,8 +1,8 @@
 /*
- * 
+ *
  * rename this file
- * 
- */ 
+ *
+ */
 #ifndef PONERES_H
 #define PONERES_H
 
@@ -15,7 +15,7 @@ struct TreeHelper
     static inline void semilla(TreeData& tree_data, float* R, Residuo& residuo);
     static inline FilterResultType filtros_ultimo_nivel(TreeData& tree_data);
     static inline void sacar_residuo(TreeData& tree_data, const Residuo& residuo);
-    static inline void sacar_residuos(TreeData& tree_data, const vector<Residuo>& residuos); 
+    static inline void sacar_residuos(TreeData& tree_data, const vector<Residuo>& residuos);
     static inline FilterResultType poner_residuo(float* pR, const unsigned int resN, TreeData& tree_data, Residuo& residuo, unsigned int si_index, unsigned int fi_index);
     static inline FilterResultType addChain(float* pR, unsigned int resN, TreeData& tree_data, vector<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chain_index);
 };
@@ -76,7 +76,7 @@ inline FilterResultType TreeHelper::poner_residuo(float* pR, const unsigned int 
     tree_data.angles_data->angles[i].fi = fi_index;
 
 #ifdef COMBINATIONS_DEBUG
-	#include "prot-filer/backbones_utils.h"
+#include "prot-filer/backbones_utils.h"
     backbones_utils::DummyFilter filter;
 #else
     ClashFilter filter(tree_data);
@@ -115,6 +115,5 @@ inline FilterResultType TreeHelper::addChain(float* pR, unsigned int resN, TreeD
     }
     return result;
 }
-
 
 #endif

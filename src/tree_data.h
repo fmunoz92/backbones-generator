@@ -2,11 +2,12 @@
 #define TREE_DATA_H
 
 #include <string>
-
-#include "grillado.h"
+#include <memory>
 
 #include "prot-filer/format_filer.h"
 #include "prot-filer/cached_reader.h"
+
+#include "grillado.h"
 
 enum FilterResultType  {FILTER_FAIL, FILTER_OK};
 
@@ -22,32 +23,16 @@ struct TreeData
     Atoms atm;       // estructura parcial
     long int cont;              // cantidad de estructuras exitosas hasta el momento
     bool hubo_algun_exito;      // si encendido, dice que hubo al menos una rama que llego al final
-    Grillado* grilla;       // Utilizamos el grillado para aproximar el volumen parcial
-    prot_filer::AnglesData* angles_data; // Used only when writing compressed data.
-    prot_filer::AnglesMapping* angles_mapping;
+    const std::auto_ptr<Grillado>& grilla;       // Utilizamos el grillado para aproximar el volumen parcial
+    const std::auto_ptr<prot_filer::AnglesMapping> angles_mapping;
+    const std::auto_ptr<prot_filer::AnglesData> angles_data; // Used only when writing compressed data.
     prot_filer::FragmentIds fragment_ids;
     const std::string output_file;
 
-    TreeData(int nRes, Grillado* grillado) :
-        nres(nRes),
-        // Maximun gyration radius and maximun CA-CA distance.
-        // Both equations constructed from database analisys.
-        rgmax(2.72 * mili::cubic_root(nres) + 5.0),
-        dmax2(mili::square(8.0 * mili::cubic_root(nres) + 25.0)),
-        atm(Atoms(nres * 3)),
-        cont(0),
-        hubo_algun_exito(false),
-        grilla(grillado),
-        angles_mapping(new prot_filer::AnglesMapping(nres)),
-        output_file("traj.xtc")
-    {}
+    TreeData(int nRes, std::auto_ptr<Grillado>& grillado, std::istream& input_file);
 
-    ~TreeData()
-    {
-        delete grilla;
-        delete angles_data;
-        delete angles_mapping;
-    }
+private:
+    void readdata(std::istream& filer);
 };
 
 struct Residuo
