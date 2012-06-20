@@ -66,7 +66,4 @@ struct Residuo
     esferaId at3;
 };
 
-/* a esto se le pone extern, para decir que quien importe el .h va a ser usuario de estas variables */
-extern float r[3][3][3];
-
 #endif
