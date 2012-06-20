@@ -2,6 +2,20 @@
 #error Internal header file, DO NOT include this.
 #endif
 
+template <class Writer>
+inline void GeneratorSimple<Writer>::generate(TreeData& tree_data)
+{
+    TreeGenerator<SimpleTreeOperator<Writer> > generator(tree_data, NULL);
+    generator.generate();
+}
+
+template <class Writer>
+inline void GeneratorChains<Writer>::generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader)
+{
+    TreeGenerator<ChainsTreeOperator<Writer> > generator(tree_data, reader);
+    generator.generate();
+}
+
 template <class TOperator>
 inline TreeGenerator<TOperator>::TreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* const reader) :
     tree_data(tree_data),
@@ -289,3 +303,4 @@ inline void TreeHelper::sacar_residuos(TreeData& tree_data, const vector<Residuo
         sacar_residuo(tree_data, residuos[i]);
     }
 }
+

@@ -1,5 +1,6 @@
 #include <cassert>
 #include <iostream>
+#include <memory>
 #include <fstream>
 #include "getoptpp/getopt_pp.h"
 
@@ -10,9 +11,6 @@
 
 static void show_usage();
 
-using namespace GetOpt;
-using std::string;
-
 struct CommandLineOptions
 {
     int Nres;         // Number of amino acids in the chains to build.
@@ -21,11 +19,11 @@ struct CommandLineOptions
     float RC;         // Radius of the Carbon atom.
     float Scal_1_4;   // Scaling factor for the radii. Used to check for 1-4 clashes.
     float Scal_1_5;   // Scaling factor for the radii. Used to check for 1-5 clashes.
-    string data;      // Name of the input file.
-    string write_format;
-    string residues_input; //Name of the residue chains file.
-    string input_format;
-    string fragments_file;
+    std::string data;      // Name of the input file.
+    std::string write_format;
+    std::string residues_input; //Name of the residue chains file.
+    std::string input_format;
+    std::string fragments_file;
     size_t m; // They indicate the size of each dimention of the grid.
     size_t n;
     size_t z;
@@ -54,22 +52,14 @@ int main(int argc, char** argv)
 
         if (o.residues_input.empty())
         {
-            IGeneratorSimple* g = mili::FactoryRegistry<IGeneratorSimple, std::string>::new_class(o.write_format);
-            if (g != NULL)
-            {
-                g->generate(tree_data);
-                delete g;
-            }
+            std::auto_ptr<IGeneratorSimple> g(mili::FactoryRegistry<IGeneratorSimple, std::string>::new_class(o.write_format));
+            g->generate(tree_data);
         }
         else
         {
             FullCachedAnglesSeqReader* db = read_chains(o.input_format, o.residues_input, o.fragments_file);
-            IGeneratorChains* g = mili::FactoryRegistry<IGeneratorChains, std::string>::new_class(o.write_format);
-            if (g != NULL)
-            {
-                g->generate(tree_data, db);
-                delete g;
-            }
+            std::auto_ptr<IGeneratorChains> g(mili::FactoryRegistry<IGeneratorChains, std::string>::new_class(o.write_format));
+            g->generate(tree_data, db);
         }
 
         cout << "Number of chains generated=" << tree_data.cont << endl;
@@ -90,7 +80,7 @@ int main(int argc, char** argv)
 
 void show_usage()
 {
-    string indent = "                  ";
+    std::string indent = "                  ";
     std::cerr << "Usage: " << std::endl;
     std::cerr << indent << "[ -i <data_file> ], default = data" << std::endl;
     std::cerr << indent << "[ {-w, --write_format} <xtc|compressed|fragments> ], default = xtc" << std::endl;
@@ -103,24 +93,24 @@ void show_usage()
 // la linea de comandos.
 bool CommandLineOptions::parse(int argc, char** argv)
 {
-    GetOpt_pp ops(argc, argv);
-    std::vector<string> input_files;
+    GetOpt::GetOpt_pp ops(argc, argv);
+    std::vector<std::string> input_files;
 
-    if (ops >> Option('r', "Nres", Nres))
+    if (ops >> GetOpt::Option('r', "Nres", Nres))
     {
         ops
-                >> Option('n', "Rn", RN, 1.5f)
-                >> Option('a', "Rca", RCa, 1.7f)
-                >> Option('c', "Rc", RC, 1.6f)
-                >> Option('s', "Scal_1_4", Scal_1_4, 0.85f)
-                >> Option('l', "Scal_1_5", Scal_1_5, 1.0f)
-                >> Option('i', "input_file", data)
-                >> Option('N', "rows", n, static_cast<size_t>(100))
-                >> Option('M', "cols", m, static_cast<size_t>(100))
-                >> Option('Z', "depth", z, static_cast<size_t>(100))
-                >> Option('w', "write_format", write_format, string("xtc"));
+                >> GetOpt::Option('n', "Rn", RN, 1.5f)
+                >> GetOpt::Option('a', "Rca", RCa, 1.7f)
+                >> GetOpt::Option('c', "Rc", RC, 1.6f)
+                >> GetOpt::Option('s', "Scal_1_4", Scal_1_4, 0.85f)
+                >> GetOpt::Option('l', "Scal_1_5", Scal_1_5, 1.0f)
+                >> GetOpt::Option('i', "input_file", data)
+                >> GetOpt::Option('N', "rows", n, static_cast<size_t>(100))
+                >> GetOpt::Option('M', "cols", m, static_cast<size_t>(100))
+                >> GetOpt::Option('Z', "depth", z, static_cast<size_t>(100))
+                >> GetOpt::Option('w', "write_format", write_format, std::string("xtc"));
 
-        const bool chains = ops >> Option("chains_input", input_files);
+        const bool chains = ops >> GetOpt::Option("chains_input", input_files);
 
         if (!chains && write_format == "fragments")
         {
@@ -129,7 +119,7 @@ bool CommandLineOptions::parse(int argc, char** argv)
         }
         if (chains)
         {
-            ops >> Option('f', "input_format", input_format, "compressed");
+            ops >> GetOpt::Option('f', "input_format", input_format, "compressed");
             if (input_format == "compressed")
             {
                 if (input_files.size() == 0)

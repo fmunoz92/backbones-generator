@@ -75,9 +75,9 @@ struct TreeHelper
 class XtcWriterHelper
 {
 public:
-    inline XtcWriterHelper();
-    inline ~XtcWriterHelper();
-    inline void write(TreeData& tree_data);
+    XtcWriterHelper();
+    ~XtcWriterHelper();
+    void write(TreeData& tree_data);
 private:
     const string output_file;
     XtcWriter writer;
@@ -86,9 +86,9 @@ private:
 class CompressedWriterHelper
 {
 public:
-    inline CompressedWriterHelper();
-    inline ~CompressedWriterHelper();
-    inline void write(TreeData& tree_data);
+    CompressedWriterHelper();
+    ~CompressedWriterHelper();
+    void write(TreeData& tree_data);
 private:
     const string output_file;
     CompressedWriter writer;
@@ -97,9 +97,9 @@ private:
 class FragmentsWriterHelper
 {
 public:
-    inline FragmentsWriterHelper(FullCachedAnglesSeqReader* reader);//Adapter
-    inline ~FragmentsWriterHelper();
-    inline void write(TreeData& tree_data);
+    FragmentsWriterHelper(FullCachedAnglesSeqReader* reader);//Adapter
+    ~FragmentsWriterHelper();
+    void write(TreeData& tree_data);
 private:
     const string output_file;
     FragmentsWriter writer;
@@ -118,45 +118,24 @@ struct IGeneratorChains
     virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader) = 0;
 };
 
-class ChainsFormatGeneratorFragmentsWriter : public IGeneratorChains
+template <class Writer>
+class GeneratorChains : public IGeneratorChains
 {
 public:
-    virtual ~ChainsFormatGeneratorFragmentsWriter() {}
+    inline virtual ~GeneratorChains() {}
 private:
-    virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader);
+    inline virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader);
 };
 
-class ChainsFormatGeneratorXtcWriter : public IGeneratorChains
+template <class Writer>
+class GeneratorSimple : public IGeneratorSimple
 {
 public:
-    virtual ~ChainsFormatGeneratorXtcWriter() {}
+    virtual ~GeneratorSimple() {}
 private:
-    virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader);
+    inline virtual void generate(TreeData& tree_data);
 };
 
-class ChainsFormatGeneratorCompressedWriter : public IGeneratorChains
-{
-public:
-    virtual ~ChainsFormatGeneratorCompressedWriter() {}
-private:
-    virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader);
-};
-
-class SimpleFormatGeneratorCompressedWriter : public IGeneratorSimple
-{
-public:
-    virtual ~SimpleFormatGeneratorCompressedWriter() {}
-private:
-    virtual void generate(TreeData& tree_data);
-};
-
-class SimpleFormatGeneratorXtcWriter : public IGeneratorSimple
-{
-public:
-    virtual ~SimpleFormatGeneratorXtcWriter() {}
-private:
-    virtual void generate(TreeData& tree_data);
-};
 
 #define TREE_GENERATOR_INLINE_H
 #include "tree_generator_inline.h"
