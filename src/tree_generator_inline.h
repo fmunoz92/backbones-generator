@@ -2,28 +2,27 @@
 #error Internal header file, DO NOT include this.
 #endif
 
-template <class TreeOperator, class WriterHelper>
-TreeGenerator<TreeOperator, WriterHelper>::TreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* const reader) :
+template <class TOperator>
+inline TreeGenerator<TOperator>::TreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* const reader) :
     tree_data(tree_data),
-    g(tree_data, reader)
+    treeOperator(tree_data, reader)
 {}
 
-template <class TreeOperator, class WriterHelper>
-void TreeGenerator<TreeOperator, WriterHelper>::generate()
+template <class TOperator>
+inline void TreeGenerator<TOperator>::generate()
 {
     float R_inicial[16];
-    unsigned int nivel = 0;
+    unsigned int nivel = 1;
 
-    g.initMatrix(R_inicial);
-    while (g.putNextSeed(nivel))
+    treeOperator.initMatrix(R_inicial);
+    while (treeOperator.putNextSeed(nivel))
     {
         if (nivel < tree_data.nres)
-        {
             generar_nivel_intermedio(nivel, R_inicial, 0);
-        }
         else
             procesar_ultimo_nivel();
-        g.remove();
+        treeOperator.remove();
+        nivel = 0;
     }
 }
 
@@ -35,47 +34,50 @@ void TreeGenerator<TreeOperator, WriterHelper>::generate()
             recurse
             remove E
 */
-template <class TreeOperator, class WriterHelper>
-void TreeGenerator<TreeOperator, WriterHelper>::generar_nivel_intermedio(unsigned int nivel, const float R_inicial[16], unsigned int indice_nivel_anterior)
+template <class TOperator>
+inline void TreeGenerator<TOperator>::generar_nivel_intermedio(unsigned int nivel, const float R_inicial[16], unsigned int indice_nivel_anterior)
 {
     bool ultimo_nivel_exitoso = false;//solo interesa si somos el anteultimo nivel
     float R_local[16];
-    Result result;
-    unsigned int nivelAux = nivel;
+    KeepRecursion result;
     unsigned int i = 0;
+    unsigned int nivelAux = nivel;
+    const unsigned int angles = tree_data.cossi.size();
 
-    while (i < tree_data.cossi.size() && !ultimo_nivel_exitoso)
+    while (i < angles && !ultimo_nivel_exitoso)
     {
-        nivelAux = nivel;
         backbones_utils::copymat(R_local, R_inicial);
-        g.initMatrix(R_local);
+        treeOperator.initMatrix(R_local);
 
-        while (g.putNext(nivelAux, i, indice_nivel_anterior, result))
+        while (treeOperator.putNext(nivelAux, i, indice_nivel_anterior, result))
         {
-            if (result == doRecursion)
+            if (result == DoRecursion)
             {
-                if (nivel < tree_data.nres)
+                // hay inconsistencia en implementacion vieja, el simple le resta uno
+                // a lo que seria nivel aux y el de chains lo deja como esta
+                if (nivelAux - 1 < tree_data.nres)
                     generar_nivel_intermedio(nivelAux, R_local, i);
                 else
                     ultimo_nivel_exitoso = procesar_ultimo_nivel();
-                g.remove();
+                treeOperator.remove();
             }
         }
         i++;
+        nivelAux = nivel;
     }
 }
 
-template <class TreeOperator, class WriterHelper>
-bool TreeGenerator<TreeOperator, WriterHelper>::procesar_ultimo_nivel()
+template <class TOperator>
+inline bool TreeGenerator<TOperator>::procesar_ultimo_nivel()
 {
     bool exito = false;
 #ifdef COMBINATIONS_DEBUG // En el modo DEBUG se deshabilitan los chequeos.
-    writer_helper.write(tree_data);
+    treeOperator.write();
     tree_data.cont++;
 #else
     if (TreeHelper::filtros_ultimo_nivel(tree_data) == FILTER_OK)
     {
-        writer_helper.write(tree_data);
+        treeOperator.write();
         tree_data.cont++;
         tree_data.hubo_algun_exito = exito = true;
     }
@@ -84,50 +86,175 @@ bool TreeGenerator<TreeOperator, WriterHelper>::procesar_ultimo_nivel()
     return exito;
 }
 
-inline XtcWriterHelper::XtcWriterHelper() :
-    output_file(output_f)
+template <class WriterHelper>
+inline SimpleTreeOperator<WriterHelper>::SimpleTreeOperator(TreeData& t, FullCachedAnglesSeqReader*) :
+    tree_data(t)
+{}
+
+template <class WriterHelper>
+inline bool SimpleTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel)
 {
-    writer.open(output_file);
+    bool result = false;
+
+    if (firstTime)
+    {
+        Residuo residuo;
+        clearatm(tree_data.atm, tree_data.nres);
+        TreeHelper::semilla(tree_data, R, residuo);
+        mili::insert_into(paraBorrar, residuo);
+        nivel = 2; //semilla is level 1 then next level is 2
+        result = true;
+    }
+
+    return result;
 }
 
-inline XtcWriterHelper::~XtcWriterHelper()
+template <class WriterHelper>
+inline void SimpleTreeOperator<WriterHelper>::remove()
 {
-    writer.close();
+    TreeHelper::sacar_residuo(tree_data, paraBorrar.back());
+    paraBorrar.pop_back();
 }
 
-inline void XtcWriterHelper::write(TreeData& tree_data)
+template <class WriterHelper>
+inline void SimpleTreeOperator<WriterHelper>::initMatrix(float newR[16])
 {
-    writer.write(tree_data.atm, *tree_data.angles_data);
+    firstTime.reset();
+    R = newR;
 }
 
-inline CompressedWriterHelper::CompressedWriterHelper() :
-    output_file(output_f)
+template <class WriterHelper>
+inline bool SimpleTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion)
 {
-    writer.open(output_file);
-}
-inline CompressedWriterHelper::~CompressedWriterHelper()
-{
-    writer.close();
+    bool result = false;
+    resultRecursion = StopRecursion;
+
+    if (firstTime)
+    {
+        Residuo residuo;
+        FilterResultType filerResult = poneres(R, nivel, tree_data, residuo, si_index, fi_index);
+
+        if (filerResult == FILTER_OK)
+        {
+            result = true;
+            mili::insert_into(paraBorrar, residuo);
+            resultRecursion = DoRecursion;
+            nivel++;
+        }
+    }
+
+    return result;
 }
 
-inline void CompressedWriterHelper::write(TreeData& tree_data)
+template <class WriterHelper>
+inline void SimpleTreeOperator<WriterHelper>::write()
 {
-    writer.write(*tree_data.angles_data);
+    writer_helper.write(tree_data);
 }
 
-inline FragmentsWriterHelper::FragmentsWriterHelper() :
-    output_file(output_file)
+template <class WriterHelper>
+inline ChainsTreeOperator<WriterHelper>::ChainsTreeOperator(TreeData& t, FullCachedAnglesSeqReader* const reader) :
+    tree_data(t),
+    reader(reader)
+{}
+
+/*Adapter*/
+template <>
+inline ChainsTreeOperator<FragmentsWriterHelper>::ChainsTreeOperator(TreeData& t, FullCachedAnglesSeqReader* const reader) :
+    tree_data(t),
+    reader(reader),
+    writer_helper(reader)//call constructor adapter
+{}
+
+template <class WriterHelper>
+inline void ChainsTreeOperator<WriterHelper>::initMatrix(float newR[16])
 {
-    writer.open(output_file);
+    R = newR;
+    firstTime.reset();
+    currentPosInChain = 0;
 }
 
-inline FragmentsWriterHelper::~FragmentsWriterHelper()
+template <class WriterHelper>
+inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel)
 {
-    writer.close();
+    bool result = true;
+    AnglesData* chain;
+    Residuo residuo;
+    vector<Residuo> residuos;
+    if ((chain = reader->read(currentPosInChain)) != NULL)
+    {
+        const unsigned int nextLevel = 2; //semilla is "level 1"
+        clearatm(tree_data.atm, tree_data.nres);
+        TreeHelper::semilla(tree_data, R, residuo);
+        addChain(R, nextLevel, tree_data, residuos, *chain, currentPosInChain);
+
+        nivel = residuos.size() + nextLevel;
+        currentPosInChain++;
+        residuosParaBorrar.push_back(residuo);
+        vectoresParaBorrar.push_back(residuos);
+    }
+    else
+        result = false;
+
+    return result;
 }
 
-inline void FragmentsWriterHelper::write(TreeData& /*tree_data*/)
+template <class WriterHelper>
+inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior,  KeepRecursion& recursion)
 {
+    bool result = true;
+    FilterResultType filterResult;
+    AnglesData* chain;
+    recursion = StopRecursion;
+    Residuo residuo;
+    vector<Residuo> residuos;
+
+    if (firstTime)//or currentPosInChain == 0
+    {
+        if (poneres(R, nivel, tree_data, residuo, indice_nivel_anterior, i) == FILTER_OK)
+        {
+            residuosParaBorrar.push_back(residuo);
+            nivel++;
+        }
+        else
+            result = false;
+    }
+
+    if (result && (chain = reader->read(currentPosInChain)) != NULL)
+    {
+        filterResult = addChain(R, nivel, tree_data, residuos, *chain, currentPosInChain);
+        nivel += residuos.size();
+        if (filterResult == FILTER_OK)
+        {
+            vectoresParaBorrar.push_back(residuos);
+            recursion = DoRecursion;
+        }
+        else
+            //saco residuos apendeados antes del primer residuo que genero FILTER_FAIL
+            TreeHelper::sacar_residuos(tree_data, residuos);
+        currentPosInChain++;
+    }
+    else
+        result = false;
+
+    return result;
+}
+
+template <class WriterHelper>
+inline void ChainsTreeOperator<WriterHelper>::remove()
+{
+    TreeHelper::sacar_residuo(tree_data, residuosParaBorrar.back());
+    TreeHelper::sacar_residuos(tree_data, vectoresParaBorrar.back());
+
+    residuosParaBorrar.pop_back();
+    vectoresParaBorrar.pop_back();
+    tree_data.fragment_ids.pop_back();
+}
+
+template <class WriterHelper>
+inline void ChainsTreeOperator<WriterHelper>::write()
+{
+    writer_helper.write(tree_data);
 }
 
 inline void TreeHelper::semilla(TreeData& tree_data, float* R, Residuo& residuo)

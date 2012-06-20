@@ -54,14 +54,22 @@ int main(int argc, char** argv)
 
         if (o.residues_input.empty())
         {
-            Generate<SimpleTreeOperator> g;
-            g(o.write_format, tree_data, NULL);
+            IGeneratorSimple* g = mili::FactoryRegistry<IGeneratorSimple, std::string>::new_class(o.write_format);
+            if (g != NULL)
+            {
+                g->generate(tree_data);
+                delete g;
+            }
         }
         else
         {
             FullCachedAnglesSeqReader* db = read_chains(o.input_format, o.residues_input, o.fragments_file);
-            Generate<ChainsTreeOperator> g;
-            g(o.write_format, tree_data, db);
+            IGeneratorChains* g = mili::FactoryRegistry<IGeneratorChains, std::string>::new_class(o.write_format);
+            if (g != NULL)
+            {
+                g->generate(tree_data, db);
+                delete g;
+            }
         }
 
         cout << "Number of chains generated=" << tree_data.cont << endl;
@@ -112,7 +120,7 @@ bool CommandLineOptions::parse(int argc, char** argv)
                 >> Option('Z', "depth", z, static_cast<size_t>(100))
                 >> Option('w', "write_format", write_format, string("xtc"));
 
-        bool chains = ops >> Option("chains_input", input_files);
+        const bool chains = ops >> Option("chains_input", input_files);
 
         if (!chains && write_format == "fragments")
         {

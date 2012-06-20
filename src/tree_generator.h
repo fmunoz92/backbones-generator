@@ -5,56 +5,54 @@
 #include <vector>
 #include "poneres.h"
 #include "utils.h"
+#include <mili/mili.h>
 
-const string output_f = "traj.xtc";
+const string output_f = "traj.xtc"; //TODO: llevar a TreeData
+enum KeepRecursion {DoRecursion, StopRecursion}; //TODO: llevar a TreeOperator o TreeGenerator
 
-typedef enum {doRecursion, stopRecursion} Result;
-
-template <class TreeOperator, class WriterHelper>
+template <class TOperator>
 class TreeGenerator
 {
 public:
-    TreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* const reader);
-    ~TreeGenerator() {}
-    void generate();
+    inline TreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* const reader);
+    inline void generate();
 private:
-    void generar_nivel_intermedio(unsigned int nivel, const float R_inicial[16], unsigned int indice_nivel_anterior);
-    bool procesar_ultimo_nivel();
+    inline void generar_nivel_intermedio(unsigned int nivel, const float R_inicial[16], unsigned int indice_nivel_anterior);
+    inline bool procesar_ultimo_nivel();
     TreeData& tree_data;
-    WriterHelper writer_helper;
-    TreeOperator g;
+    TOperator treeOperator;
 };
 
+template <class WriterHelper>
 class SimpleTreeOperator
 {
 public:
-    SimpleTreeOperator(TreeData& t, FullCachedAnglesSeqReader* const);
-    ~SimpleTreeOperator()
-    {}
+    inline SimpleTreeOperator(TreeData& t, FullCachedAnglesSeqReader* reader);
 
-    bool putNextSeed(unsigned int& nivel);
-    void initMatrix(float R[16]);
-    bool putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& doRecursion);
-    void remove();
+    inline bool putNextSeed(unsigned int& nivel);
+    inline void initMatrix(float R[16]);
+    inline bool putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion);
+    inline void remove();
+    inline void write();
 private:
     mili::FirstTimeFlag firstTime;
     float* R;
     TreeData& tree_data;
     vector<Residuo> paraBorrar;
+    WriterHelper writer_helper;
 };
 
+template <class WriterHelper>
 class ChainsTreeOperator
 {
 public:
+    inline ChainsTreeOperator(TreeData& t, FullCachedAnglesSeqReader* reader);
 
-    ChainsTreeOperator(TreeData& t, FullCachedAnglesSeqReader* reader);
-    ~ChainsTreeOperator()
-    {}
-
-    bool putNextSeed(unsigned int& nivel);
-    void initMatrix(float R[16]);
-    bool putNext(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior, Result& doRecursion);
-    void remove();
+    inline bool putNextSeed(unsigned int& nivel);
+    inline void initMatrix(float R[16]);
+    inline bool putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion);
+    inline void remove();
+    inline void write();
 private:
     mili::FirstTimeFlag firstTime;
     unsigned int currentPosInChain;
@@ -63,8 +61,8 @@ private:
     vector<Residuo> residuosParaBorrar;
     vector<vector<Residuo> > vectoresParaBorrar;
     FullCachedAnglesSeqReader* const reader;
+    WriterHelper writer_helper;
 };
-
 
 struct TreeHelper
 {
@@ -99,61 +97,65 @@ private:
 class FragmentsWriterHelper
 {
 public:
-    inline FragmentsWriterHelper();
+    inline FragmentsWriterHelper(FullCachedAnglesSeqReader* reader);//Adapter
     inline ~FragmentsWriterHelper();
     inline void write(TreeData& tree_data);
 private:
     const string output_file;
     FragmentsWriter writer;
+    const FullCachedAnglesSeqReader* reader;
 };
 
-template<class T>
-struct Generate
-{};
-
-template<>
-struct Generate<SimpleTreeOperator>
+struct IGeneratorSimple
 {
-    void operator()(const string& format, TreeData& tree_data, FullCachedAnglesSeqReader* const)
-    {
-        if (format == "xtc")
-        {
-            TreeGenerator<SimpleTreeOperator, XtcWriterHelper> g(tree_data, NULL);
-            g.generate();
-        }
-        else if (format == "compressed")
-        {
-            TreeGenerator<SimpleTreeOperator, CompressedWriterHelper> g(tree_data, NULL);
-            g.generate();
-        }
-        else
-            throw runtime_error("wrong format");
-    }
+    virtual ~IGeneratorSimple() {}
+    virtual void generate(TreeData& tree_data) = 0;
 };
 
-template<>
-struct Generate<ChainsTreeOperator>
+struct IGeneratorChains
 {
-    void operator()(const string& format, TreeData& tree_data, FullCachedAnglesSeqReader* const reader)
-    {
-        if (format == "xtc")
-        {
-            TreeGenerator<ChainsTreeOperator, XtcWriterHelper> g(tree_data, reader);
-            g.generate();
-        }
-        else if (format == "compressed")
-        {
-            TreeGenerator<ChainsTreeOperator, CompressedWriterHelper> g(tree_data, reader);
-            g.generate();
-        }
-        else if (format == "fragments")
-        {
-            TreeGenerator<ChainsTreeOperator, FragmentsWriterHelper> g(tree_data, reader);
-            g.generate();
-        }
-        else
-            throw runtime_error("wrong format");
-    }
+    virtual ~IGeneratorChains() {}
+    virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader) = 0;
+};
+
+class ChainsFormatGeneratorFragmentsWriter : public IGeneratorChains
+{
+public:
+    virtual ~ChainsFormatGeneratorFragmentsWriter() {}
+private:
+    virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader);
+};
+
+class ChainsFormatGeneratorXtcWriter : public IGeneratorChains
+{
+public:
+    virtual ~ChainsFormatGeneratorXtcWriter() {}
+private:
+    virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader);
+};
+
+class ChainsFormatGeneratorCompressedWriter : public IGeneratorChains
+{
+public:
+    virtual ~ChainsFormatGeneratorCompressedWriter() {}
+private:
+    virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader);
+};
+
+class SimpleFormatGeneratorCompressedWriter : public IGeneratorSimple
+{
+public:
+    virtual ~SimpleFormatGeneratorCompressedWriter() {}
+private:
+    virtual void generate(TreeData& tree_data);
+};
+
+class SimpleFormatGeneratorXtcWriter : public IGeneratorSimple
+{
+public:
+    virtual ~SimpleFormatGeneratorXtcWriter() {}
+private:
+    virtual void generate(TreeData& tree_data);
 };
 
 #define TREE_GENERATOR_INLINE_H
