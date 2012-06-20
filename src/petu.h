@@ -30,6 +30,8 @@ struct TreeData
     AnglesData* angles_data; // Used only when writing compressed data.
     AnglesMapping* angles_mapping;
     FragmentIds fragment_ids;
+    const std::string output_file;
+
     TreeData(int nRes, Grillado* grillado) :
         nres(nRes),
         // Maximun gyration radius and maximun CA-CA distance.
@@ -40,7 +42,8 @@ struct TreeData
         cont(0),
         hubo_algun_exito(false),
         grilla(grillado),
-        angles_mapping(new AnglesMapping(nres))
+        angles_mapping(new AnglesMapping(nres)),
+        output_file("traj.xtc")
     {}
     ~TreeData()
     {

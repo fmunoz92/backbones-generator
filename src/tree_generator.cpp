@@ -1,9 +1,9 @@
 #include "tree_generator.h"
 
-XtcWriterHelper::XtcWriterHelper() :
-    output_file(output_f)
+XtcWriterHelper::XtcWriterHelper(TreeData& tree_data) :
+    tree_data(tree_data)
 {
-    writer.open(output_file);
+    writer.open(tree_data.output_file);
 }
 
 XtcWriterHelper::~XtcWriterHelper()
@@ -11,15 +11,15 @@ XtcWriterHelper::~XtcWriterHelper()
     writer.close();
 }
 
-void XtcWriterHelper::write(TreeData& tree_data)
+void XtcWriterHelper::write()
 {
     writer.write(tree_data.atm, *tree_data.angles_data);
 }
 
-CompressedWriterHelper::CompressedWriterHelper() :
-    output_file(output_f)
+CompressedWriterHelper::CompressedWriterHelper(TreeData& tree_data) :
+    tree_data(tree_data)
 {
-    writer.open(output_file);
+    writer.open(tree_data.output_file);
 }
 
 CompressedWriterHelper::~CompressedWriterHelper()
@@ -27,16 +27,16 @@ CompressedWriterHelper::~CompressedWriterHelper()
     writer.close();
 }
 
-void CompressedWriterHelper::write(TreeData& tree_data)
+void CompressedWriterHelper::write()
 {
     writer.write(*tree_data.angles_data);
 }
 
-FragmentsWriterHelper::FragmentsWriterHelper(FullCachedAnglesSeqReader* reader) :
-    output_file(output_file),
+FragmentsWriterHelper::FragmentsWriterHelper(TreeData& tree_data, FullCachedAnglesSeqReader* reader) :
+    tree_data(tree_data),
     reader(reader)
 {
-    writer.open(output_file);
+    writer.open(tree_data.output_file);
 }
 
 FragmentsWriterHelper::~FragmentsWriterHelper()
@@ -44,7 +44,7 @@ FragmentsWriterHelper::~FragmentsWriterHelper()
     writer.close();
 }
 
-void FragmentsWriterHelper::write(TreeData& tree_data)
+void FragmentsWriterHelper::write()
 {
     size_t fragment_nres = reader->get_reader().get_atom_number() / 3;
     writer.write(fragment_nres, tree_data.fragment_ids, *tree_data.angles_data);

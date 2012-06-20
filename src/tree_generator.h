@@ -7,7 +7,6 @@
 #include "utils.h"
 #include <mili/mili.h>
 
-const string output_f = "traj.xtc"; //TODO: llevar a TreeData
 enum KeepRecursion {DoRecursion, StopRecursion}; //TODO: llevar a TreeOperator o TreeGenerator
 
 template <class TOperator>
@@ -75,35 +74,35 @@ struct TreeHelper
 class XtcWriterHelper
 {
 public:
-    XtcWriterHelper();
+    XtcWriterHelper(TreeData& tree_data);
     ~XtcWriterHelper();
-    void write(TreeData& tree_data);
+    void write();
 private:
-    const string output_file;
+    TreeData& tree_data;
     XtcWriter writer;
 };
 
 class CompressedWriterHelper
 {
 public:
-    CompressedWriterHelper();
+    CompressedWriterHelper(TreeData& tree_data);
     ~CompressedWriterHelper();
-    void write(TreeData& tree_data);
+    void write();
 private:
-    const string output_file;
+    TreeData& tree_data;
     CompressedWriter writer;
 };
 
 class FragmentsWriterHelper
 {
 public:
-    FragmentsWriterHelper(FullCachedAnglesSeqReader* reader);//Adapter
+    FragmentsWriterHelper(TreeData& tree_data, FullCachedAnglesSeqReader* reader);//Adapter
     ~FragmentsWriterHelper();
-    void write(TreeData& tree_data);
+    void write();
 private:
-    const string output_file;
-    FragmentsWriter writer;
+    TreeData& tree_data;
     const FullCachedAnglesSeqReader* reader;
+    FragmentsWriter writer;
 };
 
 struct IGeneratorSimple

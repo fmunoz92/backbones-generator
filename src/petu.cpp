@@ -53,7 +53,7 @@ int main(int argc, char** argv)
         if (o.residues_input.empty())
         {
             IGeneratorSimple* const generatorPtr = mili::FactoryRegistry<IGeneratorSimple, std::string>::new_class(o.write_format);
-            std::auto_ptr<IGeneratorSimple> g();
+            std::auto_ptr<IGeneratorSimple> g(generatorPtr);
             g->generate(tree_data);
         }
         else
@@ -70,7 +70,6 @@ int main(int argc, char** argv)
         Coord3DSeqReaderFactory::destroy_instance();
         AnglesReaderFactory::destroy_instance();
 
-        filer.close();
         return EXIT_SUCCESS;
     }
     else

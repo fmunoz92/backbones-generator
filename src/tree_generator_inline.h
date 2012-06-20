@@ -102,7 +102,8 @@ inline bool TreeGenerator<TOperator>::procesar_ultimo_nivel()
 
 template <class WriterHelper>
 inline SimpleTreeOperator<WriterHelper>::SimpleTreeOperator(TreeData& t, FullCachedAnglesSeqReader*) :
-    tree_data(t)
+    tree_data(t),
+    writer_helper(t)
 {}
 
 template <class WriterHelper>
@@ -163,13 +164,14 @@ inline bool SimpleTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
 template <class WriterHelper>
 inline void SimpleTreeOperator<WriterHelper>::write()
 {
-    writer_helper.write(tree_data);
+    writer_helper.write();
 }
 
 template <class WriterHelper>
 inline ChainsTreeOperator<WriterHelper>::ChainsTreeOperator(TreeData& t, FullCachedAnglesSeqReader* const reader) :
     tree_data(t),
-    reader(reader)
+    reader(reader),
+    writer_helper(t)
 {}
 
 /*Adapter*/
@@ -177,7 +179,7 @@ template <>
 inline ChainsTreeOperator<FragmentsWriterHelper>::ChainsTreeOperator(TreeData& t, FullCachedAnglesSeqReader* const reader) :
     tree_data(t),
     reader(reader),
-    writer_helper(reader)//call constructor adapter
+    writer_helper(t, reader)//call constructor adapter
 {}
 
 template <class WriterHelper>
@@ -268,7 +270,7 @@ inline void ChainsTreeOperator<WriterHelper>::remove()
 template <class WriterHelper>
 inline void ChainsTreeOperator<WriterHelper>::write()
 {
-    writer_helper.write(tree_data);
+    writer_helper.write();
 }
 
 inline void TreeHelper::semilla(TreeData& tree_data, float* R, Residuo& residuo)
