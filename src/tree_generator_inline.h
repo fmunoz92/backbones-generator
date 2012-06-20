@@ -2,6 +2,10 @@
 #error Internal header file, DO NOT include this.
 #endif
 
+#include "poneres.h"
+#include "utils.h"
+#include "filer.h"
+
 template <class Writer>
 inline void GeneratorSimple<Writer>::generate(TreeData& tree_data)
 {
@@ -145,7 +149,7 @@ inline bool SimpleTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
     if (firstTime)
     {
         Residuo residuo;
-        FilterResultType filerResult = poneres(R, nivel, tree_data, residuo, si_index, fi_index);
+        FilterResultType filerResult = TreeHelper::poner_residuo(R, nivel, tree_data, residuo, si_index, fi_index);
 
         if (filerResult == FILTER_OK)
         {
@@ -192,7 +196,7 @@ template <class WriterHelper>
 inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel)
 {
     bool result = true;
-    AnglesData* chain;
+    prot_filer::AnglesData* chain;
     Residuo residuo;
     vector<Residuo> residuos;
     if ((chain = reader->read(currentPosInChain)) != NULL)
@@ -200,7 +204,7 @@ inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel)
         const unsigned int nextLevel = 2; //semilla is "level 1"
         clearatm(tree_data.atm, tree_data.nres);
         TreeHelper::semilla(tree_data, R, residuo);
-        addChain(R, nextLevel, tree_data, residuos, *chain, currentPosInChain);
+        TreeHelper::addChain(R, nextLevel, tree_data, residuos, *chain, currentPosInChain);
 
         nivel = residuos.size() + nextLevel;
         currentPosInChain++;
@@ -218,14 +222,14 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
 {
     bool result = true;
     FilterResultType filterResult;
-    AnglesData* chain;
+    prot_filer::AnglesData* chain;
     recursion = StopRecursion;
     Residuo residuo;
     vector<Residuo> residuos;
 
     if (firstTime)//or currentPosInChain == 0
     {
-        if (poneres(R, nivel, tree_data, residuo, indice_nivel_anterior, i) == FILTER_OK)
+        if (TreeHelper::poner_residuo(R, nivel, tree_data, residuo, indice_nivel_anterior, i) == FILTER_OK)
         {
             residuosParaBorrar.push_back(residuo);
             nivel++;
@@ -236,7 +240,7 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
 
     if (result && (chain = reader->read(currentPosInChain)) != NULL)
     {
-        filterResult = addChain(R, nivel, tree_data, residuos, *chain, currentPosInChain);
+        filterResult = TreeHelper::addChain(R, nivel, tree_data, residuos, *chain, currentPosInChain);
         nivel += residuos.size();
         if (filterResult == FILTER_OK)
         {
@@ -273,37 +277,3 @@ inline void ChainsTreeOperator<WriterHelper>::write()
 {
     writer_helper.write();
 }
-
-inline void TreeHelper::semilla(TreeData& tree_data, float* R, Residuo& residuo)
-{
-    Atoms& atm = tree_data.atm;
-    backbones_utils::semilla(atm, R);
-    ATOM* seed = tree_data.angles_data->seed;
-
-    seed[0] = atm[0];
-    seed[1] = atm[1];
-    seed[2] = atm[2];
-
-    residuo.at2 = tree_data.grilla->agregar_esfera(tree_data.atm[1].x, tree_data.atm[1].y, tree_data.atm[1].z);
-}
-
-inline FilterResultType TreeHelper::filtros_ultimo_nivel(TreeData& tree_data)
-{
-    bool ok = calcRdG(tree_data.atm, tree_data.nres, tree_data.rgmax) == FILTER_OK
-              && volumen_en_rango(tree_data.nres, tree_data.grilla->obtener_vol_parcial()) == FILTER_OK;
-    return ok ? FILTER_OK : FILTER_FAIL;
-}
-
-inline void TreeHelper::sacar_residuo(TreeData& tree_data, const Residuo& residuo)
-{
-    tree_data.grilla->sacar_esfera(residuo.at2);
-}
-
-inline void TreeHelper::sacar_residuos(TreeData& tree_data, const vector<Residuo>& residuos)
-{
-    for (unsigned int i = 0; i < residuos.size(); ++i)
-    {
-        sacar_residuo(tree_data, residuos[i]);
-    }
-}
-

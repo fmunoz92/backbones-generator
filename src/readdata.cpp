@@ -26,17 +26,17 @@ FullCachedAnglesSeqReader* read_chains(const string& format, const string& input
 {
     if (format == "compressed")
     {
-        AnglesReader* r = AnglesReaderFactory::get_instance()->create(format);
+        prot_filer::AnglesReader* r = prot_filer::AnglesReaderFactory::get_instance()->create(format);
         r->open(input_file);
         return new FullCachedAnglesSeqReader(r);
     }
     else if (format == "fragments")
     {
-        AnglesReader* r = AnglesReaderFactory::get_instance()->create("compressed");
-        FragmentsFromReader* fragments = new FragmentsFromReader(r);
+        prot_filer::AnglesReader* r = prot_filer::AnglesReaderFactory::get_instance()->create("compressed");
+        prot_filer::FragmentsFromReader* fragments = new prot_filer::FragmentsFromReader(r);
         r->open(fragments_file);
 
-        FragmentsAnglesReader* ar = FragmentsAnglesReaderFactory::get_instance()->create(format);
+        prot_filer::FragmentsAnglesReader* ar = prot_filer::FragmentsAnglesReaderFactory::get_instance()->create(format);
         ar->open(fragments, input_file);
         FullCachedAnglesSeqReader* reader = new FullCachedAnglesSeqReader(ar);
         return reader;

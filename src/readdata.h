@@ -1,9 +1,10 @@
 #ifndef READDATA_H
 #define READDATA_H
 
-#include "petu.h"
 #include <sstream>
 #include <fstream>
+
+#include "tree_data.h"
 
 void readdata(std::istream& filer, TreeData& tree_data);
 

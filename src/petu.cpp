@@ -4,32 +4,11 @@
 #include <fstream>
 #include "getoptpp/getopt_pp.h"
 
-#include <mili/mili.h>
-#include "tree_generator.h"
+#include "petu.h"
+#include "generator.h"
 #include "readdata.h"
 #include "utils.h"
-
-static void show_usage();
-
-struct CommandLineOptions
-{
-    int Nres;         // Number of amino acids in the chains to build.
-    float RN;         // Radius of the Nitrogen atom.
-    float RCa;        // Radius of the Carbon atom.
-    float RC;         // Radius of the Carbon atom.
-    float Scal_1_4;   // Scaling factor for the radii. Used to check for 1-4 clashes.
-    float Scal_1_5;   // Scaling factor for the radii. Used to check for 1-5 clashes.
-    std::string data;      // Name of the input file.
-    std::string write_format;
-    std::string residues_input; //Name of the residue chains file.
-    std::string input_format;
-    std::string fragments_file;
-    size_t m; // They indicate the size of each dimention of the grid.
-    size_t n;
-    size_t z;
-
-    bool parse(int arg, char** argv);
-};
+#include "tree_data.h"
 
 int main(int argc, char** argv)
 {
@@ -46,40 +25,40 @@ int main(int argc, char** argv)
         setr(o.RN, o.RCa, o.RC, o.Scal_1_4, o.Scal_1_5);
 
         readdata(filer, tree_data);
-        tree_data.angles_data = new AnglesData(tree_data.nres, tree_data.angles_mapping);
+        tree_data.angles_data = new prot_filer::AnglesData(tree_data.nres, tree_data.angles_mapping);
 
         cout << "Number of fi-si combinations in file=" << tree_data.cossi.size() << endl;
 
         if (o.residues_input.empty())
         {
-            IGeneratorSimple* const generatorPtr = mili::FactoryRegistry<IGeneratorSimple, std::string>::new_class(o.write_format);
+            IGeneratorSimple* const generatorPtr = FactoryGeneratorSimple::new_class(o.write_format);
             std::auto_ptr<IGeneratorSimple> g(generatorPtr);
             g->generate(tree_data);
         }
         else
         {
             FullCachedAnglesSeqReader* db = read_chains(o.input_format, o.residues_input, o.fragments_file);//not necessary autoptr because ReaderFactory destroy the instance
-            IGeneratorChains* const genaratorPtr = mili::FactoryRegistry<IGeneratorChains, std::string>::new_class(o.write_format);
+            IGeneratorChains* const genaratorPtr = FactoryGeneratorChains::new_class(o.write_format);
             std::auto_ptr<IGeneratorChains> g(genaratorPtr);
             g->generate(tree_data, db);
         }
 
         cout << "Number of chains generated=" << tree_data.cont << endl;
 
-        Coord3DReaderFactory::destroy_instance();
-        Coord3DSeqReaderFactory::destroy_instance();
-        AnglesReaderFactory::destroy_instance();
+        prot_filer::Coord3DReaderFactory::destroy_instance();
+        prot_filer::Coord3DSeqReaderFactory::destroy_instance();
+        prot_filer::AnglesReaderFactory::destroy_instance();
 
         return EXIT_SUCCESS;
     }
     else
     {
-        show_usage();
+        o.show_usage();
         return EXIT_FAILURE;
     }
 }
 
-void show_usage()
+void CommandLineOptions::show_usage()
 {
     std::string indent = "                  ";
     std::cerr << "Usage: " << std::endl;

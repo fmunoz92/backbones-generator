@@ -1,7 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "petu.h"
+#include "tree_data.h"
 
 //This function puts 0 in all the atoms coordinates
 void clearatm(Atoms& patm, int nres);

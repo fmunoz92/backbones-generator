@@ -4,8 +4,7 @@
 #include <string>
 #include <vector>
 #include <mili/mili.h>
-#include "poneres.h"
-#include "utils.h"
+#include "tree_data.h"
 
 template <class TOperator>
 class TreeGenerator
@@ -73,79 +72,6 @@ private:
     FullCachedAnglesSeqReader* const reader;
     WriterHelper writer_helper;
 };
-
-struct TreeHelper
-{
-    static inline void semilla(TreeData& tree_data, float* R, Residuo& residuo);
-    static inline FilterResultType filtros_ultimo_nivel(TreeData& tree_data);
-    static inline void sacar_residuo(TreeData& tree_data, const Residuo& residuo);
-    static inline void sacar_residuos(TreeData& tree_data, const vector<Residuo>& residuos);
-};
-
-class XtcWriterHelper
-{
-public:
-    XtcWriterHelper(TreeData& tree_data);
-    ~XtcWriterHelper();
-    void write();
-private:
-    TreeData& tree_data;
-    XtcWriter writer;
-};
-
-class CompressedWriterHelper
-{
-public:
-    CompressedWriterHelper(TreeData& tree_data);
-    ~CompressedWriterHelper();
-    void write();
-private:
-    TreeData& tree_data;
-    CompressedWriter writer;
-};
-
-class FragmentsWriterHelper
-{
-public:
-    FragmentsWriterHelper(TreeData& tree_data, FullCachedAnglesSeqReader* reader);//Adapter
-    ~FragmentsWriterHelper();
-    void write();
-private:
-    TreeData& tree_data;
-    const FullCachedAnglesSeqReader* reader;
-    FragmentsWriter writer;
-};
-
-struct IGeneratorSimple
-{
-    virtual ~IGeneratorSimple() {}
-    virtual void generate(TreeData& tree_data) = 0;
-};
-
-struct IGeneratorChains
-{
-    virtual ~IGeneratorChains() {}
-    virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader) = 0;
-};
-
-template <class Writer>
-class GeneratorChains : public IGeneratorChains
-{
-public:
-    inline virtual ~GeneratorChains() {}
-private:
-    inline virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader);
-};
-
-template <class Writer>
-class GeneratorSimple : public IGeneratorSimple
-{
-public:
-    virtual ~GeneratorSimple() {}
-private:
-    inline virtual void generate(TreeData& tree_data);
-};
-
 
 #define TREE_GENERATOR_INLINE_H
 #include "tree_generator_inline.h"
