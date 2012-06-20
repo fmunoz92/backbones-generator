@@ -52,13 +52,15 @@ int main(int argc, char** argv)
 
         if (o.residues_input.empty())
         {
-            std::auto_ptr<IGeneratorSimple> g(mili::FactoryRegistry<IGeneratorSimple, std::string>::new_class(o.write_format));
+            IGeneratorSimple* const generatorPtr = mili::FactoryRegistry<IGeneratorSimple, std::string>::new_class(o.write_format);
+            std::auto_ptr<IGeneratorSimple> g();
             g->generate(tree_data);
         }
         else
         {
-            FullCachedAnglesSeqReader* db = read_chains(o.input_format, o.residues_input, o.fragments_file);
-            std::auto_ptr<IGeneratorChains> g(mili::FactoryRegistry<IGeneratorChains, std::string>::new_class(o.write_format));
+            FullCachedAnglesSeqReader* db = read_chains(o.input_format, o.residues_input, o.fragments_file);//not necessary autoptr because ReaderFactory destroy the instance
+            IGeneratorChains* const genaratorPtr = mili::FactoryRegistry<IGeneratorChains, std::string>::new_class(o.write_format);
+            std::auto_ptr<IGeneratorChains> g(genaratorPtr);
             g->generate(tree_data, db);
         }
 
