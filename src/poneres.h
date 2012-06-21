@@ -6,7 +6,7 @@
 #ifndef PONERES_H
 #define PONERES_H
 
-#include <vector>
+#include <list>
 #include "tree_data.h"
 #include "utils.h"
 
@@ -15,9 +15,9 @@ struct TreeHelper
     static inline void semilla(TreeData& tree_data, float* R, Residuo& residuo);
     static inline FilterResultType filtros_ultimo_nivel(TreeData& tree_data);
     static inline void sacar_residuo(TreeData& tree_data, const Residuo& residuo);
-    static inline void sacar_residuos(TreeData& tree_data, const vector<Residuo>& residuos);
+    static inline void sacar_residuos(TreeData& tree_data, const list<Residuo>& residuos);
     static inline FilterResultType poner_residuo(float* pR, const unsigned int resN, TreeData& tree_data, Residuo& residuo, unsigned int si_index, unsigned int fi_index);
-    static inline FilterResultType addChain(float* pR, unsigned int resN, TreeData& tree_data, vector<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chain_index);
+    static inline FilterResultType addChain(float* pR, unsigned int resN, TreeData& tree_data, list<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chain_index);
 };
 
 class ClashFilter
@@ -55,11 +55,11 @@ inline void TreeHelper::sacar_residuo(TreeData& tree_data, const Residuo& residu
     tree_data.grilla->sacar_esfera(residuo.at2);
 }
 
-inline void TreeHelper::sacar_residuos(TreeData& tree_data, const vector<Residuo>& residuos)
+inline void TreeHelper::sacar_residuos(TreeData& tree_data, const list<Residuo>& residuos)
 {
-    for (unsigned int i = 0; i < residuos.size(); ++i)
+    for (list<Residuo>::const_iterator it = residuos.begin(); it != residuos.end(); it++)
     {
-        sacar_residuo(tree_data, residuos[i]);
+        sacar_residuo(tree_data, *it);
     }
 }
 
@@ -93,7 +93,7 @@ inline FilterResultType TreeHelper::poner_residuo(float* pR, const unsigned int 
     return FILTER_OK;
 }
 
-inline FilterResultType TreeHelper::addChain(float* pR, unsigned int resN, TreeData& tree_data, vector<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chain_index)
+inline FilterResultType TreeHelper::addChain(float* pR, unsigned int resN, TreeData& tree_data, list<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chain_index)
 {
     FilterResultType result = FILTER_OK;
     unsigned int i = 0;

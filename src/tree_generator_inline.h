@@ -127,7 +127,7 @@ inline bool SimpleTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel)
         Residuo residuo;
         clearatm(tree_data.atm, tree_data.nres);
         TreeHelper::semilla(tree_data, R, residuo);
-        mili::insert_into(paraBorrar, residuo);
+        paraBorrar.push_back(residuo);
         nivel = 2; //semilla is level 1 then next level is 2
         result = true;
     }
@@ -164,7 +164,7 @@ inline bool SimpleTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
         if (filerResult == FILTER_OK)
         {
             result = true;
-            mili::insert_into(paraBorrar, residuo);
+            paraBorrar.push_back(residuo);
             resultRecursion = DoRecursion;
             nivel++;
         }
@@ -208,7 +208,7 @@ inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel)
     bool result = true;
     prot_filer::AnglesData* chain;
     Residuo residuo;
-    vector<Residuo> residuos;
+    list<Residuo> residuos;
     if ((chain = reader->read(currentPosInChain)) != NULL)
     {
         const unsigned int nextLevel = 2; //semilla is "level 1"
@@ -235,7 +235,7 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
     prot_filer::AnglesData* chain;
     recursion = StopRecursion;
     Residuo residuo;
-    vector<Residuo> residuos;
+    list<Residuo> residuos;
 
     if (firstTime)//or currentPosInChain == 0
     {
@@ -248,8 +248,8 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
             result = false;
     }
 
-    result = result && (chain = reader->read(currentPosInChain)) != NULL
-             if (result)
+    result = result && (chain = reader->read(currentPosInChain)) != NULL;
+    if (result)
     {
         filterResult = TreeHelper::addChain(R, nivel, tree_data, residuos, *chain, currentPosInChain);
         nivel += residuos.size();

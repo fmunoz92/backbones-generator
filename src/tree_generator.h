@@ -2,7 +2,7 @@
 #define TREE_GENERATOR_H
 
 #include <string>
-#include <vector>
+#include <list>
 #include <mili/mili.h>
 #include "tree_data.h"
 
@@ -48,7 +48,7 @@ private:
     mili::FirstTimeFlag firstTime;
     float* R;
     TreeData& tree_data;
-    vector<Residuo> paraBorrar;
+    list<Residuo> paraBorrar;
     WriterHelper writer_helper;
 };
 
@@ -68,8 +68,8 @@ private:
     unsigned int currentPosInChain;
     float* R;
     TreeData& tree_data;
-    vector<Residuo> residuosParaBorrar;
-    vector<vector<Residuo> > vectoresParaBorrar;
+    list<Residuo> residuosParaBorrar;
+    list<list<Residuo> > vectoresParaBorrar;
     FullCachedAnglesSeqReader* const reader;
     WriterHelper writer_helper;
 };
