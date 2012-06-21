@@ -248,7 +248,8 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
             result = false;
     }
 
-    if (result && (chain = reader->read(currentPosInChain)) != NULL)
+    result = result && (chain = reader->read(currentPosInChain)) != NULL
+             if (result)
     {
         filterResult = TreeHelper::addChain(R, nivel, tree_data, residuos, *chain, currentPosInChain);
         nivel += residuos.size();
@@ -262,8 +263,6 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
             TreeHelper::sacar_residuos(tree_data, residuos);
         currentPosInChain++;
     }
-    else
-        result = false;
 
     return result;
 }
