@@ -13,8 +13,10 @@ public:
     inline TreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* const reader);
     inline void generate();
 private:
-    inline void generar_nivel_intermedio(unsigned int nivel, const float R_inicial[16], unsigned int indice_nivel_anterior);
-    inline bool procesar_ultimo_nivel();
+    inline void expand_tree(unsigned int nivel, const float R_inicial[16], unsigned int indice_nivel_anterior);
+    inline bool process_leaf();
+    inline bool appendElements(unsigned int nivel, unsigned int indice_nivel_anterior, unsigned int index, const float R_local[16]);
+
     TreeData& tree_data;
     TOperator treeOperator;
 };
@@ -23,7 +25,6 @@ struct TreeOperator
 {
     enum KeepRecursion {DoRecursion, StopRecursion};
     /*
-    interfaz no utilizada, por razones de eficacia?
     virtual bool putNextSeed(unsigned int& nivel) = 0;
     virtual void initMatrix(float R[16]) = 0;
     virtual bool putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion) = 0;

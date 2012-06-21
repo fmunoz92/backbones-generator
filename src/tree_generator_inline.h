@@ -36,9 +36,9 @@ inline void TreeGenerator<TOperator>::generate()
     while (treeOperator.putNextSeed(nivel))
     {
         if (nivel < tree_data.nres)
-            generar_nivel_intermedio(nivel, R_inicial, 0);
+            expand_tree(nivel, R_inicial, 0);
         else
-            procesar_ultimo_nivel();
+            process_leaf();
         treeOperator.remove(nivel);
     }
 }
@@ -52,38 +52,48 @@ inline void TreeGenerator<TOperator>::generate()
             remove E
 */
 template <class TOperator>
-inline void TreeGenerator<TOperator>::generar_nivel_intermedio(unsigned int nivel, const float R_inicial[16], unsigned int indice_nivel_anterior)
+inline void TreeGenerator<TOperator>::expand_tree(unsigned int nivel, const float R_inicial[16], unsigned int indice_nivel_anterior)
 {
     bool ultimo_nivel_exitoso = false;//solo interesa si somos el anteultimo nivel
     float R_local[16];
-    typename TOperator::KeepRecursion result;
-    unsigned int i = 0;
+
+    unsigned int index_angles = 0;
     const unsigned int angles = tree_data.cossi.size();
 
-    while (i < angles && !ultimo_nivel_exitoso)
+    while (index_angles < angles && !ultimo_nivel_exitoso)
     {
         backbones_utils::copymat(R_local, R_inicial);
         treeOperator.initMatrix(R_local);
 
-        while (treeOperator.putNext(nivel, i, indice_nivel_anterior, result))
-        {
-            if (result == TOperator::DoRecursion)
-            {
-                // hay inconsistencia en implementacion vieja, el simple le resta uno
-                // a lo que seria nivel aux y el de chains lo deja como esta
-                if (nivel - 1 < tree_data.nres)
-                    generar_nivel_intermedio(nivel, R_local, i);
-                else
-                    ultimo_nivel_exitoso = procesar_ultimo_nivel();
-                treeOperator.remove(nivel);
-            }
-        }
-        i++;
+        ultimo_nivel_exitoso = appendElements(nivel, indice_nivel_anterior, index_angles, R_local);
+
+        index_angles++;
     }
 }
 
 template <class TOperator>
-inline bool TreeGenerator<TOperator>::procesar_ultimo_nivel()
+inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigned int indice_nivel_anterior, unsigned int index, const float R_local[16])
+{
+    typename TOperator::KeepRecursion resultRecursion;
+    bool result = false;
+
+    while (treeOperator.putNext(nivel, index, indice_nivel_anterior, resultRecursion))
+    {
+        if (resultRecursion == TOperator::DoRecursion)
+        {
+            if (nivel - 1 < tree_data.nres)
+                expand_tree(nivel, R_local, index);
+            else
+                result = process_leaf();
+            treeOperator.remove(nivel);
+        }
+    }
+
+    return result;
+}
+
+template <class TOperator>
+inline bool TreeGenerator<TOperator>::process_leaf()
 {
     bool exito = false;
 #ifdef COMBINATIONS_DEBUG // En el modo DEBUG se deshabilitan los chequeos.
