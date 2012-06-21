@@ -1,6 +1,6 @@
 #include "tree_data.h"
 
-TreeData::TreeData(int nRes, std::auto_ptr<Grillado>& grillado, std::istream& input_file) :
+TreeData::TreeData(int nRes, size_t cols, size_t rows, size_t depth, std::istream& input_file) :
     nres(nRes),
     // Maximun gyration radius and maximun CA-CA distance.
     // Both equations constructed from database analisys.
@@ -9,7 +9,7 @@ TreeData::TreeData(int nRes, std::auto_ptr<Grillado>& grillado, std::istream& in
     atm(Atoms(nres * 3)),
     cont(0),
     hubo_algun_exito(false),
-    grilla(grillado),
+    grilla(new Grillado(cols, rows, depth)),
     angles_mapping(new prot_filer::AnglesMapping(nres)),
     angles_data(new prot_filer::AnglesData(nres, angles_mapping.get())),
     output_file("traj.xtc")

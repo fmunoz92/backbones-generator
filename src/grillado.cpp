@@ -28,7 +28,15 @@
 // x^2 = D^2 + D^2, luego buscamos que 2*R < sqrt(2)*D.
 // Que es lo mismo que sqrt(2)*R < D.
 Grillado::Grillado(size_t M, size_t N, size_t Z, Length R, Length D) throw(radiusOrDistanceParamException, sizeParamException, bad_alloc)
-    : v(M), w(N), z(Z), r(R), d(D), vol_esfera(calc_vol(R)), vol_int(calc_int(R, D)), intersecciones(0), esferas(0)
+    : v(M),
+      w(N),
+      z(Z),
+      r(R),
+      d(D),
+      vol_esfera(calc_vol(R)),
+      vol_int(calc_int(R, D)),
+      intersecciones(0),
+      esferas(0)
 {
     const Length paramDiagonal = sqrt(2.0f) * R;
     const Length cota = (2.0f) * R;

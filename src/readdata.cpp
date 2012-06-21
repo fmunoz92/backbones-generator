@@ -2,11 +2,13 @@
 
 FullCachedAnglesSeqReader* read_chains(const string& format, const string& input_file, const string& fragments_file)
 {
+    FullCachedAnglesSeqReader* reader = NULL;
+
     if (format == "compressed")
     {
-        prot_filer::AnglesReader* r = prot_filer::AnglesReaderFactory::get_instance()->create(format);
-        r->open(input_file);
-        return new FullCachedAnglesSeqReader(r);
+        prot_filer::AnglesReader* ar = prot_filer::AnglesReaderFactory::get_instance()->create(format);
+        ar->open(input_file);
+        reader = new FullCachedAnglesSeqReader(ar);
     }
     else if (format == "fragments")
     {
@@ -16,11 +18,12 @@ FullCachedAnglesSeqReader* read_chains(const string& format, const string& input
 
         prot_filer::FragmentsAnglesReader* ar = prot_filer::FragmentsAnglesReaderFactory::get_instance()->create(format);
         ar->open(fragments, input_file);
-        FullCachedAnglesSeqReader* reader = new FullCachedAnglesSeqReader(ar);
-        return reader;
+        reader = new FullCachedAnglesSeqReader(ar);
     }
     else
     {
         throw runtime_error("wrong input format");
     }
+
+    return reader;
 }

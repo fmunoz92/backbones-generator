@@ -17,20 +17,30 @@ typedef prot_filer::BasicProtein Atoms;
 // Datos a compartir por todos los niveles:
 struct TreeData
 {
+    TreeData(int nRes, size_t cols, size_t rows, size_t depth, std::istream& input_file);
+
     unsigned int nres;
-    float rgmax, dmax2;
-    std::vector<float> cosfi, cossi, sinfi, sinsi;    // constantes
-    Atoms atm;       // estructura parcial
-    long int cont;              // cantidad de estructuras exitosas hasta el momento
-    bool hubo_algun_exito;      // si encendido, dice que hubo al menos una rama que llego al final
-    const std::auto_ptr<Grillado>& grilla;       // Utilizamos el grillado para aproximar el volumen parcial
+
+    float rgmax;
+    float dmax2;
+
+    std::vector<float> cosfi;
+    std::vector<float> cossi;
+    std::vector<float> sinfi;
+    std::vector<float> sinsi;
+
+    Atoms atm; // estructura parcial
+
+    long int cont;         // cantidad de estructuras exitosas hasta el momento
+    bool hubo_algun_exito; // si encendido, dice que hubo al menos una rama que llego al final
+
+    const std::auto_ptr<Grillado>                  grilla;       // Utilizamos el grillado para aproximar el volumen parcial
     const std::auto_ptr<prot_filer::AnglesMapping> angles_mapping;
-    const std::auto_ptr<prot_filer::AnglesData> angles_data; // Used only when writing compressed data.
+    const std::auto_ptr<prot_filer::AnglesData>    angles_data; // Used only when writing compressed data.
+
     prot_filer::FragmentIds fragment_ids;
+
     const std::string output_file;
-
-    TreeData(int nRes, std::auto_ptr<Grillado>& grillado, std::istream& input_file);
-
 private:
     void readdata(std::istream& filer);
 };

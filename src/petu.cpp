@@ -5,6 +5,7 @@
 #include "getoptpp/getopt_pp.h"
 
 #include "petu.h"
+
 #include "generator.h"
 #include "readdata.h"
 #include "utils.h"
@@ -17,9 +18,7 @@ int main(int argc, char** argv)
     if (o.parse(argc, argv))
     {
         std::ifstream filer(o.data.c_str());
-
-        std::auto_ptr<Grillado> grilla(new Grillado(o.m, o.n, o.z));
-        TreeData tree_data(o.Nres, grilla, filer);
+        TreeData tree_data(o.Nres, o.m, o.n, o.z, filer);
 
         // Fill r[][][] with the minimun squared distance between atoms
         setr(o.RN, o.RCa, o.RC, o.Scal_1_4, o.Scal_1_5);
@@ -30,14 +29,18 @@ int main(int argc, char** argv)
         {
             IGeneratorSimple* const generatorPtr = FactoryGeneratorSimple::new_class(o.write_format);
             std::auto_ptr<IGeneratorSimple> g(generatorPtr);
+
             g->generate(tree_data);
         }
         else
         {
-            FullCachedAnglesSeqReader* db = read_chains(o.input_format, o.residues_input, o.fragments_file);//not necessary autoptr because ReaderFactory destroy the instance
-            IGeneratorChains* const genaratorPtr = FactoryGeneratorChains::new_class(o.write_format);
-            std::auto_ptr<IGeneratorChains> g(genaratorPtr);
-            g->generate(tree_data, db);
+            FullCachedAnglesSeqReader* readerPtr = read_chains(o.input_format, o.residues_input, o.fragments_file);
+            IGeneratorChains* const generatorPtr = FactoryGeneratorChains::new_class(o.write_format);
+
+            std::auto_ptr<FullCachedAnglesSeqReader> db(readerPtr);
+            std::auto_ptr<IGeneratorChains> g(generatorPtr);
+
+            g->generate(tree_data, db.get());
         }
 
         cout << "Number of chains generated=" << tree_data.cont << endl;
