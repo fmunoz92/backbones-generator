@@ -42,6 +42,7 @@ public:
     prot_filer::FragmentIds fragment_ids;
 
     const std::string output_file;
+
 private:
     void readdata(std::istream& filer);
 };

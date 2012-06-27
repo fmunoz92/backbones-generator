@@ -9,15 +9,15 @@
 
 struct IGeneratorSimple
 {
-	typedef mili::FactoryRegistry<IGeneratorSimple, std::string> Factory;
-    
+    typedef mili::FactoryRegistry<IGeneratorSimple, std::string> Factory;
+
     virtual void generate(TreeData& tree_data) = 0;
     virtual ~IGeneratorSimple() {}
 };
 
 struct IGeneratorChains
 {
-	typedef mili::FactoryRegistry<IGeneratorChains, std::string> Factory;
+    typedef mili::FactoryRegistry<IGeneratorChains, std::string> Factory;
 
     virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader) = 0;
     virtual ~IGeneratorChains() {}

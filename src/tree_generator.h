@@ -5,16 +5,18 @@
 #include <list>
 #include <mili/mili.h>
 #include "tree_data.h"
+#include "poneres.h"
 
 template <class TOperator>
 class TreeGenerator
 {
 public:
     inline TreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* const reader);
+
     inline void generate();
 private:
-    inline void expand_tree(unsigned int nivel, const float R_inicial[16], unsigned int indice_nivel_anterior);
-    inline bool process_leaf();
+    inline void expandTree(unsigned int nivel, const float R_inicial[16], unsigned int indice_nivel_anterior);
+    inline bool processLeaf();
     inline bool appendElements(unsigned int nivel, unsigned int indice_nivel_anterior, unsigned int index, const float R_local[16]);
 
     TreeData& tree_data;
@@ -45,9 +47,10 @@ public:
     inline void remove(unsigned int& nivel);
     inline void write();
 private:
+    TreeData& tree_data;
+    TreeHelper tree_helper;
     mili::FirstTimeFlag firstTime;
     float* R;
-    TreeData& tree_data;
     list<Residuo> paraBorrar;
     WriterHelper writer_helper;
 };
@@ -64,10 +67,11 @@ public:
     inline void remove(unsigned int& nivel);
     inline void write();
 private:
+    TreeData& tree_data;
+    TreeHelper tree_helper;
     mili::FirstTimeFlag firstTime;
     unsigned int currentPosInChain;
     float* R;
-    TreeData& tree_data;
     list<Residuo> residuosParaBorrar;
     list<list<Residuo> > vectoresParaBorrar;
     FullCachedAnglesSeqReader* const reader;
