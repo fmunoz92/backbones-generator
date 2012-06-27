@@ -3,13 +3,28 @@
 
 #include <mili/mili.h>
 
+#include "tree_generator.h"
 #include "tree_data.h"
+#include "filer.h"
 
 struct IGeneratorSimple
 {
-    virtual ~IGeneratorSimple() {}
+	typedef mili::FactoryRegistry<IGeneratorSimple, std::string> Factory;
+    
     virtual void generate(TreeData& tree_data) = 0;
+    virtual ~IGeneratorSimple() {}
 };
+
+struct IGeneratorChains
+{
+	typedef mili::FactoryRegistry<IGeneratorChains, std::string> Factory;
+
+    virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader) = 0;
+    virtual ~IGeneratorChains() {}
+};
+
+
+
 
 template <class Writer>
 class GeneratorSimple : public IGeneratorSimple
@@ -20,22 +35,28 @@ private:
     inline virtual void generate(TreeData& tree_data);
 };
 
-struct IGeneratorChains
-{
-    virtual ~IGeneratorChains() {}
-    virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader) = 0;
-};
-
 template <class Writer>
 class GeneratorChains : public IGeneratorChains
 {
 public:
-    inline virtual ~GeneratorChains() {}
+    virtual ~GeneratorChains() {}
 private:
     inline virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader);
 };
 
-typedef mili::FactoryRegistry<IGeneratorChains, std::string> FactoryGeneratorChains;
-typedef mili::FactoryRegistry<IGeneratorSimple, std::string> FactoryGeneratorSimple;
+//move to _inline
+template <class Writer>
+inline void GeneratorSimple<Writer>::generate(TreeData& tree_data)
+{
+    TreeGenerator<SimpleTreeOperator<Writer> > generator(tree_data, NULL);
+    generator.generate();
+}
+
+template <class Writer>
+inline void GeneratorChains<Writer>::generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader)
+{
+    TreeGenerator<ChainsTreeOperator<Writer> > generator(tree_data, reader);
+    generator.generate();
+}
 
 #endif

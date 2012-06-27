@@ -6,20 +6,6 @@
 #include "utils.h"
 #include "filer.h"
 
-template <class Writer>
-inline void GeneratorSimple<Writer>::generate(TreeData& tree_data)
-{
-    TreeGenerator<SimpleTreeOperator<Writer> > generator(tree_data, NULL);
-    generator.generate();
-}
-
-template <class Writer>
-inline void GeneratorChains<Writer>::generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader)
-{
-    TreeGenerator<ChainsTreeOperator<Writer> > generator(tree_data, reader);
-    generator.generate();
-}
-
 template <class TOperator>
 inline TreeGenerator<TOperator>::TreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* const reader) :
     tree_data(tree_data),
@@ -209,7 +195,10 @@ inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel)
     prot_filer::AnglesData* chain;
     Residuo residuo;
     list<Residuo> residuos;
-    if ((chain = reader->read(currentPosInChain)) != NULL)
+    
+    chain = reader->read(currentPosInChain);
+    
+    if (chain != NULL)
     {
         const unsigned int nextLevel = 2; //semilla is "level 1"
         clearatm(tree_data.atm, tree_data.nres);
@@ -248,8 +237,9 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
             result = false;
     }
 
-    result = result && (chain = reader->read(currentPosInChain)) != NULL;
-    if (result)
+    chain = reader->read(currentPosInChain);
+
+    if (result && (chain != NULL))
     {
         filterResult = TreeHelper::addChain(R, nivel, tree_data, residuos, *chain, currentPosInChain);
         nivel += residuos.size();
@@ -260,7 +250,7 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
         }
         else
             //saco residuos apendeados antes del primer residuo que genero FILTER_FAIL
-            TreeHelper::sacar_residuos(tree_data, residuos);
+	            TreeHelper::sacar_residuos(tree_data, residuos);
         currentPosInChain++;
     }
 

@@ -22,6 +22,7 @@ void TreeData::readdata(std::istream& filer)
     float fi = 0.0f;
     float si = 0.0f;
     unsigned int i = 0;
+
     while (filer.good())
     {
         if (filer >> fi && filer >> si)

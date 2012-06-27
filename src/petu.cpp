@@ -2,6 +2,7 @@
 #include <iostream>
 #include <memory>
 #include <fstream>
+
 #include "getoptpp/getopt_pp.h"
 
 #include "petu.h"
@@ -23,11 +24,11 @@ int main(int argc, char** argv)
         // Fill r[][][] with the minimun squared distance between atoms
         setr(o.RN, o.RCa, o.RC, o.Scal_1_4, o.Scal_1_5);
 
-        cout << "Number of fi-si combinations in file=" << tree_data.cossi.size() << endl;
+        std::cout << "Number of fi-si combinations in file=" << tree_data.cossi.size() << endl;
 
         if (o.residues_input.empty())
         {
-            IGeneratorSimple* const generatorPtr = FactoryGeneratorSimple::new_class(o.write_format);
+            IGeneratorSimple* const generatorPtr = IGeneratorSimple::Factory::new_class(o.write_format);
             std::auto_ptr<IGeneratorSimple> g(generatorPtr);
 
             g->generate(tree_data);
@@ -35,7 +36,7 @@ int main(int argc, char** argv)
         else
         {
             FullCachedAnglesSeqReader* readerPtr = read_chains(o.input_format, o.residues_input, o.fragments_file);
-            IGeneratorChains* const generatorPtr = FactoryGeneratorChains::new_class(o.write_format);
+            IGeneratorChains* const generatorPtr = IGeneratorChains::Factory::new_class(o.write_format);
 
             std::auto_ptr<FullCachedAnglesSeqReader> db(readerPtr);
             std::auto_ptr<IGeneratorChains> g(generatorPtr);
@@ -43,7 +44,7 @@ int main(int argc, char** argv)
             g->generate(tree_data, db.get());
         }
 
-        cout << "Number of chains generated=" << tree_data.cont << endl;
+        std::cout << "Number of chains generated=" << tree_data.cont << endl;
 
         prot_filer::Coord3DReaderFactory::destroy_instance();
         prot_filer::Coord3DSeqReaderFactory::destroy_instance();
@@ -54,6 +55,7 @@ int main(int argc, char** argv)
     else
     {
         o.show_usage();
+
         return EXIT_FAILURE;
     }
 }
@@ -94,7 +96,7 @@ bool CommandLineOptions::parse(int argc, char** argv)
 
         if (!chains && write_format == "fragments")
         {
-            cerr << "Error: fragments output format cannot be used without chains input" << endl;
+            std::cerr << "Error: fragments output format cannot be used without chains input" << endl;
             return false;
         }
         if (chains)
@@ -104,7 +106,7 @@ bool CommandLineOptions::parse(int argc, char** argv)
             {
                 if (input_files.size() == 0)
                 {
-                    cerr << "Error: Compressed input file required" << endl;
+                    std::cerr << "Error: Compressed input file required" << endl;
                     return false;
                 }
                 else
@@ -116,7 +118,7 @@ bool CommandLineOptions::parse(int argc, char** argv)
             {
                 if (input_files.size() < 2)
                 {
-                    cerr << "Error: Fragments input format, requires both fragments files" << endl;
+                    std::cerr << "Error: Fragments input format, requires both fragments files" << endl;
                     return false;
                 }
                 else

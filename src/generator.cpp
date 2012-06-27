@@ -1,6 +1,4 @@
 #include "generator.h"
-#include "tree_generator.h"
-#include "filer.h"
 
 /* REGISTER_FACTORIZABLE_CLASS TAKE A TYPEDEF IF DERIVED CLASS IS A TEMPLATE-CLASS*/
 typedef GeneratorChains<CompressedWriterHelper> ChainsFormatGeneratorCompressedWriter;

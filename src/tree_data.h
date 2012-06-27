@@ -15,8 +15,9 @@ typedef prot_filer::CachedReader<prot_filer::FullCache, prot_filer::SimpleAngles
 typedef prot_filer::BasicProtein Atoms;
 
 // Datos a compartir por todos los niveles:
-struct TreeData
+class TreeData
 {
+public:
     TreeData(int nRes, size_t cols, size_t rows, size_t depth, std::istream& input_file);
 
     unsigned int nres;
