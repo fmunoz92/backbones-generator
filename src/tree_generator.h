@@ -4,14 +4,13 @@
 #include <string>
 #include <list>
 #include <mili/mili.h>
-#include "tree_data.h"
-#include "poneres.h"
+#include "poneres.h"//TreeHelper
 
 template <class TOperator>
 class TreeGenerator
 {
 public:
-    inline TreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* const reader);
+    inline TreeGenerator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader);
 
     inline void generate();
 private:
@@ -33,7 +32,7 @@ template <class WriterHelper>
 class SimpleTreeOperator : public TreeOperator
 {
 public:
-    inline SimpleTreeOperator(TreeData& t, FullCachedAnglesSeqReader* reader);
+    inline SimpleTreeOperator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader);
 
     inline bool putNextSeed(unsigned int& nivel);
     inline void initMatrix(float R[16]);
@@ -42,7 +41,6 @@ public:
     inline void write();
     inline bool lastLevelOk();
 private:
-    TreeData& tree_data;
     TreeHelper tree_helper;
     mili::FirstTimeFlag firstTime;
     float* R;
@@ -54,7 +52,7 @@ template <class WriterHelper>
 class ChainsTreeOperator : public TreeOperator
 {
 public:
-    inline ChainsTreeOperator(TreeData& t, FullCachedAnglesSeqReader* reader);
+    inline ChainsTreeOperator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader);
 
     inline bool putNextSeed(unsigned int& nivel);
     inline void initMatrix(float R[16]);
@@ -63,7 +61,6 @@ public:
     inline void write();
     inline bool lastLevelOk();
 private:
-    TreeData& tree_data;
     TreeHelper tree_helper;
     mili::FirstTimeFlag firstTime;
     unsigned int currentPosInChain;

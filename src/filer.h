@@ -1,38 +1,38 @@
 #ifndef FILER_H
 #define FILER_H
 
-#include "tree_data.h"
+#include "poneres.h"//TreeHelper
 
 class XtcWriterHelper
 {
 public:
-    XtcWriterHelper(TreeData& tree_data);
+    XtcWriterHelper(TreeHelper& tree_helper);
     ~XtcWriterHelper();
     void write();
 private:
-    TreeData& tree_data;
+    TreeHelper& tree_helper;
     prot_filer::XtcWriter writer;
 };
 
 class CompressedWriterHelper
 {
 public:
-    CompressedWriterHelper(TreeData& tree_data);
+    CompressedWriterHelper(TreeHelper& tree_helper);
     ~CompressedWriterHelper();
     void write();
 private:
-    TreeData& tree_data;
+    TreeHelper& tree_helper;
     prot_filer::CompressedWriter writer;
 };
 
 class FragmentsWriterHelper
 {
 public:
-    FragmentsWriterHelper(TreeData& tree_data, FullCachedAnglesSeqReader* reader);//Adapter
+    FragmentsWriterHelper(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader);//Adapter
     ~FragmentsWriterHelper();
     void write();
 private:
-    TreeData& tree_data;
+    TreeHelper& tree_helper;
     const FullCachedAnglesSeqReader* reader;
     prot_filer::FragmentsWriter writer;
 };

@@ -7,10 +7,10 @@
 
 
 template <class TOperator>
-inline TreeGenerator<TOperator>::TreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* const reader) :
-    treeOperator(tree_data, reader),
-    CANT_RES(tree_data.nres),
-    CANT_ANGLES(tree_data.cossi.size())
+inline TreeGenerator<TOperator>::TreeGenerator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader) :
+    treeOperator(tree_helper, reader),
+    CANT_RES(tree_helper.getNRes()),
+    CANT_ANGLES(tree_helper.getNAngles())
 {}
 
 template <class TOperator>
@@ -95,9 +95,8 @@ inline bool TreeGenerator<TOperator>::processLeaf()
 }
 
 template <class WriterHelper>
-inline SimpleTreeOperator<WriterHelper>::SimpleTreeOperator(TreeData& t, FullCachedAnglesSeqReader*) :
-    tree_data(t),
-    tree_helper(tree_data),
+inline SimpleTreeOperator<WriterHelper>::SimpleTreeOperator(TreeHelper& t, FullCachedAnglesSeqReader*) :
+    tree_helper(t),
     writer_helper(t)
 {}
 
@@ -109,7 +108,7 @@ inline bool SimpleTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel)
     if (firstTime)
     {
         Residuo residuo;
-        clearatm(tree_data.atm, tree_data.nres);
+        tree_helper.clearatm();
         tree_helper.putSeed(R, residuo);
         paraBorrar.push_back(residuo);
         nivel = 2; //semilla is level 1 then next level is 2
@@ -167,23 +166,20 @@ template <class WriterHelper>
 inline void SimpleTreeOperator<WriterHelper>::write()
 {
     writer_helper.write();
-    tree_data.cont++;
-    tree_data.hubo_algun_exito = true;
+    tree_helper.reportSuccess();
 }
 
 template <class WriterHelper>
-inline ChainsTreeOperator<WriterHelper>::ChainsTreeOperator(TreeData& t, FullCachedAnglesSeqReader* const reader) :
-    tree_data(t),
-    tree_helper(tree_data),
+inline ChainsTreeOperator<WriterHelper>::ChainsTreeOperator(TreeHelper& t, FullCachedAnglesSeqReader* const reader) :
+    tree_helper(t),
     reader(reader),
     writer_helper(t)
 {}
 
 /*Adapter*/
 template <>
-inline ChainsTreeOperator<FragmentsWriterHelper>::ChainsTreeOperator(TreeData& t, FullCachedAnglesSeqReader* const reader) :
-    tree_data(t),
-    tree_helper(tree_data),
+inline ChainsTreeOperator<FragmentsWriterHelper>::ChainsTreeOperator(TreeHelper& t, FullCachedAnglesSeqReader* const reader) :
+    tree_helper(t),
     reader(reader),
     writer_helper(t, reader)//call constructor adapter
 {}
@@ -215,7 +211,7 @@ inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel)
     if (chain != NULL)
     {
         const unsigned int nextLevel = 2; //semilla is "level 1"
-        clearatm(tree_data.atm, tree_data.nres);
+        tree_helper.clearatm();
         tree_helper.putSeed(R, residuo);
         tree_helper.putChain(R, nextLevel, residuos, *chain, currentPosInChain);
 
@@ -283,7 +279,7 @@ inline void ChainsTreeOperator<WriterHelper>::remove(unsigned int& nivel)
 
     residuosParaBorrar.pop_back();
     vectoresParaBorrar.pop_back();
-    tree_data.fragment_ids.pop_back();
+    tree_helper.deleteLastFragmentId();
 
     nivel -= nivelesRetrocedidos;
 }
@@ -292,6 +288,5 @@ template <class WriterHelper>
 inline void ChainsTreeOperator<WriterHelper>::write()
 {
     writer_helper.write();
-    tree_data.cont++;
-    tree_data.hubo_algun_exito = true;
+    tree_helper.reportSuccess();
 }

@@ -4,14 +4,14 @@
 #include <mili/mili.h>
 
 #include "tree_generator.h"
-#include "tree_data.h"
+#include "poneres.h"//TreeHelper
 #include "filer.h"
 
 struct IGeneratorSimple
 {
     typedef mili::FactoryRegistry<IGeneratorSimple, std::string> Factory;
 
-    virtual void generate(TreeData& tree_data) = 0;
+    virtual void generate(TreeHelper& tree_helper) = 0;
     virtual ~IGeneratorSimple() {}
 };
 
@@ -19,7 +19,7 @@ struct IGeneratorChains
 {
     typedef mili::FactoryRegistry<IGeneratorChains, std::string> Factory;
 
-    virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader) = 0;
+    virtual void generate(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader) = 0;
     virtual ~IGeneratorChains() {}
 };
 
@@ -29,7 +29,7 @@ class GeneratorSimple : public IGeneratorSimple
 public:
     virtual ~GeneratorSimple() {}
 private:
-    inline virtual void generate(TreeData& tree_data);
+    inline virtual void generate(TreeHelper& tree_helper);
 };
 
 template <class Writer>
@@ -38,21 +38,21 @@ class GeneratorChains : public IGeneratorChains
 public:
     virtual ~GeneratorChains() {}
 private:
-    inline virtual void generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader);
+    inline virtual void generate(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader);
 };
 
 //move to _inline
 template <class Writer>
-inline void GeneratorSimple<Writer>::generate(TreeData& tree_data)
+inline void GeneratorSimple<Writer>::generate(TreeHelper& tree_helper)
 {
-    TreeGenerator<SimpleTreeOperator<Writer> > generator(tree_data, NULL);
+    TreeGenerator<SimpleTreeOperator<Writer> > generator(tree_helper, NULL);
     generator.generate();
 }
 
 template <class Writer>
-inline void GeneratorChains<Writer>::generate(TreeData& tree_data, FullCachedAnglesSeqReader* const reader)
+inline void GeneratorChains<Writer>::generate(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader)
 {
-    TreeGenerator<ChainsTreeOperator<Writer> > generator(tree_data, reader);
+    TreeGenerator<ChainsTreeOperator<Writer> > generator(tree_helper, reader);
     generator.generate();
 }
 

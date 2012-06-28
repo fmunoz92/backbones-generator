@@ -1,7 +1,8 @@
 #include "poneres.h"
 
-TreeHelper::TreeHelper(TreeData& tree_data) :
-    tree_data(tree_data)
+TreeHelper::TreeHelper(TreeData& tree_data, TreeFilters& tree_filters) :
+    tree_data(tree_data),
+    tree_filters(tree_filters)
 {}
 
 void TreeHelper::putSeed(float* R, Residuo& residuo)
@@ -17,8 +18,8 @@ void TreeHelper::putSeed(float* R, Residuo& residuo)
 
 FilterResultType TreeHelper::filtros_ultimo_nivel()
 {
-    bool ok = calcRdG(tree_data.atm, tree_data.nres, tree_data.rgmax) == FILTER_OK &&
-              volumen_en_rango(tree_data.nres, tree_data.grilla->obtener_vol_parcial()) == FILTER_OK;
+    bool ok = tree_filters.calcRdG(tree_data.atm, tree_data.nres, tree_data.rgmax) == FILTER_OK &&
+              tree_filters.volumen_en_rango(tree_data.nres, tree_data.grilla->obtener_vol_parcial()) == FILTER_OK;
     return ok ? FILTER_OK : FILTER_FAIL;
 }
 
@@ -50,7 +51,7 @@ FilterResultType TreeHelper::putRes(float* pR, const unsigned int resN, Residuo&
 #include "prot-filer/backbones_utils.h"
     backbones_utils::DummyFilter filter;
 #else
-    ClashFilter filter(tree_data);
+    ClashFilter filter(tree_data, tree_filters);
 #endif
     bool success = backbones_utils::poneres(pR, cossi, sinsi, cosfi, sinfi, patm, resN, filter);
 
@@ -87,13 +88,65 @@ FilterResultType TreeHelper::putChain(float* pR, unsigned int resN, std::list<Re
     return result;
 }
 
-ClashFilter::ClashFilter(const TreeData& tree_data) :
-    tree_data(tree_data)
+void TreeHelper::clearatm()
+{
+    for (unsigned int i = 0; i < 3 * tree_data.nres; i++)
+    {
+        tree_data.atm[i].x = 0.0;
+        tree_data.atm[i].y = 0.0;
+        tree_data.atm[i].z = 0.0;
+    }
+}
+
+void TreeHelper::reportSuccess()
+{
+    tree_data.cont++;
+    tree_data.hubo_algun_exito = true;
+}
+
+void TreeHelper::deleteLastFragmentId()
+{
+    tree_data.fragment_ids.pop_back();
+}
+
+prot_filer::AnglesData&  TreeHelper::getAnglesData() const
+{
+    return *tree_data.angles_data;
+}
+
+Atoms& TreeHelper::getAtm() const
+{
+    return tree_data.atm;
+}
+
+prot_filer::FragmentIds& TreeHelper::getFragmentIds() const
+{
+    return tree_data.fragment_ids;
+}
+
+const std::string& TreeHelper::getOutputFile() const
+{
+    return tree_data.output_file;
+}
+
+unsigned int TreeHelper::getNRes() const
+{
+    return tree_data.nres;
+}
+
+unsigned int TreeHelper::getNAngles() const
+{
+    return tree_data.cossi.size();
+}
+
+ClashFilter::ClashFilter(const TreeData& tree_data, const TreeFilters& tree_filters) :
+    tree_data(tree_data),
+    tree_filters(tree_filters)
 {}
 
 bool ClashFilter::operator()(unsigned int index, const Atoms& patm, int at) const
 {
-    const bool clash = isclash(patm, at) == FILTER_FAIL;
-    return !clash && (index != 2 || (islong(patm, at, tree_data.dmax2) != FILTER_FAIL));
+    const bool clash = tree_filters.isclash(patm, at) == FILTER_FAIL;
+    return !clash && (index != 2 || (tree_filters.islong(patm, at, tree_data.dmax2) != FILTER_FAIL));
 }
 

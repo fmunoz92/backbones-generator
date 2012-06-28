@@ -5,7 +5,7 @@
 #include <fstream>
 #include <string>
 
-#include "tree_data.h"
+#include "tree_data.h"// for global typedef FullCachedAnglesSeqReader
 
 FullCachedAnglesSeqReader* read_chains(const std::string& format, const std::string& input_file, const std::string& fragments_file);
 

@@ -11,6 +11,7 @@
 #include "readdata.h"
 #include "utils.h"
 #include "tree_data.h"
+#include "poneres.h"//TreeHelper
 
 int main(int argc, char** argv)
 {
@@ -20,18 +21,21 @@ int main(int argc, char** argv)
     {
         std::ifstream filer(o.data.c_str());
         TreeData tree_data(o.Nres, o.m, o.n, o.z, filer);
+        TreeFilters tree_filters;
 
         // Fill r[][][] with the minimun squared distance between atoms
-        setr(o.RN, o.RCa, o.RC, o.Scal_1_4, o.Scal_1_5);
+        tree_filters.setr(o.RN, o.RCa, o.RC, o.Scal_1_4, o.Scal_1_5);
 
-        std::cout << "Number of fi-si combinations in file=" << tree_data.cossi.size() << std::endl;
+        TreeHelper tree_helper(tree_data, tree_filters);
+
+        std::cout << "Number of fi-si combinations in file=" << tree_helper.getNAngles() << std::endl;
 
         if (o.residues_input.empty())
         {
             IGeneratorSimple* const generatorPtr = IGeneratorSimple::Factory::new_class(o.write_format);
             std::auto_ptr<IGeneratorSimple> g(generatorPtr);
 
-            g->generate(tree_data);
+            g->generate(tree_helper);
         }
         else
         {
@@ -41,7 +45,7 @@ int main(int argc, char** argv)
             std::auto_ptr<FullCachedAnglesSeqReader> db(readerPtr);
             std::auto_ptr<IGeneratorChains> g(generatorPtr);
 
-            g->generate(tree_data, db.get());
+            g->generate(tree_helper, db.get());
         }
 
         std::cout << "Number of chains generated=" << tree_data.cont << std::endl;

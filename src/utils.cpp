@@ -4,19 +4,9 @@
 using mili::square;
 using mili::in_range;
 
-void clearatm(Atoms& patm, int nres)
-{
-    for (int i = 0; i < 3 * nres; i++)
-    {
-        patm[i].x = 0.0;
-        patm[i].y = 0.0;
-        patm[i].z = 0.0;
-    }
-}
 
-float r[3][3][3];
 
-void setr(float rn, float rca, float rc, float scal_1_4, float scal_1_5)
+void TreeFilters::setr(float rn, float rca, float rc, float scal_1_4, float scal_1_5)
 {
     /* La matriz de distancias minimas al cuadrado*/
     float radio[3];
@@ -36,7 +26,7 @@ void setr(float rn, float rca, float rc, float scal_1_4, float scal_1_5)
     }
 }
 
-FilterResultType calcRdG(const Atoms& patm, int nres, float rgmax)
+FilterResultType TreeFilters::calcRdG(const Atoms& patm, int nres, float rgmax) const
 {
     float Rcm, xcm, ycm, zcm;
 
@@ -59,28 +49,21 @@ FilterResultType calcRdG(const Atoms& patm, int nres, float rgmax)
         Rcm += (dx2 + dy2 + dz2);
     }
 
-
 #ifdef VERBOSE
     printf("Raduis of gyration= %f. Maximun allowed=%f\n", sqrt(Rcm / nres), rgmax);
 #endif
     if (sqrt(Rcm / nres) > rgmax)
-    {
         return FILTER_FAIL ;
-    }
     else
-    {
         return FILTER_OK;
-    }
 }
 
-FilterResultType islong(const Atoms& patm, int at, float dmax2)
+FilterResultType TreeFilters::islong(const Atoms& patm, int at, float dmax2) const
 {
     // Until we reach residue #5, the check for long chain is meaningless
     // at=13 is the CA of residue #5
     if (at < 13)
-    {
         return FILTER_OK;
-    }
 
     // at-12 is the CA atom that is four residues down the chain
     // at=1 is the first CA in the chain
@@ -101,18 +84,7 @@ FilterResultType islong(const Atoms& patm, int at, float dmax2)
     return FILTER_OK;
 }
 
-//This function detect colitions between atoms
-//The matrix r have the reference radius (actually the sum of the squares of the raduis)
-//The last index of r is 0 for 1-4 clashes, 1 for 1-5 and 2 for the rest
-static inline float distance(const Atoms& patm, const int at, const int i)
-{
-    const float dx2 = square(patm[at].x - patm[i].x);
-    const float dy2 = square(patm[at].y - patm[i].y);
-    const float dz2 = square(patm[at].z - patm[i].z);
-    return dx2 + dy2 + dz2;
-}
-
-FilterResultType isclash(const Atoms& patm, int at)
+FilterResultType TreeFilters::isclash(const Atoms& patm, int at) const
 {
     //This is to check for the so-called 1-4 clashes,
     //i.e. a clash between atom at position i with atom at position i+3
@@ -129,9 +101,7 @@ FilterResultType isclash(const Atoms& patm, int at)
 
     //If this is atom #3 and passes the check for 1-4 clashes, then there is nothing else to check.
     if (at == 3)
-    {
         return FILTER_OK;
-    }
 
     //This is to check for the so-called 1-5 clashes;
     //i.e. a clash between atom at position i with atom at position i+4
@@ -147,9 +117,7 @@ FilterResultType isclash(const Atoms& patm, int at)
 
     //If this is atom #4 and passes check for 1-4 and 1-5 clashes, then there is nothing else to check.
     if (at == 4)
-    {
         return FILTER_OK;
-    }
 
     //The rest of the clashes until the end of the chain.
     for (i = at - 5; i >= 0; i--)
@@ -167,7 +135,7 @@ FilterResultType isclash(const Atoms& patm, int at)
     return FILTER_OK;
 }
 
-FilterResultType volumen_en_rango(int nres, Volume vol_parcial)
+FilterResultType TreeFilters::volumen_en_rango(int nres, Volume vol_parcial) const
 {
     // Valores obtenidos a partir de pruebas de un set de datos en Grillado.
     static const float cota_maxima_volumen = 177.65f;
