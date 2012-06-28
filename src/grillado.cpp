@@ -21,6 +21,41 @@
 
 #include "grillado.h"
 
+using namespace std;
+
+esferaId::esferaId() :
+    v(0),
+    w(0),
+    z(0)
+{}
+
+esferaId::esferaId(GridCoord input_v, GridCoord input_w, GridCoord input_z) :
+    v(input_v),
+    w(input_w),
+    z(input_z)
+{}
+
+esferaId::esferaId(const esferaId& s) :
+    v(s.get_m()),
+    w(s.get_n()),
+    z(s.get_z())
+{}
+
+GridCoord esferaId::get_m() const
+{
+    return v;
+}
+
+GridCoord esferaId::get_n() const
+{
+    return w;
+}
+
+GridCoord esferaId::get_z() const
+{
+    return z;
+}
+
 // Se asigna memoria a la matriz y se inicializa con 0s.
 // Para que no hayan intersecciones diagonales
 // la suma de dos radios tiene que ser menor a la
@@ -61,7 +96,6 @@ Grillado::Grillado(size_t M, size_t N, size_t Z, Length R, Length D) throw(radiu
             }
         }
     }
-
 }
 
 
@@ -96,9 +130,8 @@ Grillado::~Grillado()
     for (size_t m = 0; m < v; m++)
     {
         for (size_t n = 0; n < w; n++)
-        {
             delete [] matriz[m][n];
-        }
+
         delete [] matriz[m];
     }
     delete [] matriz;
@@ -113,10 +146,10 @@ void Grillado::agregar_esfera(const esferaId& id)
     const GridCoord coord_x = id.get_m();
     const GridCoord coord_y = id.get_n();
     const GridCoord coord_z = id.get_z();
+
     if (matriz[coord_x][coord_y][coord_z] == 0)
-    {
         aumentar_vol_parcial(coord_x, coord_y, coord_z);
-    }
+
     matriz[coord_x][coord_y][coord_z]++;
 }
 
@@ -128,11 +161,14 @@ void Grillado::sacar_esfera(const esferaId& id) throw(gridPositionException)
     const GridCoord coord_x = id.get_m();
     const GridCoord coord_y = id.get_n();
     const GridCoord coord_z = id.get_z();
+
     if (matriz[coord_x][coord_y][coord_z] == 0)
     {
         throw gridPositionException();
     }
+
     matriz[coord_x][coord_y][coord_z]--;
+
     if (matriz[coord_x][coord_y][coord_z] == 0)
     {
         reducir_vol_parcial(coord_x, coord_y, coord_z);
@@ -192,12 +228,15 @@ unsigned int Grillado::calcular_intersecciones(GridCoord coord_x, GridCoord coor
     const GridCoord z_plus  = modulo((static_cast<int>(coord_z) + 1) , z);
     const GridCoord z_minus = modulo((static_cast<int>(coord_z) - 1) , z);
 
-    unsigned int inters = matriz[coord_x][coord_y][z_plus] != 0;
+    unsigned int inters = 0;
+
+    inters += matriz[coord_x][coord_y][z_plus ] != 0;
     inters += matriz[coord_x][coord_y][z_minus] != 0;
-    inters += matriz[x_plus][coord_y][coord_z] != 0;
+    inters += matriz[x_plus ][coord_y][coord_z] != 0;
     inters += matriz[x_minus][coord_y][coord_z] != 0;
-    inters += matriz[coord_x][y_plus][coord_z] != 0;
+    inters += matriz[coord_x][y_plus ][coord_z] != 0;
     inters += matriz[coord_x][y_minus][coord_z] != 0;
+
     return inters;
 }
 
@@ -206,15 +245,9 @@ unsigned int Grillado::calcular_intersecciones(GridCoord coord_x, GridCoord coor
 void Grillado::reset()
 {
     for (size_t m = 0; m < v; m++)
-    {
         for (size_t n = 0; n < w; n++)
-        {
             for (size_t Z = 0; Z < z; Z++)
-            {
                 matriz[m][n][Z] = 0;
-            }
-        }
-    }
     esferas = 0;
     intersecciones = 0;
 }

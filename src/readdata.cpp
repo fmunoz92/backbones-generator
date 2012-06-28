@@ -1,6 +1,6 @@
 #include "readdata.h"
 
-FullCachedAnglesSeqReader* read_chains(const string& format, const string& input_file, const string& fragments_file)
+FullCachedAnglesSeqReader* read_chains(const std::string& format, const std::string& input_file, const std::string& fragments_file)
 {
     FullCachedAnglesSeqReader* reader = NULL;
 
@@ -22,7 +22,7 @@ FullCachedAnglesSeqReader* read_chains(const string& format, const string& input
     }
     else
     {
-        throw runtime_error("wrong input format");
+        throw std::runtime_error("wrong input format");
     }
 
     return reader;

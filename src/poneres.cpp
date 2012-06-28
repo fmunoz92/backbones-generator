@@ -17,8 +17,8 @@ void TreeHelper::putSeed(float* R, Residuo& residuo)
 
 FilterResultType TreeHelper::filtros_ultimo_nivel()
 {
-    bool ok = calcRdG(tree_data.atm, tree_data.nres, tree_data.rgmax) == FILTER_OK
-              && volumen_en_rango(tree_data.nres, tree_data.grilla->obtener_vol_parcial()) == FILTER_OK;
+    bool ok = calcRdG(tree_data.atm, tree_data.nres, tree_data.rgmax) == FILTER_OK &&
+              volumen_en_rango(tree_data.nres, tree_data.grilla->obtener_vol_parcial()) == FILTER_OK;
     return ok ? FILTER_OK : FILTER_FAIL;
 }
 
@@ -27,9 +27,9 @@ void TreeHelper::deleteRes(const Residuo& residuo)
     tree_data.grilla->sacar_esfera(residuo.at2);
 }
 
-void TreeHelper::deleteRes(const list<Residuo>& residuos)
+void TreeHelper::deleteRes(const std::list<Residuo>& residuos)
 {
-    for (list<Residuo>::const_iterator it = residuos.begin(); it != residuos.end(); it++)
+    for (std::list<Residuo>::const_iterator it = residuos.begin(); it != residuos.end(); it++)
         deleteRes(*it);
 }
 
@@ -65,7 +65,7 @@ FilterResultType TreeHelper::putRes(float* pR, const unsigned int resN, Residuo&
     return FILTER_OK;
 }
 
-FilterResultType TreeHelper::putChain(float* pR, unsigned int resN, list<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chain_index)
+FilterResultType TreeHelper::putChain(float* pR, unsigned int resN, std::list<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chain_index)
 {
     FilterResultType result = FILTER_OK;
     unsigned int i = 0;

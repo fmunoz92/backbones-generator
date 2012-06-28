@@ -24,7 +24,7 @@ int main(int argc, char** argv)
         // Fill r[][][] with the minimun squared distance between atoms
         setr(o.RN, o.RCa, o.RC, o.Scal_1_4, o.Scal_1_5);
 
-        std::cout << "Number of fi-si combinations in file=" << tree_data.cossi.size() << endl;
+        std::cout << "Number of fi-si combinations in file=" << tree_data.cossi.size() << std::endl;
 
         if (o.residues_input.empty())
         {
@@ -44,7 +44,7 @@ int main(int argc, char** argv)
             g->generate(tree_data, db.get());
         }
 
-        std::cout << "Number of chains generated=" << tree_data.cont << endl;
+        std::cout << "Number of chains generated=" << tree_data.cont << std::endl;
 
         prot_filer::Coord3DReaderFactory::destroy_instance();
         prot_filer::Coord3DSeqReaderFactory::destroy_instance();
@@ -96,7 +96,7 @@ bool CommandLineOptions::parse(int argc, char** argv)
 
         if (!chains && write_format == "fragments")
         {
-            std::cerr << "Error: fragments output format cannot be used without chains input" << endl;
+            std::cerr << "Error: fragments output format cannot be used without chains input" << std::endl;
             return false;
         }
         if (chains)
@@ -106,7 +106,7 @@ bool CommandLineOptions::parse(int argc, char** argv)
             {
                 if (input_files.size() == 0)
                 {
-                    std::cerr << "Error: Compressed input file required" << endl;
+                    std::cerr << "Error: Compressed input file required" << std::endl;
                     return false;
                 }
                 else
@@ -118,7 +118,7 @@ bool CommandLineOptions::parse(int argc, char** argv)
             {
                 if (input_files.size() < 2)
                 {
-                    std::cerr << "Error: Fragments input format, requires both fragments files" << endl;
+                    std::cerr << "Error: Fragments input format, requires both fragments files" << std::endl;
                     return false;
                 }
                 else

@@ -197,7 +197,7 @@ inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel)
     bool result = true;
     prot_filer::AnglesData* chain;
     Residuo residuo;
-    list<Residuo> residuos;
+    std::list<Residuo> residuos;
 
     chain = reader->read(currentPosInChain);
 
@@ -227,7 +227,7 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
     prot_filer::AnglesData* chain;
     recursion = StopRecursion;
     Residuo residuo;
-    list<Residuo> residuos;
+    std::list<Residuo> residuos;
 
     if (firstTime)//or currentPosInChain == 0
     {
@@ -246,6 +246,7 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
     {
         filterResult = tree_helper.putChain(R, nivel, residuos, *chain, currentPosInChain);
         nivel += residuos.size();
+
         if (filterResult == FILTER_OK)
         {
             vectoresParaBorrar.push_back(residuos);
@@ -254,8 +255,9 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
         else
             //saco residuos apendeados antes del primer residuo que genero FILTER_FAIL
             tree_helper.deleteRes(residuos);
-        currentPosInChain++;
     }
+
+    currentPosInChain++;
 
     return result;
 }
@@ -264,6 +266,7 @@ template <class WriterHelper>
 inline void ChainsTreeOperator<WriterHelper>::remove(unsigned int& nivel)
 {
     const unsigned int nivelesRetrocedidos = vectoresParaBorrar.back().size() + 1;// +1 for residuosParaBorrar
+
     tree_helper.deleteRes(residuosParaBorrar.back());
     tree_helper.deleteRes(vectoresParaBorrar.back());
 

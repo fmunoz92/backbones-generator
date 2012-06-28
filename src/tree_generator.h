@@ -26,13 +26,6 @@ private:
 struct TreeOperator
 {
     enum KeepRecursion {DoRecursion, StopRecursion};
-    /*
-    virtual bool putNextSeed(unsigned int& nivel) = 0;
-    virtual void initMatrix(float R[16]) = 0;
-    virtual bool putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion) = 0;
-    virtual void remove(unsigned int& nivel) = 0;
-    virtual void write() = 0;
-    */
 };
 
 template <class WriterHelper>
@@ -51,7 +44,7 @@ private:
     TreeHelper tree_helper;
     mili::FirstTimeFlag firstTime;
     float* R;
-    list<Residuo> paraBorrar;
+    std::list<Residuo> paraBorrar;
     WriterHelper writer_helper;
 };
 
@@ -72,8 +65,8 @@ private:
     mili::FirstTimeFlag firstTime;
     unsigned int currentPosInChain;
     float* R;
-    list<Residuo> residuosParaBorrar;
-    list<list<Residuo> > vectoresParaBorrar;
+    std::list<Residuo> residuosParaBorrar;
+    std::list<std::list<Residuo> > vectoresParaBorrar;
     FullCachedAnglesSeqReader* const reader;
     WriterHelper writer_helper;
 };
