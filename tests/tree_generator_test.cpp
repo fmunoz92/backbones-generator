@@ -7,7 +7,7 @@
 #include "tree_generator.h"
 #include "utils.h"
 #include "readdata.h"
-
+/*
 using namespace std;
 using namespace prot_filer;
 using mili::insert_into;
@@ -70,3 +70,4 @@ TEST(Test, simple_generator)
     g.generate();
     ASSERT_EQ(2, tree_data.cont);
 }
+*/
