@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef TREE_FILTERS_H
+#define TREE_FILTERS_H
 
 #include "tree_data.h"// for global enum FilterResultType
 

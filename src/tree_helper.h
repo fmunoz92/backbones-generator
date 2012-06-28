@@ -1,14 +1,9 @@
-/*
- *
- * rename this file
- *
- */
-#ifndef PONERES_H
-#define PONERES_H
+#ifndef TREE_HELPER_H
+#define TREE_HELPER_H
 
 #include <list>
 #include "tree_data.h"
-#include "utils.h"
+#include "tree_filters.h"
 
 class TreeHelper
 {

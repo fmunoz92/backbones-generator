@@ -4,7 +4,7 @@
 #include <string>
 #include <list>
 #include <mili/mili.h>
-#include "poneres.h"//TreeHelper
+#include "tree_helper.h"
 
 template <class TOperator>
 class TreeGenerator
@@ -19,8 +19,8 @@ private:
     inline bool appendElements(unsigned int nivel, unsigned int indice_nivel_anterior, unsigned int index, const float R_local[16]);
 
     TOperator treeOperator;
-    const unsigned int CANT_RES;//
-    const unsigned int CANT_ANGLES;//
+    const unsigned int CANT_RES;
+    const unsigned int CANT_ANGLES;
 };
 
 struct TreeOperator

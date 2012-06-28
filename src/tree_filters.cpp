@@ -1,10 +1,8 @@
 #include <cmath>
-#include "utils.h"
+#include "tree_filters.h"
 
 using mili::square;
 using mili::in_range;
-
-
 
 void TreeFilters::setr(float rn, float rca, float rc, float scal_1_4, float scal_1_5)
 {
