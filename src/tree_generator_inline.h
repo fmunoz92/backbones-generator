@@ -8,8 +8,9 @@
 
 template <class TOperator>
 inline TreeGenerator<TOperator>::TreeGenerator(TreeData& tree_data, FullCachedAnglesSeqReader* const reader) :
-    tree_data(tree_data),
-    treeOperator(tree_data, reader)
+    treeOperator(tree_data, reader),
+    CANT_RES(tree_data.nres),
+    CANT_ANGLES(tree_data.cossi.size())
 {}
 
 template <class TOperator>
@@ -21,7 +22,7 @@ inline void TreeGenerator<TOperator>::generate()
     treeOperator.initMatrix(R_inicial);
     while (treeOperator.putNextSeed(nivel))
     {
-        if (nivel < tree_data.nres)
+        if (nivel < CANT_RES)
             expandTree(nivel, R_inicial, 0);
         else
             processLeaf();
@@ -44,9 +45,8 @@ inline void TreeGenerator<TOperator>::expandTree(unsigned int nivel, const float
     float R_local[16];
 
     unsigned int index_angles = 0;
-    const unsigned int angles = tree_data.cossi.size();
 
-    while (index_angles < angles && !ultimo_nivel_exitoso)
+    while (index_angles < CANT_ANGLES && !ultimo_nivel_exitoso)
     {
         backbones_utils::copymat(R_local, R_inicial);
         treeOperator.initMatrix(R_local);
@@ -67,7 +67,7 @@ inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigne
     {
         if (resultRecursion == TOperator::DoRecursion)
         {
-            if (nivel - 1 < tree_data.nres)
+            if (nivel - 1 < CANT_RES)
                 expandTree(nivel, R_local, index);
             else
                 result = processLeaf();
@@ -85,8 +85,7 @@ inline bool TreeGenerator<TOperator>::processLeaf()
 #ifdef COMBINATIONS_DEBUG // En el modo DEBUG se deshabilitan los chequeos.
     treeOperator.write();
 #else
-    TreeHelper tree_helper(tree_data);
-    if (tree_helper.filtros_ultimo_nivel() == FILTER_OK)
+    if (treeOperator.lastLevelOk())
         treeOperator.write();
     else
         exito = false;
@@ -133,6 +132,12 @@ inline void SimpleTreeOperator<WriterHelper>::initMatrix(float newR[16])
 {
     firstTime.reset();
     R = newR;
+}
+
+template <class WriterHelper>
+inline bool SimpleTreeOperator<WriterHelper>::lastLevelOk()
+{
+    return (tree_helper.filtros_ultimo_nivel() == FILTER_OK);
 }
 
 template <class WriterHelper>
@@ -189,6 +194,12 @@ inline void ChainsTreeOperator<WriterHelper>::initMatrix(float newR[16])
     R = newR;
     firstTime.reset();
     currentPosInChain = 0;
+}
+
+template <class WriterHelper>
+inline bool ChainsTreeOperator<WriterHelper>::lastLevelOk()
+{
+    return (tree_helper.filtros_ultimo_nivel() == FILTER_OK);
 }
 
 template <class WriterHelper>

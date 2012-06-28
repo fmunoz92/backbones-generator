@@ -19,8 +19,9 @@ private:
     inline bool processLeaf();
     inline bool appendElements(unsigned int nivel, unsigned int indice_nivel_anterior, unsigned int index, const float R_local[16]);
 
-    TreeData& tree_data;
     TOperator treeOperator;
+    const unsigned int CANT_RES;//
+    const unsigned int CANT_ANGLES;//
 };
 
 struct TreeOperator
@@ -39,6 +40,7 @@ public:
     inline bool putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion);
     inline void remove(unsigned int& nivel);
     inline void write();
+    inline bool lastLevelOk();
 private:
     TreeData& tree_data;
     TreeHelper tree_helper;
@@ -59,6 +61,7 @@ public:
     inline bool putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion);
     inline void remove(unsigned int& nivel);
     inline void write();
+    inline bool lastLevelOk();
 private:
     TreeData& tree_data;
     TreeHelper tree_helper;
