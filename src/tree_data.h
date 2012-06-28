@@ -20,10 +20,10 @@ class TreeData
 public:
     TreeData(int nRes, size_t cols, size_t rows, size_t depth, std::istream& input_file);
 
-    unsigned int nres;
+    const unsigned int nres;
 
-    float rgmax;
-    float dmax2;
+    const float rgmax;
+    const float dmax2;
 
     std::vector<float> cosfi;
     std::vector<float> cossi;
@@ -49,12 +49,6 @@ private:
 
 struct Residuo
 {
-    Residuo(const esferaId& param_at1, const esferaId& param_at2, const esferaId& param_at3)
-        : at1(param_at1),
-          at2(param_at2),
-          at3(param_at3)
-    {};
-    Residuo() {};
     esferaId at1;
     esferaId at2;
     esferaId at3;

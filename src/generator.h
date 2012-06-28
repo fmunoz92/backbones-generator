@@ -23,9 +23,6 @@ struct IGeneratorChains
     virtual ~IGeneratorChains() {}
 };
 
-
-
-
 template <class Writer>
 class GeneratorSimple : public IGeneratorSimple
 {
