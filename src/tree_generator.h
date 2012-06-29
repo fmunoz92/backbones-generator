@@ -34,14 +34,14 @@ class SimpleTreeOperator : public TreeOperator
 public:
     inline SimpleTreeOperator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader);
 
-    inline bool putNextSeed(unsigned int& nivel);
+    inline bool putNextSeed(unsigned int& nivel, unsigned int index_seed);
     inline void initMatrix(float R[16]);
-    inline bool putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion);
+    inline bool putNext(unsigned int& nivel, unsigned int index_res, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion);
     inline void remove(unsigned int& nivel);
     inline void write();
     inline bool lastLevelOk();
 private:
-    TreeHelper tree_helper;
+    TreeHelper& tree_helper;
     mili::FirstTimeFlag firstTime;
     float* R;
     std::list<Residuo> paraBorrar;
@@ -54,16 +54,15 @@ class ChainsTreeOperator : public TreeOperator
 public:
     inline ChainsTreeOperator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader);
 
-    inline bool putNextSeed(unsigned int& nivel);
+    inline bool putNextSeed(unsigned int& nivel, unsigned int index_seed);
     inline void initMatrix(float R[16]);
-    inline bool putNext(unsigned int& nivel, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion);
+    inline bool putNext(unsigned int& nivel, unsigned int index_res, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion);
     inline void remove(unsigned int& nivel);
     inline void write();
     inline bool lastLevelOk();
 private:
-    TreeHelper tree_helper;
+    TreeHelper& tree_helper;
     mili::FirstTimeFlag firstTime;
-    unsigned int currentPosInChain;
     float* R;
     std::list<Residuo> residuosParaBorrar;
     std::list<std::list<Residuo> > vectoresParaBorrar;

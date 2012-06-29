@@ -82,6 +82,7 @@ FilterResultType TreeHelper::putChain(float* pR, unsigned int resN, std::list<Re
         ++i;
     }
 
+
     if (result == FILTER_OK)
         tree_data.fragment_ids.push_back(chain_index);
 

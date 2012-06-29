@@ -49,6 +49,20 @@ private:
 
 struct Residuo
 {
+    Residuo(const Residuo& r)
+        : at1(r.at1),
+          at2(r.at2),
+          at3(r.at3)
+    {}
+
+    Residuo(const esferaId& param_at1, const esferaId& param_at2, const esferaId& param_at3)
+        : at1(param_at1),
+          at2(param_at2),
+          at3(param_at3)
+    {};
+
+    Residuo() {};
+
     esferaId at1;
     esferaId at2;
     esferaId at3;
