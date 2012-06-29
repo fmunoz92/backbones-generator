@@ -68,7 +68,9 @@ inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigne
     {
         if (resultRecursion == TOperator::DoRecursion)
         {
-            if (nivel < CANT_RES + 1)//with ChainsTreeOperator the condition is (nivel < CANT_RES)
+            //with ChainsTreeOperator the condition is (nivel < CANT_RES) but
+            // with Simple is (nivel < CANT_RES + 1)
+            if (nivel < CANT_RES)
                 expandTree(nivel, R_local, index);
             else
                 result = processLeaf();
@@ -247,12 +249,6 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
             result = false;
     }
 
-    if (result && !(nivel < tree_helper.getNRes()))
-    {
-        recursion = DoRecursion;
-        return true;
-    }
-
     chain = reader->read(index_res);
     if (result && (chain != NULL))
     {
@@ -277,13 +273,23 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
 template <class WriterHelper>
 inline void ChainsTreeOperator<WriterHelper>::remove(unsigned int& nivel)
 {
-    const unsigned int nivelesRetrocedidos = vectoresParaBorrar.back().size() + 1;
+    unsigned int nivelesRetrocedidos =  vectoresParaBorrar.back().size() + 1;
 
-    tree_helper.deleteRes(residuosParaBorrar.back());
-    residuosParaBorrar.pop_back();
+    //puede darse el caso de que se haya insertado un residuo individual y ninguna cadena y viseversa
+    //por ello los chequeos, unificando ambos en una misma lista no haria falta revisar si esta vacio.
+    if (!residuosParaBorrar.empty())
+    {
+        tree_helper.deleteRes(residuosParaBorrar.back());
+        residuosParaBorrar.pop_back();
+        nivelesRetrocedidos++;
+    }
 
-    tree_helper.deleteRes(vectoresParaBorrar.back());
-    vectoresParaBorrar.pop_back();
+    if (!vectoresParaBorrar.empty())
+    {
+        tree_helper.deleteRes(vectoresParaBorrar.back());
+        nivelesRetrocedidos += vectoresParaBorrar.back().size();
+        vectoresParaBorrar.pop_back();
+    }
 
     tree_helper.deleteLastFragmentId();
 
