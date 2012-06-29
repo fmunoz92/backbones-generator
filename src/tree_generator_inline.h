@@ -271,22 +271,16 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
 template <class WriterHelper>
 inline void ChainsTreeOperator<WriterHelper>::remove(unsigned int& nivel)
 {
-    unsigned int nivelesRetrocedidos = 0;
+    const unsigned int nivelesRetrocedidos = vectoresParaBorrar.back().size() + 1;
 
-    if (!residuosParaBorrar.empty())
-    {
-        nivelesRetrocedidos++;
-        tree_helper.deleteRes(residuosParaBorrar.back());
-        residuosParaBorrar.pop_back();
-    }
-    if (!vectoresParaBorrar.empty())
-    {
-        nivelesRetrocedidos += vectoresParaBorrar.back().size();
-        tree_helper.deleteRes(vectoresParaBorrar.back());
-        vectoresParaBorrar.pop_back();
-    }
+    tree_helper.deleteRes(residuosParaBorrar.back());
+    residuosParaBorrar.pop_back();
+
+    tree_helper.deleteRes(vectoresParaBorrar.back());
+    vectoresParaBorrar.pop_back();
 
     tree_helper.deleteLastFragmentId();
+
     nivel -= nivelesRetrocedidos;
 }
 
