@@ -68,7 +68,7 @@ inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigne
     {
         if (resultRecursion == TOperator::DoRecursion)
         {
-            if (nivel <= CANT_RES)//in SimpleTreeOperator the condition is (nivel < CANT_RES + 1)
+            if (nivel < CANT_RES + 1)//with ChainsTreeOperator the condition is (nivel < CANT_RES)
                 expandTree(nivel, R_local, index);
             else
                 result = processLeaf();
@@ -245,6 +245,12 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
         }
         else
             result = false;
+    }
+
+    if (result && !(nivel < tree_helper.getNRes()))
+    {
+        recursion = DoRecursion;
+        return true;
     }
 
     chain = reader->read(index_res);
