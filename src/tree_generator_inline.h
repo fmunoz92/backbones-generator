@@ -19,7 +19,9 @@ inline void TreeGenerator<TOperator>::generate()
     float R_inicial[16];
     unsigned int nivel = 1;
     unsigned int index_seed = 0;
+
     treeOperator.initMatrix(R_inicial);
+
     while (treeOperator.putNextSeed(nivel, index_seed))
     {
         if (nivel < CANT_RES)
@@ -85,15 +87,18 @@ inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigne
 template <class TOperator>
 inline bool TreeGenerator<TOperator>::processLeaf()
 {
-    bool exito = false;
+    bool exito;
 #ifdef COMBINATIONS_DEBUG // En el modo DEBUG se deshabilitan los chequeos.
     treeOperator.write();
+    exito = true;
 #else
     if (treeOperator.lastLevelOk())
     {
         treeOperator.write();
         exito = true;
     }
+    else
+        exito = false;
 #endif
 
     return exito;
@@ -147,8 +152,7 @@ inline bool SimpleTreeOperator<WriterHelper>::lastLevelOk()
 template <class WriterHelper>
 inline bool SimpleTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsigned int, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion)
 {
-    bool result = false;
-    resultRecursion = StopRecursion;
+    bool result;
 
     if (firstTime)
     {
@@ -162,7 +166,11 @@ inline bool SimpleTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
             resultRecursion = DoRecursion;
             nivel++;
         }
+        else
+            result = false;
     }
+    else
+        result = false;
 
     return result;
 }
@@ -205,7 +213,7 @@ inline bool ChainsTreeOperator<WriterHelper>::lastLevelOk()
 template <class WriterHelper>
 inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, unsigned int index_seed)
 {
-    bool result = true;
+    bool result;
     prot_filer::AnglesData* chain;
     Residuo residuo;
     std::list<Residuo> residuos;
@@ -221,6 +229,66 @@ inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, u
         nivel = residuos.size() + nextLevel;
         residuosParaBorrar.push_back(residuo);
         vectoresParaBorrar.push_back(residuos);
+        result = true;
+    }
+    else
+        result = false;
+
+    return result;
+}
+
+template <class WriterHelper>
+inline bool ChainsTreeOperator<WriterHelper>::putRes(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior,  KeepRecursion& recursion)
+{
+    Residuo residuo;
+    bool result;
+
+    if (tree_helper.putRes(R, nivel, residuo, indice_nivel_anterior, i) == FILTER_OK)
+    {
+        residuosParaBorrar.push_back(residuo);
+        nivel++;
+        if (nivel < tree_helper.getNRes())
+        {
+            recursion = StopRecursion; //recursionamos cuando metemos alguna cadenita recien
+            result = true;
+        }
+        else
+        {
+            recursion = DoRecursion;//recursionamos para que en realidad vaya a procesar ultimo nivel
+            result = true;
+        }
+    }
+    else
+        result = false;
+
+    return result;
+}
+template <class WriterHelper>
+inline bool ChainsTreeOperator<WriterHelper>::putChain(unsigned int& nivel, unsigned int index_res, KeepRecursion& recursion)
+{
+    std::list<Residuo> residuos;
+    prot_filer::AnglesData* chain;
+    FilterResultType filterResult;
+    bool result;
+
+    chain = reader->read(index_res);
+    if (chain != NULL)
+    {
+        filterResult = tree_helper.putChain(R, nivel, residuos, *chain, index_res);
+        if (filterResult == FILTER_OK)
+        {
+            nivel += residuos.size();
+            vectoresParaBorrar.push_back(residuos);
+            recursion = DoRecursion;
+        }
+        else
+        {
+            //saco residuos apendeados antes del primer residuo que genero FILTER_FAIL
+            tree_helper.deleteRes(residuos);
+            recursion = StopRecursion;
+        }
+
+        result = true;//vamos a ciclar mientras tengamos chains para leer
     }
     else
         result = false;
@@ -231,41 +299,15 @@ inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, u
 template <class WriterHelper>
 inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsigned int index_res, unsigned int  i, unsigned int  indice_nivel_anterior,  KeepRecursion& recursion)
 {
-    bool result = true;
-    FilterResultType filterResult;
-    prot_filer::AnglesData* chain;
-    recursion = StopRecursion;
-    Residuo residuo;
-    std::list<Residuo> residuos;
+    bool result;
 
-    if (firstTime)//or currentPosInChain == 0
-    {
-        if (tree_helper.putRes(R, nivel, residuo, indice_nivel_anterior, i) == FILTER_OK)
-        {
-            residuosParaBorrar.push_back(residuo);
-            nivel++;
-        }
-        else
-            result = false;
-    }
-
-    chain = reader->read(index_res);
-    if (result && (chain != NULL))
-    {
-        filterResult = tree_helper.putChain(R, nivel, residuos, *chain, index_res);
-
-        if (filterResult == FILTER_OK)
-        {
-            nivel += residuos.size();
-            vectoresParaBorrar.push_back(residuos);
-            recursion = DoRecursion;
-        }
-        else
-            //saco residuos apendeados antes del primer residuo que genero FILTER_FAIL
-            tree_helper.deleteRes(residuos);
-    }
+    if (firstTime)//or index_res == 0
+        result = putRes(nivel, i, indice_nivel_anterior, recursion);
     else
-        result = false;
+    {
+        const unsigned int index_chain = index_res - 1;// 0 is used by putRes
+        result = putChain(nivel, index_chain, recursion);
+    }
 
     return result;
 }
@@ -273,10 +315,8 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
 template <class WriterHelper>
 inline void ChainsTreeOperator<WriterHelper>::remove(unsigned int& nivel)
 {
-    unsigned int nivelesRetrocedidos =  vectoresParaBorrar.back().size() + 1;
+    unsigned int nivelesRetrocedidos =  0;
 
-    //puede darse el caso de que se haya insertado un residuo individual y ninguna cadena y viseversa
-    //por ello los chequeos, unificando ambos en una misma lista no haria falta revisar si esta vacio.
     if (!residuosParaBorrar.empty())
     {
         tree_helper.deleteRes(residuosParaBorrar.back());

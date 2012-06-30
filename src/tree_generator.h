@@ -61,6 +61,8 @@ public:
     inline void write();
     inline bool lastLevelOk();
 private:
+    inline bool putChain(unsigned int& nivel, unsigned int index_res, KeepRecursion& recursion);
+    inline bool putRes(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior,  KeepRecursion& recursion);
     TreeHelper& tree_helper;
     mili::FirstTimeFlag firstTime;
     float* R;
