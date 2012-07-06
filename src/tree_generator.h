@@ -6,6 +6,8 @@
 #include <mili/mili.h>
 #include "tree_helper.h"
 
+typedef float RMatrix[16]; //TODO: move this global definition to TreeOperator class
+
 template <class TOperator>
 class TreeGenerator
 {
@@ -14,7 +16,7 @@ public:
 
     inline void generate();
 private:
-    inline void expandTree(unsigned int nivel, const float R_inicial[16], unsigned int indice_nivel_anterior);
+    inline void expandTree(unsigned int nivel, const RMatrix R_inicial, unsigned int indice_nivel_anterior);
     inline bool processLeaf();
     inline bool appendElements(unsigned int nivel, unsigned int indice_nivel_anterior, unsigned int index, const float R_local[16]);
 
@@ -35,15 +37,16 @@ public:
     inline SimpleTreeOperator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader);
 
     inline bool putNextSeed(unsigned int& nivel, unsigned int index_seed);
-    inline void initMatrix(float R[16]);
+    inline void initMatrix(const RMatrix rMatrix);
     inline bool putNext(unsigned int& nivel, unsigned int index_res, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion);
     inline void remove(unsigned int& nivel);
     inline void write();
     inline bool lastLevelOk();
+    inline void copyMatrix(RMatrix R_inicial);
 private:
     TreeHelper& tree_helper;
     mili::FirstTimeFlag firstTime;
-    float* R;
+    RMatrix R;
     std::list<Residuo> paraBorrar;
     WriterHelper writer_helper;
 };
@@ -55,17 +58,18 @@ public:
     inline ChainsTreeOperator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader);
 
     inline bool putNextSeed(unsigned int& nivel, unsigned int index_seed);
-    inline void initMatrix(float R[16]);
+    inline void initMatrix(const RMatrix rMatrix);
     inline bool putNext(unsigned int& nivel, unsigned int index_res, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion);
     inline void remove(unsigned int& nivel);
     inline void write();
     inline bool lastLevelOk();
+    inline void copyMatrix(RMatrix R_inicial);
 private:
     inline bool putChain(unsigned int& nivel, unsigned int index_res, KeepRecursion& recursion);
     inline bool putRes(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior,  KeepRecursion& recursion);
     TreeHelper& tree_helper;
     mili::FirstTimeFlag firstTime;
-    float* R;
+    RMatrix R;
     std::list<Residuo> residuosParaBorrar;
     std::list<std::list<Residuo> > vectoresParaBorrar;
     FullCachedAnglesSeqReader* const reader;
