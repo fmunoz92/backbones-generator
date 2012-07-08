@@ -31,7 +31,9 @@ inline void TreeGenerator<TOperator>::generate()
         }
         else
             processLeaf();
-        treeOperator.remove(nivel);
+
+        treeOperator.removeSeed(nivel);
+
         index_seed++;
     }
 }
@@ -48,27 +50,35 @@ template <class TOperator>
 inline void TreeGenerator<TOperator>::expandTree(unsigned int nivel, const RMatrix R_inicial, unsigned int indice_nivel_anterior)
 {
     bool ultimo_nivel_exitoso = false;//solo interesa si somos el anteultimo nivel
-
     unsigned int index_angles = 0;
 
     while (index_angles < CANT_ANGLES && !ultimo_nivel_exitoso)
     {
-        ultimo_nivel_exitoso = appendElements(nivel, indice_nivel_anterior, index_angles, R_inicial);
+        treeOperator.initMatrix(R_inicial);
+
+        if (treeOperator.putFirst(nivel, index_angles, indice_nivel_anterior))
+        {
+            if (nivel < CANT_RES)
+                ultimo_nivel_exitoso = appendElements(nivel, index_angles);
+            else
+                ultimo_nivel_exitoso = processLeaf();
+
+            treeOperator.removeFirst(nivel);
+        }
+
         index_angles++;
     }
 }
 
 template <class TOperator>
-inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigned int indice_nivel_anterior, unsigned int index, const RMatrix R_inicial)
+inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigned int index)
 {
     typename TOperator::KeepRecursion resultRecursion;
+    RMatrix rLocal;
     bool result = false;
     unsigned int index_res = 0;
-    RMatrix rLocal;
 
-    treeOperator.initMatrix(R_inicial);
-
-    while (treeOperator.putNext(nivel, index_res, index, indice_nivel_anterior, resultRecursion))
+    while (treeOperator.putNext(nivel, index_res, resultRecursion))
     {
         if (resultRecursion == TOperator::DoRecursion)
         {
@@ -76,13 +86,15 @@ inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigne
             // with Simple is (nivel < CANT_RES + 1)
             if (nivel < CANT_RES)
             {
-                treeOperator.copyMatrix(rLocal);
+                treeOperator.copyMatrix(rLocal);//for changes generated in putNext and putFirst
                 expandTree(nivel, rLocal, index);
             }
             else
                 result = processLeaf();
+
             treeOperator.remove(nivel);
         }
+
         index_res++;
     }
 
@@ -126,7 +138,7 @@ inline bool SimpleTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, u
 {
     bool result = false;
 
-    if (firstTime)
+    if (firstTime && !tree_helper.success())
     {
         Residuo residuo;
         tree_helper.clearatm();
@@ -140,11 +152,22 @@ inline bool SimpleTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, u
 }
 
 template <class WriterHelper>
-inline void SimpleTreeOperator<WriterHelper>::remove(unsigned int& nivel)
+inline void SimpleTreeOperator<WriterHelper>::removeFirst(unsigned int& nivel)
 {
     tree_helper.deleteRes(paraBorrar.back());
     nivel--;
     paraBorrar.pop_back();
+}
+
+template <class WriterHelper>
+inline void SimpleTreeOperator<WriterHelper>::remove(unsigned int&)
+{
+}
+
+template <class WriterHelper>
+inline void SimpleTreeOperator<WriterHelper>::removeSeed(unsigned int& nivel)
+{
+    removeFirst(nivel);
 }
 
 template <class WriterHelper>
@@ -161,24 +184,32 @@ inline bool SimpleTreeOperator<WriterHelper>::lastLevelOk()
 }
 
 template <class WriterHelper>
-inline bool SimpleTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsigned int, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion)
+inline bool SimpleTreeOperator<WriterHelper>::putFirst(unsigned int& nivel, unsigned int fi_index, unsigned int si_index)
+{
+    bool result;
+    Residuo residuo;
+
+    if (tree_helper.putRes(R, nivel, residuo, si_index, fi_index) == FILTER_OK)
+    {
+        paraBorrar.push_back(residuo);
+        nivel++;
+        result = true;
+    }
+    else
+        result = false;
+
+    return result;
+}
+
+template <class WriterHelper>
+inline bool SimpleTreeOperator<WriterHelper>::putNext(unsigned int& /*nivel*/, unsigned int index_res, KeepRecursion& resultRecursion)
 {
     bool result;
 
-    if (firstTime)
+    if (index_res == 0)
     {
-        Residuo residuo;
-        FilterResultType filerResult = tree_helper.putRes(R, nivel, residuo, si_index, fi_index);
-
-        if (filerResult == FILTER_OK)
-        {
-            result = true;
-            paraBorrar.push_back(residuo);
-            resultRecursion = DoRecursion;
-            nivel++;
-        }
-        else
-            result = false;
+        result = true;
+        resultRecursion = DoRecursion;
     }
     else
         result = false;
@@ -231,11 +262,10 @@ template <class WriterHelper>
 inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, unsigned int index_seed)
 {
     bool result;
-    prot_filer::AnglesData* chain;
     Residuo residuo;
     std::list<Residuo> residuos;
 
-    chain = reader->read(index_seed);
+    prot_filer::AnglesData* chain = reader->read(index_seed);
 
     if (chain != NULL)
     {
@@ -259,36 +289,29 @@ inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, u
 }
 
 template <class WriterHelper>
-inline bool ChainsTreeOperator<WriterHelper>::putRes(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior,  KeepRecursion& recursion)
+
+inline bool ChainsTreeOperator<WriterHelper>::putFirst(unsigned int& nivel, unsigned int fi_index, unsigned int si_index)
 {
     Residuo residuo;
     bool result;
 
-    if (tree_helper.putRes(R, nivel, residuo, indice_nivel_anterior, i) == FILTER_OK)
+    if (tree_helper.putRes(R, nivel, residuo, si_index, fi_index) == FILTER_OK)
     {
         residuosParaBorrar.push_back(residuo);
         nivel++;
-        if (nivel < tree_helper.getNRes())
-        {
-            const unsigned int index_chain = 0;
-            result = putChain(nivel, index_chain, recursion);
-        }
-        else
-        {
-            recursion = DoRecursion;//recursionamos para que en realidad vaya a procesar ultimo nivel
-            result = true;
-        }
+        result = true;
     }
     else
         result = false;
 
     return result;
 }
+
+
 template <class WriterHelper>
-inline bool ChainsTreeOperator<WriterHelper>::putChain(unsigned int& nivel, unsigned int index_res, KeepRecursion& recursion)
+inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsigned int index_res, KeepRecursion& recursion)
 {
     std::list<Residuo> residuos;
-    FilterResultType filterResult;
     bool result;
 
     prot_filer::AnglesData* chain = reader->read(index_res);
@@ -297,8 +320,7 @@ inline bool ChainsTreeOperator<WriterHelper>::putChain(unsigned int& nivel, unsi
     {
         result = true;//vamos a ciclar mientras tengamos chains para leer
 
-        filterResult = tree_helper.putChain(R, nivel, residuos, *chain, index_res);
-        if (filterResult == FILTER_OK)
+        if (tree_helper.putChain(R, nivel, residuos, *chain, index_res) == FILTER_OK)
         {
             nivel += residuos.size();
             vectoresParaBorrar.push_back(residuos);
@@ -318,40 +340,29 @@ inline bool ChainsTreeOperator<WriterHelper>::putChain(unsigned int& nivel, unsi
 }
 
 template <class WriterHelper>
-inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsigned int index_res, unsigned int  i, unsigned int  indice_nivel_anterior,  KeepRecursion& recursion)
+inline void ChainsTreeOperator<WriterHelper>::remove(unsigned int& nivel)
 {
-    bool result;
+    tree_helper.deleteRes(vectoresParaBorrar.back());
+    tree_helper.deleteLastFragmentId();
+    nivel -= vectoresParaBorrar.back().size();
 
-    if (firstTime)//or index_res == 0
-        result = putRes(nivel, i, indice_nivel_anterior, recursion);
-    else
-        result = putChain(nivel, index_res, recursion);
-
-    return result;
+    vectoresParaBorrar.pop_back();
 }
 
 template <class WriterHelper>
-inline void ChainsTreeOperator<WriterHelper>::remove(unsigned int& nivel)
+inline void ChainsTreeOperator<WriterHelper>::removeFirst(unsigned int& nivel)
 {
-    unsigned int nivelesRetrocedidos =  0;
+    tree_helper.deleteRes(residuosParaBorrar.back());
+    nivel--;
 
-    if (!residuosParaBorrar.empty())
-    {
-        tree_helper.deleteRes(residuosParaBorrar.back());
-        residuosParaBorrar.pop_back();
-        nivelesRetrocedidos++;
-    }
+    residuosParaBorrar.pop_back();
+}
 
-    if (!vectoresParaBorrar.empty())
-    {
-        nivelesRetrocedidos += vectoresParaBorrar.back().size();
-        tree_helper.deleteRes(vectoresParaBorrar.back());
-        vectoresParaBorrar.pop_back();
-    }
-
-    tree_helper.deleteLastFragmentId();
-
-    nivel -= nivelesRetrocedidos;
+template <class WriterHelper>
+inline void ChainsTreeOperator<WriterHelper>::removeSeed(unsigned int& nivel)
+{
+    removeFirst(nivel);
+    remove(nivel);
 }
 
 template <class WriterHelper>

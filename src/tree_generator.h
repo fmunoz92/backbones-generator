@@ -18,7 +18,7 @@ public:
 private:
     inline void expandTree(unsigned int nivel, const RMatrix R_inicial, unsigned int indice_nivel_anterior);
     inline bool processLeaf();
-    inline bool appendElements(unsigned int nivel, unsigned int indice_nivel_anterior, unsigned int index, const float R_local[16]);
+    inline bool appendElements(unsigned int nivel, unsigned int index);
 
     TOperator treeOperator;
     const unsigned int CANT_RES;
@@ -36,10 +36,16 @@ class SimpleTreeOperator : public TreeOperator
 public:
     inline SimpleTreeOperator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader);
 
-    inline bool putNextSeed(unsigned int& nivel, unsigned int index_seed);
     inline void initMatrix(const RMatrix rMatrix);
-    inline bool putNext(unsigned int& nivel, unsigned int index_res, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion);
+
+    inline bool putNextSeed(unsigned int& nivel, unsigned int index_seed);
+    inline bool putFirst(unsigned int& nivel, unsigned int fi_index, unsigned int si_index);
+    inline bool putNext(unsigned int& nivel, unsigned int index_res, KeepRecursion& resultRecursion);
+
     inline void remove(unsigned int& nivel);
+    inline void removeFirst(unsigned int& nivel);
+    inline void removeSeed(unsigned int& nivel);
+
     inline void write();
     inline bool lastLevelOk();
     inline void copyMatrix(RMatrix R_inicial);
@@ -57,16 +63,20 @@ class ChainsTreeOperator : public TreeOperator
 public:
     inline ChainsTreeOperator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader);
 
-    inline bool putNextSeed(unsigned int& nivel, unsigned int index_seed);
     inline void initMatrix(const RMatrix rMatrix);
-    inline bool putNext(unsigned int& nivel, unsigned int index_res, unsigned int fi_index, unsigned int si_index, KeepRecursion& resultRecursion);
+
+    inline bool putNextSeed(unsigned int& nivel, unsigned int index_seed);
+    inline bool putFirst(unsigned int& nivel, unsigned int fi_index, unsigned int si_index);
+    inline bool putNext(unsigned int& nivel, unsigned int index_res, KeepRecursion& resultRecursion);
+
     inline void remove(unsigned int& nivel);
+    inline void removeFirst(unsigned int& nivel);
+    inline void removeSeed(unsigned int& nivel);
+
     inline void write();
     inline bool lastLevelOk();
     inline void copyMatrix(RMatrix R_inicial);
 private:
-    inline bool putChain(unsigned int& nivel, unsigned int index_res, KeepRecursion& recursion);
-    inline bool putRes(unsigned int& nivel, unsigned int  i, unsigned int  indice_nivel_anterior,  KeepRecursion& recursion);
     TreeHelper& tree_helper;
     mili::FirstTimeFlag firstTime;
     RMatrix R;

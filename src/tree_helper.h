@@ -29,6 +29,7 @@ public:
     const std::string&       getOutputFile()  const;
     unsigned int             getNRes()        const;
     unsigned int             getNAngles()     const;
+    bool                     success()        const;
 
 private:
     TreeData& tree_data;

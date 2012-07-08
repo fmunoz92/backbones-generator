@@ -99,6 +99,10 @@ void TreeHelper::clearatm()
     }
 }
 
+bool TreeHelper::success() const
+{
+    return tree_data.hubo_algun_exito;
+}
 void TreeHelper::reportSuccess()
 {
     tree_data.cont++;
