@@ -46,10 +46,13 @@ public:
     inline void removeFirst(unsigned int& nivel);
     inline void removeSeed(unsigned int& nivel);
 
-    inline void write();
-    inline bool lastLevelOk();
+    inline bool write();
+
     inline void copyMatrix(RMatrix R_inicial);
+
 private:
+    inline bool lastLevelOk();
+
     TreeHelper& tree_helper;
     mili::FirstTimeFlag firstTime;
     RMatrix R;
@@ -73,10 +76,13 @@ public:
     inline void removeFirst(unsigned int& nivel);
     inline void removeSeed(unsigned int& nivel);
 
-    inline void write();
-    inline bool lastLevelOk();
+    inline bool write();
+
     inline void copyMatrix(RMatrix R_inicial);
+
 private:
+    inline bool lastLevelOk();
+
     TreeHelper& tree_helper;
     mili::FirstTimeFlag firstTime;
     RMatrix R;

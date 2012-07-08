@@ -12,7 +12,6 @@ TreeData::TreeData(int nRes, size_t cols, size_t rows, size_t depth, std::istrea
     grilla(new Grillado(cols, rows, depth)),
     angles_mapping(new prot_filer::AnglesMapping(nres)),
     angles_data(new prot_filer::AnglesData(nres, angles_mapping.get())),
-    fragment_ids(1000),
     output_file("traj.xtc")
 {
     readdata(input_file);

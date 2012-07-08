@@ -82,7 +82,7 @@ inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigne
     {
         if (resultRecursion == TOperator::DoRecursion)
         {
-            //with ChainsTreeOperator the condition is (nivel < CANT_RES) but
+            // with ChainsTreeOperator the condition is (nivel < CANT_RES) but
             // with Simple is (nivel < CANT_RES + 1)
             if (nivel < CANT_RES)
             {
@@ -104,21 +104,7 @@ inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigne
 template <class TOperator>
 inline bool TreeGenerator<TOperator>::processLeaf()
 {
-    bool exito;
-#ifdef COMBINATIONS_DEBUG // En el modo DEBUG se deshabilitan los chequeos.
-    treeOperator.write();
-    exito = true;
-#else
-    if (treeOperator.lastLevelOk())
-    {
-        treeOperator.write();
-        exito = true;
-    }
-    else
-        exito = false;
-#endif
-
-    return exito;
+    return treeOperator.write();
 }
 
 template <class WriterHelper>
@@ -218,10 +204,29 @@ inline bool SimpleTreeOperator<WriterHelper>::putNext(unsigned int& /*nivel*/, u
 }
 
 template <class WriterHelper>
-inline void SimpleTreeOperator<WriterHelper>::write()
+inline bool SimpleTreeOperator<WriterHelper>::write()
 {
+    bool exito;
+
+#ifdef COMBINATIONS_DEBUG // En el modo DEBUG se deshabilitan los chequeos.
+
     writer_helper.write();
     tree_helper.reportSuccess();
+    exito = true;
+
+#else
+
+    if (lastLevelOk())
+    {
+        writer_helper.write();
+        tree_helper.reportSuccess();
+        exito = true;
+    }
+    else
+        exito = false;
+#endif
+
+    return exito;
 }
 
 template <class WriterHelper>
@@ -366,8 +371,27 @@ inline void ChainsTreeOperator<WriterHelper>::removeSeed(unsigned int& nivel)
 }
 
 template <class WriterHelper>
-inline void ChainsTreeOperator<WriterHelper>::write()
+inline bool ChainsTreeOperator<WriterHelper>::write()
 {
+    bool exito;
+
+#ifdef COMBINATIONS_DEBUG // En el modo DEBUG se deshabilitan los chequeos.
+
     writer_helper.write();
     tree_helper.reportSuccess();
+    exito = true;
+
+#else
+
+    if (lastLevelOk())
+    {
+        writer_helper.write();
+        tree_helper.reportSuccess();
+        exito = true;
+    }
+    else
+        exito = false;
+#endif
+
+    return exito;
 }
