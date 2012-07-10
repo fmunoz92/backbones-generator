@@ -20,7 +20,7 @@ int main(int argc, char** argv)
     if (o.parse(argc, argv))
     {
         std::ifstream filer(o.data.c_str());
-        TreeData tree_data(o.Nres, o.m, o.n, o.z, filer);
+        TreeData tree_data(o.Nres, o.m, o.n, o.z, filer, o.output_file);
         TreeFilters tree_filters;
 
         // Fill r[][][] with the minimun squared distance between atoms
@@ -69,6 +69,7 @@ void CommandLineOptions::show_usage()
     std::string indent = "                  ";
     std::cerr << "Usage: " << std::endl;
     std::cerr << indent << "[ -i <data_file> ], default = data" << std::endl;
+    std::cerr << indent << "[ -o <output file name> ], default = traj" << std::endl;
     std::cerr << indent << "[ {-w, --write_format} <xtc|compressed|fragments> ], default = xtc" << std::endl;
     std::cerr << indent << "[ --chains_input [fragments_file] <input_file> ], default = No using chains" << std::endl;
     std::cerr << indent << "if using chains: [ {-f, --input_format} <compressed|fragments> ], default = compressed " << std::endl;
@@ -91,6 +92,7 @@ bool CommandLineOptions::parse(int argc, char** argv)
                 >> GetOpt::Option('s', "Scal_1_4", Scal_1_4, 0.85f)
                 >> GetOpt::Option('l', "Scal_1_5", Scal_1_5, 1.0f)
                 >> GetOpt::Option('i', "input_file", data)
+                >> GetOpt::Option('o', "output_file", output_file, std::string("traj"))
                 >> GetOpt::Option('N', "rows", n, static_cast<size_t>(100))
                 >> GetOpt::Option('M', "cols", m, static_cast<size_t>(100))
                 >> GetOpt::Option('Z', "depth", z, static_cast<size_t>(100))

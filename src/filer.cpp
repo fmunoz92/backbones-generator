@@ -3,7 +3,7 @@
 XtcWriterHelper::XtcWriterHelper(TreeHelper& tree_helper) :
     tree_helper(tree_helper)
 {
-    writer.open(tree_helper.getOutputFile());
+    writer.open(tree_helper.getOutputFile() + ".xtc");
 }
 
 XtcWriterHelper::~XtcWriterHelper()
@@ -19,7 +19,7 @@ void XtcWriterHelper::write()
 CompressedWriterHelper::CompressedWriterHelper(TreeHelper& tree_helper) :
     tree_helper(tree_helper)
 {
-    writer.open(tree_helper.getOutputFile());
+    writer.open(tree_helper.getOutputFile() + ".cps");//consultar extension
 }
 
 CompressedWriterHelper::~CompressedWriterHelper()
@@ -36,7 +36,7 @@ FragmentsWriterHelper::FragmentsWriterHelper(TreeHelper& tree_helper, FullCached
     tree_helper(tree_helper),
     reader(reader)
 {
-    writer.open(tree_helper.getOutputFile());
+    writer.open(tree_helper.getOutputFile() + ".fgs");//consultar extension
 }
 
 FragmentsWriterHelper::~FragmentsWriterHelper()

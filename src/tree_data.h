@@ -18,7 +18,7 @@ typedef prot_filer::BasicProtein Atoms;
 class TreeData
 {
 public:
-    TreeData(int nRes, size_t cols, size_t rows, size_t depth, std::istream& input_file);
+    TreeData(int nRes, size_t cols, size_t rows, size_t depth, std::istream& input_file, std::string& output_file);
 
     const unsigned int nres;
 

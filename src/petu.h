@@ -1,6 +1,8 @@
 #ifndef PETU_H
 #define PETU_H
 
+#include <string>
+
 struct CommandLineOptions
 {
     unsigned int Nres;// Number of amino acids in the chains to build.
@@ -10,6 +12,7 @@ struct CommandLineOptions
     float Scal_1_4;   // Scaling factor for the radii. Used to check for 1-4 clashes.
     float Scal_1_5;   // Scaling factor for the radii. Used to check for 1-5 clashes.
     std::string data;      // Name of the input file.
+    std::string output_file; // Name of the output file.
     std::string write_format;
     std::string residues_input; //Name of the residue chains file.
     std::string input_format;

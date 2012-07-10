@@ -201,8 +201,7 @@ inline bool SimpleTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, u
 
 template <class WriterHelper>
 inline void SimpleTreeOperator<WriterHelper>::remove(unsigned int&)
-{
-}
+{}
 
 template <class WriterHelper>
 inline void SimpleTreeOperator<WriterHelper>::removeSeed(unsigned int& nivel)
@@ -301,10 +300,14 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
 template <class WriterHelper>
 inline void ChainsTreeOperator<WriterHelper>::remove(unsigned int& nivel)
 {
+    const unsigned int nivelesRetrocedidos = vectoresParaBorrar.back().size();
+
+    assert(nivelesRetrocedidos > 0);
+
     this->tree_helper.deleteRes(vectoresParaBorrar.back());
     this->tree_helper.deleteLastFragmentId();
-    nivel -= vectoresParaBorrar.back().size();
 
+    nivel -= nivelesRetrocedidos;
     vectoresParaBorrar.pop_back();
 }
 
