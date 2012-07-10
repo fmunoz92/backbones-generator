@@ -60,9 +60,6 @@ public:
 
     inline void remove(unsigned int& nivel);
     inline void removeSeed(unsigned int& nivel);
-
-private:
-    TreeHelper& tree_helper;
 };
 
 template <class WriterHelper>
@@ -79,7 +76,7 @@ public:
 
 private:
     inline void putChain(prot_filer::AnglesData& chain, unsigned int& nivel, unsigned int index_res, typename TreeOperator<WriterHelper>::KeepRecursion& recursion);
-    TreeHelper& tree_helper;
+
     std::list<std::list<Residuo> > vectoresParaBorrar;
     FullCachedAnglesSeqReader* const reader;
 };

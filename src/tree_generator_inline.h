@@ -23,7 +23,7 @@ inline void TreeGenerator<TOperator>::generate()
 
     while (treeOperator.putNextSeed(nivel, index_seed))
     {
-        if (nivel < CANT_RES + 1)
+        if (nivel < CANT_RES)
         {
             treeOperator.copyMatrix(R_inicial);//for changes generated in putNextSeed
             expandTree(nivel, R_inicial, 0);
@@ -57,7 +57,7 @@ inline void TreeGenerator<TOperator>::expandTree(unsigned int nivel, const RMatr
 
         if (treeOperator.putFirst(nivel, index_angles, indice_nivel_anterior))
         {
-            if (nivel < CANT_RES + 1)
+            if (nivel < CANT_RES)
                 ultimo_nivel_exitoso = appendElements(nivel, index_angles);
             else
                 ultimo_nivel_exitoso = processLeaf();
@@ -81,7 +81,7 @@ inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigne
     {
         if (resultRecursion == TOperator::DoRecursion)
         {
-            if (nivel < CANT_RES + 1)
+            if (nivel < CANT_RES)
             {
                 treeOperator.copyMatrix(rLocal);//for changes generated in putNext and putFirst
                 expandTree(nivel, rLocal, index);
@@ -131,7 +131,6 @@ inline void TreeOperator<WriterHelper>::initMatrix(const RMatrix newR)
 template <class WriterHelper>
 inline bool TreeOperator<WriterHelper>::putFirst(unsigned int& nivel, unsigned int fi_index, unsigned int si_index)
 {
-
     Residuo residuo;
 
     bool result = tree_helper.putRes(R, nivel, residuo, si_index, fi_index) == FILTER_OK;
@@ -165,20 +164,16 @@ inline bool TreeOperator<WriterHelper>::write()
     bool exito;
 
 #ifdef COMBINATIONS_DEBUG // En el modo DEBUG se deshabilitan los chequeos.
-
     writer_helper.write();
     tree_helper.reportSuccess();
     exito = true;
-
 #else
-
     exito = lastLevelOk();
     if (exito)
     {
         writer_helper.write();
         tree_helper.reportSuccess();
     }
-
 #endif
 
     return exito;
@@ -186,20 +181,19 @@ inline bool TreeOperator<WriterHelper>::write()
 
 template <class WriterHelper>
 inline SimpleTreeOperator<WriterHelper>::SimpleTreeOperator(TreeHelper& t, FullCachedAnglesSeqReader*) :
-    TreeOperator<WriterHelper>(t),
-    tree_helper(t)
+    TreeOperator<WriterHelper>(t)
 {}
 
 template <class WriterHelper>
 inline bool SimpleTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, unsigned int)
 {
-    bool result = !tree_helper.success();
+    bool result = !this->tree_helper.success();
 
     if (result)
     {
         Residuo residuo;
-        tree_helper.clearatm();
-        tree_helper.putSeed(this->R, residuo);
+        this->tree_helper.clearatm();
+        this->tree_helper.putSeed(this->R, residuo);
         this->residuos.push_back(residuo);
         nivel = 2; //semilla is level 1 then next level is 2
     }
@@ -232,7 +226,6 @@ inline bool SimpleTreeOperator<WriterHelper>::putNext(unsigned int& /*nivel*/, u
 template <class WriterHelper>
 inline ChainsTreeOperator<WriterHelper>::ChainsTreeOperator(TreeHelper& t, FullCachedAnglesSeqReader* const reader) :
     TreeOperator<WriterHelper>(t),
-    tree_helper(t),
     reader(reader)
 {}
 
@@ -240,7 +233,6 @@ inline ChainsTreeOperator<WriterHelper>::ChainsTreeOperator(TreeHelper& t, FullC
 template <>
 inline ChainsTreeOperator<FragmentsWriterHelper>::ChainsTreeOperator(TreeHelper& t, FullCachedAnglesSeqReader* const reader) :
     TreeOperator<FragmentsWriterHelper>(t, reader),
-    tree_helper(t),
     reader(reader)
 {}
 
@@ -257,10 +249,10 @@ inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, u
     if (result)
     {
         const unsigned int nextLevel = 2; //semilla is "level 1"
-        tree_helper.clearatm();
+        this->tree_helper.clearatm();
 
-        tree_helper.putSeed(this->R, residuo);
-        tree_helper.putChain(this->R, nextLevel, residuos, *chain, index_seed);
+        this->tree_helper.putSeed(this->R, residuo);
+        this->tree_helper.putChain(this->R, nextLevel, residuos, *chain, index_seed);
 
         nivel = residuos.size() + nextLevel;
 
@@ -276,7 +268,7 @@ inline void ChainsTreeOperator<WriterHelper>::putChain(prot_filer::AnglesData& c
 {
     std::list<Residuo> residuos;
 
-    bool isOk = tree_helper.putChain(this->R, nivel, residuos, chain, index_res) == FILTER_OK;
+    bool isOk = this->tree_helper.putChain(this->R, nivel, residuos, chain, index_res) == FILTER_OK;
 
     if (isOk)
     {
@@ -286,7 +278,7 @@ inline void ChainsTreeOperator<WriterHelper>::putChain(prot_filer::AnglesData& c
     }
     else
     {
-        tree_helper.deleteRes(residuos);//saco residuos apendeados antes del primer residuo que genero FILTER_FAIL
+        this->tree_helper.deleteRes(residuos);//saco residuos apendeados antes del primer residuo que genero FILTER_FAIL
         recursion = TreeOperator<WriterHelper>::StopRecursion;
     }
 }
@@ -307,8 +299,8 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
 template <class WriterHelper>
 inline void ChainsTreeOperator<WriterHelper>::remove(unsigned int& nivel)
 {
-    tree_helper.deleteRes(vectoresParaBorrar.back());
-    tree_helper.deleteLastFragmentId();
+    this->tree_helper.deleteRes(vectoresParaBorrar.back());
+    this->tree_helper.deleteLastFragmentId();
     nivel -= vectoresParaBorrar.back().size();
 
     vectoresParaBorrar.pop_back();
