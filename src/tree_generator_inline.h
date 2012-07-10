@@ -235,28 +235,32 @@ inline ChainsTreeOperator<FragmentsWriterHelper>::ChainsTreeOperator(TreeHelper&
 {}
 
 template <class WriterHelper>
-inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, unsigned int index_seed)
+inline void ChainsTreeOperator<WriterHelper>::putSeed(prot_filer::AnglesData& chain, unsigned int& nivel, unsigned int index_seed)
 {
     Residuo residuo;
     std::list<Residuo> residuos;
 
+    const unsigned int nextLevel = 2; //semilla is "level 1"
+    this->tree_helper.clearatm();
+
+    this->tree_helper.putSeed(this->R, residuo);
+    this->tree_helper.putChain(this->R, nextLevel, residuos, chain, index_seed);
+
+    nivel = residuos.size() + nextLevel;
+
+    this->residuos.push_back(residuo);
+    vectoresParaBorrar.push_back(residuos);
+}
+
+template <class WriterHelper>
+inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, unsigned int index_seed)
+{
     prot_filer::AnglesData* chain = reader->read(index_seed);
 
     const bool result = chain != NULL;
 
     if (result)
-    {
-        const unsigned int nextLevel = 2; //semilla is "level 1"
-        this->tree_helper.clearatm();
-
-        this->tree_helper.putSeed(this->R, residuo);
-        this->tree_helper.putChain(this->R, nextLevel, residuos, *chain, index_seed);
-
-        nivel = residuos.size() + nextLevel;
-
-        this->residuos.push_back(residuo);
-        vectoresParaBorrar.push_back(residuos);
-    }
+        putSeed(*chain, nivel, index_seed);
 
     return result;
 }

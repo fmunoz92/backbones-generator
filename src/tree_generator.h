@@ -80,6 +80,7 @@ public:
 
 private:
     inline void putChain(prot_filer::AnglesData& chain, unsigned int& nivel, unsigned int index_res, typename TreeOperator<WriterHelper>::KeepRecursion& recursion);
+    inline void putSeed(prot_filer::AnglesData& chain, unsigned int& nivel, unsigned int index_seed);
 
     std::list<std::list<Residuo> > vectoresParaBorrar;
     FullCachedAnglesSeqReader* const reader;
