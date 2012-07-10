@@ -216,14 +216,13 @@ inline bool SimpleTreeOperator<WriterHelper>::write()
 
 #else
 
-    if (lastLevelOk())
+    exito = lastLevelOk();
+    if (exito)
     {
         writer_helper.write();
         tree_helper.reportSuccess();
-        exito = true;
     }
-    else
-        exito = false;
+
 #endif
 
     return exito;
@@ -314,9 +313,27 @@ inline bool ChainsTreeOperator<WriterHelper>::putFirst(unsigned int& nivel, unsi
 
 
 template <class WriterHelper>
-inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsigned int index_res, KeepRecursion& recursion)
+inline void ChainsTreeOperator<WriterHelper>::putChain(prot_filer::AnglesData& chain, unsigned int& nivel, unsigned int index_res, KeepRecursion& recursion)
 {
     std::list<Residuo> residuos;
+
+    if (tree_helper.putChain(R, nivel, residuos, chain, index_res) == FILTER_OK)
+    {
+        nivel += residuos.size();
+        vectoresParaBorrar.push_back(residuos);
+        recursion = DoRecursion;
+    }
+    else
+    {
+        //saco residuos apendeados antes del primer residuo que genero FILTER_FAIL
+        tree_helper.deleteRes(residuos);
+        recursion = StopRecursion;
+    }
+}
+
+template <class WriterHelper>
+inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsigned int index_res, KeepRecursion& recursion)
+{
     bool result;
 
     prot_filer::AnglesData* chain = reader->read(index_res);
@@ -324,19 +341,7 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
     if (chain != NULL)
     {
         result = true;//vamos a ciclar mientras tengamos chains para leer
-
-        if (tree_helper.putChain(R, nivel, residuos, *chain, index_res) == FILTER_OK)
-        {
-            nivel += residuos.size();
-            vectoresParaBorrar.push_back(residuos);
-            recursion = DoRecursion;
-        }
-        else
-        {
-            //saco residuos apendeados antes del primer residuo que genero FILTER_FAIL
-            tree_helper.deleteRes(residuos);
-            recursion = StopRecursion;
-        }
+        putChain(*chain, nivel, index_res, recursion);
     }
     else
         result = false;
@@ -383,14 +388,13 @@ inline bool ChainsTreeOperator<WriterHelper>::write()
 
 #else
 
-    if (lastLevelOk())
+    exito = lastLevelOk();
+    if (exito)
     {
         writer_helper.write();
         tree_helper.reportSuccess();
-        exito = true;
     }
-    else
-        exito = false;
+
 #endif
 
     return exito;

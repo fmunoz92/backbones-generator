@@ -81,6 +81,7 @@ public:
     inline void copyMatrix(RMatrix R_inicial);
 
 private:
+    inline void putChain(prot_filer::AnglesData& chain, unsigned int& nivel, unsigned int index_res, KeepRecursion& recursion);
     inline bool lastLevelOk();
 
     TreeHelper& tree_helper;
