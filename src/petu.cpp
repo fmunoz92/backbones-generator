@@ -98,7 +98,7 @@ bool CommandLineOptions::parse(int argc, char** argv)
 
         const bool chains = ops >> GetOpt::Option("chains_input", input_files);
 
-        if (Nres <= 0)
+        if (Nres == 0)
         {
             std::cerr << "Error: the amount of residues must be greater than zero" << std::endl;
             return false;

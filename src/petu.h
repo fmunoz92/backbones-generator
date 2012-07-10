@@ -3,7 +3,7 @@
 
 struct CommandLineOptions
 {
-    int Nres;         // Number of amino acids in the chains to build.
+    unsigned int Nres;// Number of amino acids in the chains to build.
     float RN;         // Radius of the Nitrogen atom.
     float RCa;        // Radius of the Carbon atom.
     float RC;         // Radius of the Carbon atom.
