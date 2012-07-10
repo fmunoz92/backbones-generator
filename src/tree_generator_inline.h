@@ -23,7 +23,7 @@ inline void TreeGenerator<TOperator>::generate()
 
     while (treeOperator.putNextSeed(nivel, index_seed))
     {
-        if (nivel < CANT_RES)
+        if (nivel < CANT_RES + 1)
         {
             treeOperator.copyMatrix(R_inicial);//for changes generated in putNextSeed
             expandTree(nivel, R_inicial, 0);
@@ -276,9 +276,9 @@ inline void ChainsTreeOperator<WriterHelper>::putChain(prot_filer::AnglesData& c
 {
     std::list<Residuo> residuos;
 
-    bool isOk = tree_helper.putChain(this->R, nivel, residuos, chain, index_res) == FILTER_OK
+    bool isOk = tree_helper.putChain(this->R, nivel, residuos, chain, index_res) == FILTER_OK;
 
-                if (isOK)
+    if (isOk)
     {
         nivel += residuos.size();
         vectoresParaBorrar.push_back(residuos);
