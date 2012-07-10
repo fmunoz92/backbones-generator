@@ -15,6 +15,7 @@ public:
     inline TreeGenerator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader);
 
     inline void generate();
+
 private:
     inline void expandTree(unsigned int nivel, const RMatrix R_inicial, unsigned int indice_nivel_anterior);
     inline bool processLeaf();
@@ -26,8 +27,9 @@ private:
 };
 
 template <class WriterHelper>
-struct TreeOperator
+class TreeOperator
 {
+public:
     enum KeepRecursion {DoRecursion, StopRecursion};
 
     inline TreeOperator(TreeHelper& tree_helper);
@@ -42,10 +44,12 @@ struct TreeOperator
     inline bool write();
 
 protected:
-    inline bool lastLevelOk();
     RMatrix R;
     std::list<Residuo> residuos;
     TreeHelper& tree_helper;
+
+private:
+    inline bool lastLevelOk();
     WriterHelper writer_helper;
 };
 

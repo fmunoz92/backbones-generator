@@ -47,5 +47,6 @@ FragmentsWriterHelper::~FragmentsWriterHelper()
 void FragmentsWriterHelper::write()
 {
     size_t fragment_nres = reader->get_reader().get_atom_number() / 3;
+
     writer.write(fragment_nres, tree_helper.getFragmentIds(), tree_helper.getAnglesData());
 }

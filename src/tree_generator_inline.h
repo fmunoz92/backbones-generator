@@ -133,7 +133,7 @@ inline bool TreeOperator<WriterHelper>::putFirst(unsigned int& nivel, unsigned i
 {
     Residuo residuo;
 
-    bool result = tree_helper.putRes(R, nivel, residuo, si_index, fi_index) == FILTER_OK;
+    const bool result = tree_helper.putRes(R, nivel, residuo, si_index, fi_index) == FILTER_OK;
 
     if (result)
     {
@@ -161,14 +161,12 @@ inline bool TreeOperator<WriterHelper>::lastLevelOk()
 template <class WriterHelper>
 inline bool TreeOperator<WriterHelper>::write()
 {
-    bool exito;
-
 #ifdef COMBINATIONS_DEBUG // En el modo DEBUG se deshabilitan los chequeos.
+    const bool exito = true;
     writer_helper.write();
     tree_helper.reportSuccess();
-    exito = true;
 #else
-    exito = lastLevelOk();
+    const bool exito = lastLevelOk();
     if (exito)
     {
         writer_helper.write();
@@ -185,9 +183,9 @@ inline SimpleTreeOperator<WriterHelper>::SimpleTreeOperator(TreeHelper& t, FullC
 {}
 
 template <class WriterHelper>
-inline bool SimpleTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, unsigned int)
+inline bool SimpleTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, unsigned int index_seed)
 {
-    bool result = !this->tree_helper.success();
+    const bool result = !this->tree_helper.success() && index_seed == 0;
 
     if (result)
     {
@@ -215,7 +213,7 @@ inline void SimpleTreeOperator<WriterHelper>::removeSeed(unsigned int& nivel)
 template <class WriterHelper>
 inline bool SimpleTreeOperator<WriterHelper>::putNext(unsigned int& /*nivel*/, unsigned int index_res, typename TreeOperator<WriterHelper>::KeepRecursion& resultRecursion)
 {
-    bool result = index_res == 0;
+    const bool result = index_res == 0;
 
     if (result)
         resultRecursion = TreeOperator<WriterHelper>::DoRecursion;
@@ -244,7 +242,7 @@ inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, u
 
     prot_filer::AnglesData* chain = reader->read(index_seed);
 
-    bool result = chain != NULL;
+    const bool result = chain != NULL;
 
     if (result)
     {
@@ -268,7 +266,7 @@ inline void ChainsTreeOperator<WriterHelper>::putChain(prot_filer::AnglesData& c
 {
     std::list<Residuo> residuos;
 
-    bool isOk = this->tree_helper.putChain(this->R, nivel, residuos, chain, index_res) == FILTER_OK;
+    const bool isOk = this->tree_helper.putChain(this->R, nivel, residuos, chain, index_res) == FILTER_OK;
 
     if (isOk)
     {
@@ -288,7 +286,7 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsig
 {
     prot_filer::AnglesData* chain = reader->read(index_res);
 
-    bool result = chain != NULL;//vamos a ciclar mientras tengamos chains para leer
+    const bool result = chain != NULL;//vamos a ciclar mientras tengamos chains para leer
 
     if (result)
         putChain(*chain, nivel, index_res, recursion);

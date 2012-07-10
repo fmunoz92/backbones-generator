@@ -98,6 +98,12 @@ bool CommandLineOptions::parse(int argc, char** argv)
 
         const bool chains = ops >> GetOpt::Option("chains_input", input_files);
 
+        if (Nres <= 0)
+        {
+            std::cerr << "Error: the amount of residues must be greater than zero" << std::endl;
+            return false;
+        }
+
         if (!chains && write_format == "fragments")
         {
             std::cerr << "Error: fragments output format cannot be used without chains input" << std::endl;

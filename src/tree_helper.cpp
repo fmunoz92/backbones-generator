@@ -71,7 +71,7 @@ FilterResultType TreeHelper::putChain(float* pR, unsigned int resN, std::list<Re
     FilterResultType result = FILTER_OK;
     unsigned int i = 0;
 
-    while (result == FILTER_OK  && i < (chain.nres - 1) && ((resN + i) < tree_data.nres))
+    while (result == FILTER_OK  && ((i + 1) < chain.nres) && ((resN + i) < tree_data.nres))
     {
         Residuo residuo;
         result = putRes(pR, resN + i, residuo, chain.angles[i].si, chain.angles[i].fi);
@@ -81,7 +81,6 @@ FilterResultType TreeHelper::putChain(float* pR, unsigned int resN, std::list<Re
 
         ++i;
     }
-
 
     if (result == FILTER_OK)
         tree_data.fragment_ids.push_back(chain_index);
@@ -103,6 +102,7 @@ bool TreeHelper::success() const
 {
     return tree_data.hubo_algun_exito;
 }
+
 void TreeHelper::reportSuccess()
 {
     tree_data.cont++;
@@ -154,4 +154,3 @@ bool ClashFilter::operator()(unsigned int index, const Atoms& patm, int at) cons
     const bool clash = tree_filters.isclash(patm, at) == FILTER_FAIL;
     return !clash && (index != 2 || (tree_filters.islong(patm, at, tree_data.dmax2) != FILTER_FAIL));
 }
-
