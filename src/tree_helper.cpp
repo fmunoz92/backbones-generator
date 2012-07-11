@@ -1,8 +1,8 @@
 #include "tree_helper.h"
 
-TreeHelper::TreeHelper(TreeData& tree_data, TreeFilters& tree_filters) :
-    tree_data(tree_data),
-    tree_filters(tree_filters)
+TreeHelper::TreeHelper(TreeData& tree_data, TreeFilters& tree_filters)
+    : tree_data(tree_data),
+      tree_filters(tree_filters)
 {}
 
 void TreeHelper::putSeed(float* R, Residuo& residuo)

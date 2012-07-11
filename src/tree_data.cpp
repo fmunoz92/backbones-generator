@@ -1,18 +1,18 @@
 #include "tree_data.h"
 
-TreeData::TreeData(int nRes, size_t cols, size_t rows, size_t depth, std::istream& input_file, std::string& output_file) :
-    nres(nRes),
-    // Maximun gyration radius and maximun CA-CA distance.
-    // Both equations constructed from database analisys.
-    rgmax(2.72 * mili::cubic_root(nres) + 5.0),
-    dmax2(mili::square(8.0 * mili::cubic_root(nres) + 25.0)),
-    atm(Atoms(nres * 3)),
-    cont(0),
-    hubo_algun_exito(false),
-    grilla(new Grillado(cols, rows, depth)),
-    angles_mapping(new prot_filer::AnglesMapping(nres)),
-    angles_data(new prot_filer::AnglesData(nres, angles_mapping.get())),
-    output_file(output_file)
+TreeData::TreeData(int nRes, size_t cols, size_t rows, size_t depth, std::istream& input_file, std::string& output_file)
+    : nres(nRes),
+      // Maximun gyration radius and maximun CA-CA distance.
+      // Both equations constructed from database analisys.
+      rgmax(2.72 * mili::cubic_root(nres) + 5.0),
+      dmax2(mili::square(8.0 * mili::cubic_root(nres) + 25.0)),
+      atm(Atoms(nres * 3)),
+      cont(0),
+      hubo_algun_exito(false),
+      grilla(new Grillado(cols, rows, depth)),
+      angles_mapping(new prot_filer::AnglesMapping(nres)),
+      angles_data(new prot_filer::AnglesData(nres, angles_mapping.get())),
+      output_file(output_file)
 {
     readdata(input_file);
 }
