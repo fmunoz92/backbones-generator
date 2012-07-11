@@ -163,16 +163,14 @@ inline bool TreeOperator<WriterHelper>::write()
 {
 #ifdef COMBINATIONS_DEBUG // En el modo DEBUG se deshabilitan los chequeos.
     const bool exito = true;
-    writer_helper.write();
-    tree_helper.reportSuccess();
 #else
     const bool exito = lastLevelOk();
+#endif
     if (exito)
     {
         writer_helper.write();
         tree_helper.reportSuccess();
     }
-#endif
 
     return exito;
 }
