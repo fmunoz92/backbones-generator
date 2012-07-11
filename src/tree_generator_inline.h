@@ -6,11 +6,12 @@
 #include "filer.h"
 
 template <class TOperator>
-inline TreeGenerator<TOperator>::TreeGenerator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader) :
-    treeOperator(tree_helper, reader),
-    CANT_RES(tree_helper.getNRes()),
-    CANT_ANGLES(tree_helper.getNAngles())
-{}
+inline TreeGenerator<TOperator>::TreeGenerator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader)
+    : treeOperator(tree_helper, reader),
+      CANT_RES(tree_helper.getNRes()),
+      CANT_ANGLES(tree_helper.getNAngles())
+{
+}
 
 template <class TOperator>
 inline void TreeGenerator<TOperator>::generate()
@@ -105,19 +106,20 @@ inline bool TreeGenerator<TOperator>::processLeaf()
 }
 
 template <class WriterHelper>
-inline TreeOperator<WriterHelper>::TreeOperator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader) :
-    tree_helper(tree_helper),
-    writer_helper(tree_helper, reader)//call constructor adapter
+inline TreeOperator<WriterHelper>::TreeOperator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader)
+    : tree_helper(tree_helper),
+      writer_helper(tree_helper, reader)//call constructor adapter
 {}
 
 template <class WriterHelper>
-inline TreeOperator<WriterHelper>::TreeOperator(TreeHelper& tree_helper) :
-    tree_helper(tree_helper),
-    writer_helper(tree_helper)
-{}
+inline TreeOperator<WriterHelper>::TreeOperator(TreeHelper& tree_helper)
+    : tree_helper(tree_helper),
+      writer_helper(tree_helper)
+{
+}
 
 template <class WriterHelper>
-inline void TreeOperator<WriterHelper>::copyMatrix(RMatrix R_inicial)
+inline void TreeOperator<WriterHelper>::copyMatrix(RMatrix R_inicial) const
 {
     backbones_utils::copymat(R_inicial, R);
 }
@@ -129,7 +131,7 @@ inline void TreeOperator<WriterHelper>::initMatrix(const RMatrix newR)
 }
 
 template <class WriterHelper>
-inline bool TreeOperator<WriterHelper>::putFirst(unsigned int& nivel, unsigned int fi_index, unsigned int si_index)
+inline bool TreeOperator<WriterHelper>::putFirst(unsigned int& nivel, const unsigned int fi_index, const unsigned int si_index)
 {
     Residuo residuo;
 
@@ -153,7 +155,7 @@ inline void TreeOperator<WriterHelper>::removeFirst(unsigned int& nivel)
 }
 
 template <class WriterHelper>
-inline bool TreeOperator<WriterHelper>::lastLevelOk()
+inline bool TreeOperator<WriterHelper>::lastLevelOk() const
 {
     return (tree_helper.filtros_ultimo_nivel() == FILTER_OK);
 }
@@ -176,12 +178,13 @@ inline bool TreeOperator<WriterHelper>::write()
 }
 
 template <class WriterHelper>
-inline SimpleTreeOperator<WriterHelper>::SimpleTreeOperator(TreeHelper& t, FullCachedAnglesSeqReader*) :
-    TreeOperator<WriterHelper>(t)
-{}
+inline SimpleTreeOperator<WriterHelper>::SimpleTreeOperator(TreeHelper& t, FullCachedAnglesSeqReader*)
+    : TreeOperator<WriterHelper>(t)
+{
+}
 
 template <class WriterHelper>
-inline bool SimpleTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, unsigned int index_seed)
+inline bool SimpleTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, const unsigned int index_seed)
 {
     const bool result = !this->tree_helper.success() && index_seed == 0;
 
@@ -208,7 +211,7 @@ inline void SimpleTreeOperator<WriterHelper>::removeSeed(unsigned int& nivel)
 }
 
 template <class WriterHelper>
-inline bool SimpleTreeOperator<WriterHelper>::putNext(unsigned int& /*nivel*/, unsigned int index_res, typename TreeOperator<WriterHelper>::KeepRecursion& resultRecursion)
+inline bool SimpleTreeOperator<WriterHelper>::putNext(unsigned int& /*nivel*/, const unsigned int index_res, typename TreeOperator<WriterHelper>::KeepRecursion& resultRecursion)
 {
     const bool result = index_res == 0;
 
@@ -219,20 +222,22 @@ inline bool SimpleTreeOperator<WriterHelper>::putNext(unsigned int& /*nivel*/, u
 }
 
 template <class WriterHelper>
-inline ChainsTreeOperator<WriterHelper>::ChainsTreeOperator(TreeHelper& t, FullCachedAnglesSeqReader* const reader) :
-    TreeOperator<WriterHelper>(t),
-    reader(reader)
-{}
+inline ChainsTreeOperator<WriterHelper>::ChainsTreeOperator(TreeHelper& t, FullCachedAnglesSeqReader* const reader)
+    : TreeOperator<WriterHelper>(t),
+      reader(reader)
+{
+}
 
 /*Adapter*/
 template <>
-inline ChainsTreeOperator<FragmentsWriterHelper>::ChainsTreeOperator(TreeHelper& t, FullCachedAnglesSeqReader* const reader) :
-    TreeOperator<FragmentsWriterHelper>(t, reader),
-    reader(reader)
-{}
+inline ChainsTreeOperator<FragmentsWriterHelper>::ChainsTreeOperator(TreeHelper& t, FullCachedAnglesSeqReader* const reader)
+    : TreeOperator<FragmentsWriterHelper>(t, reader),
+      reader(reader)
+{
+}
 
 template <class WriterHelper>
-inline void ChainsTreeOperator<WriterHelper>::putSeed(prot_filer::AnglesData& chain, unsigned int& nivel, unsigned int index_seed)
+inline void ChainsTreeOperator<WriterHelper>::putSeed(prot_filer::AnglesData& chain, unsigned int& nivel, const unsigned int index_seed)
 {
     Residuo residuo;
     std::list<Residuo> residuos;
@@ -250,7 +255,7 @@ inline void ChainsTreeOperator<WriterHelper>::putSeed(prot_filer::AnglesData& ch
 }
 
 template <class WriterHelper>
-inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, unsigned int index_seed)
+inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, const unsigned int index_seed)
 {
     prot_filer::AnglesData* chain = reader->read(index_seed);
 
@@ -263,7 +268,7 @@ inline bool ChainsTreeOperator<WriterHelper>::putNextSeed(unsigned int& nivel, u
 }
 
 template <class WriterHelper>
-inline void ChainsTreeOperator<WriterHelper>::putChain(prot_filer::AnglesData& chain, unsigned int& nivel, unsigned int index_res, typename TreeOperator<WriterHelper>::KeepRecursion& recursion)
+inline void ChainsTreeOperator<WriterHelper>::putChain(prot_filer::AnglesData& chain, unsigned int& nivel, const unsigned int index_res, typename TreeOperator<WriterHelper>::KeepRecursion& recursion)
 {
     std::list<Residuo> residuos;
 
@@ -283,7 +288,7 @@ inline void ChainsTreeOperator<WriterHelper>::putChain(prot_filer::AnglesData& c
 }
 
 template <class WriterHelper>
-inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, unsigned int index_res, typename TreeOperator<WriterHelper>::KeepRecursion& recursion)
+inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& nivel, const unsigned int index_res, typename TreeOperator<WriterHelper>::KeepRecursion& recursion)
 {
     prot_filer::AnglesData* chain = reader->read(index_res);
 

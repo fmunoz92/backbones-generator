@@ -1,9 +1,12 @@
+#include <string>
+
 #include "filer.h"
 
 XtcWriterHelper::XtcWriterHelper(TreeHelper& tree_helper) :
     tree_helper(tree_helper)
 {
-    writer.open(tree_helper.getOutputFile() + ".xtc");
+    const std::string XTC_EXTENSION = ".xtc";
+    writer.open(tree_helper.getOutputFile() + XTC_EXTENSION);
 }
 
 XtcWriterHelper::~XtcWriterHelper()
@@ -19,7 +22,8 @@ void XtcWriterHelper::write()
 CompressedWriterHelper::CompressedWriterHelper(TreeHelper& tree_helper) :
     tree_helper(tree_helper)
 {
-    writer.open(tree_helper.getOutputFile() + ".cps");//consultar extension
+    const std::string COMPRESSED_EXTENSION = ".cps";
+    writer.open(tree_helper.getOutputFile() + COMPRESSED_EXTENSION);
 }
 
 CompressedWriterHelper::~CompressedWriterHelper()
@@ -36,7 +40,8 @@ FragmentsWriterHelper::FragmentsWriterHelper(TreeHelper& tree_helper, FullCached
     tree_helper(tree_helper),
     reader(reader)
 {
-    writer.open(tree_helper.getOutputFile() + ".fgs");//consultar extension
+    const std::string FRAGMENSTS_EXTENSION = ".fgs";
+    writer.open(tree_helper.getOutputFile() + FRAGMENSTS_EXTENSION);
 }
 
 FragmentsWriterHelper::~FragmentsWriterHelper()

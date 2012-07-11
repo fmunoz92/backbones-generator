@@ -30,13 +30,17 @@ template <class WriterHelper>
 class TreeOperator
 {
 public:
-    enum KeepRecursion {DoRecursion, StopRecursion};
+    enum KeepRecursion
+    {
+        DoRecursion,
+        StopRecursion
+    };
 
     inline TreeOperator(TreeHelper& tree_helper);
     inline TreeOperator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader);
 
     inline void initMatrix(const RMatrix rMatrix);
-    inline void copyMatrix(RMatrix R_inicial);
+    inline void copyMatrix(RMatrix R_inicial) const;
 
     inline bool putFirst(unsigned int& nivel, unsigned int fi_index, unsigned int si_index);
     inline void removeFirst(unsigned int& nivel);
@@ -49,7 +53,7 @@ protected:
     TreeHelper& tree_helper;
 
 private:
-    inline bool lastLevelOk();
+    inline bool lastLevelOk() const;
     WriterHelper writer_helper;
 };
 
