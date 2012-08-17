@@ -54,34 +54,35 @@ public:
     struct gridPositionException : public std::domain_error
     {
         gridPositionException()
-            : domain_error("The desired position is already empty") {}
+            : domain_error("The desired position is already empty")
+        {}
     };
 
     struct sizeParamException : public std::invalid_argument
     {
         sizeParamException()
-            : invalid_argument("M<3 || N<3 || Z<3") {}
+            : invalid_argument("M<3 || N<3 || Z<3")
+        {}
     };
 
     struct radiusOrDistanceParamException : public std::invalid_argument
     {
         radiusOrDistanceParamException()
-            : std::invalid_argument("Either 1) sqrt(2)*radio >= dist: there may be diagonal intersections between spheres (spheres which differ in more than one coordinate) or 2) dist>=2*R: there are no intersections between spheres.") {}
-
+            : std::invalid_argument("Either 1) sqrt(2)*radio >= dist: there may be diagonal intersections between spheres (spheres which differ in more than one coordinate) or 2) dist>=2*R: there are no intersections between spheres.")
+        {}
     };
 
-    Grillado(size_t a, size_t b, size_t c, Length R = 4.0f, Length D = 5.7f) throw
-    (radiusOrDistanceParamException, sizeParamException, std::bad_alloc);
+    Grillado(size_t a, size_t b, size_t c, Length R = 4.0f, Length D = 5.7f) throw(radiusOrDistanceParamException, sizeParamException, std::bad_alloc);
 
     ~Grillado();
 
     void info_grillado() const;
 
-    inline esferaId agregar_esfera(Coord x, Coord y, Coord z) ;
+    inline esferaId agregar_esfera(Coord x, Coord y, Coord z);
 
     void agregar_esfera(const esferaId& id);
 
-    inline void sacar_esfera(Coord x, Coord y, Coord z) throw(gridPositionException) ;
+    inline void sacar_esfera(Coord x, Coord y, Coord z) throw(gridPositionException);
 
     void sacar_esfera(const esferaId& id) throw(gridPositionException);
 
@@ -95,8 +96,7 @@ private:
 
     void reducir_vol_parcial(int coord_x, int coord_y, int coord_z);
     void aumentar_vol_parcial(int coord_x, int coord_y, int coord_z);
-    void calcular_coord(Coord coord_x, Coord coord_y, Coord coord_z,
-                        GridCoord& x, GridCoord& y, GridCoord& z) const;
+    void calcular_coord(Coord coord_x, Coord coord_y, Coord coord_z, GridCoord& x, GridCoord& y, GridCoord& z) const;
     unsigned int calcular_intersecciones(GridCoord coord_x, GridCoord coord_y, GridCoord coord_z) const;
     inline esferaId obtener_id(Coord x, Coord y, Coord z) const;
 

@@ -8,7 +8,7 @@
 #include "petu.h"
 
 #include "generator.h"
-#include "readdata.h"
+#include "factory_reader_chains.h"
 #include "tree_filters.h"
 #include "tree_data.h"
 #include "tree_helper.h"
@@ -20,6 +20,7 @@ int main(int argc, char** argv)
     if (o.parse(argc, argv))
     {
         std::ifstream filer(o.data.c_str());
+
         TreeData tree_data(o.Nres, o.m, o.n, o.z, filer, o.output_file);
         TreeFilters tree_filters;
 
@@ -39,7 +40,7 @@ int main(int argc, char** argv)
         }
         else
         {
-            FullCachedAnglesSeqReader* readerPtr = read_chains(o.input_format, o.residues_input, o.fragments_file);
+            FullCachedAnglesSeqReader* readerPtr = FactoryReaderChains::new_class(o.input_format, o.residues_input, o.fragments_file);
             IGeneratorChains* const generatorPtr = IGeneratorChains::Factory::new_class(o.write_format);
 
             std::auto_ptr<FullCachedAnglesSeqReader> db(readerPtr);

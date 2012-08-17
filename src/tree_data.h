@@ -9,12 +9,6 @@
 
 #include "grillado.h"
 
-enum FilterResultType //move to TreeFilters
-{
-    FILTER_FAIL,
-    FILTER_OK
-};
-
 typedef prot_filer::CachedReader<prot_filer::FullCache, prot_filer::SimpleAnglesReader, prot_filer::AnglesData> FullCachedAnglesSeqReader;
 typedef prot_filer::BasicProtein Atoms;
 
@@ -22,7 +16,6 @@ typedef prot_filer::BasicProtein Atoms;
 class TreeData
 {
 public:
-    //tomar referencias a prot_filer::AnglesMapping, prot_filer::AnglesData y Grillado en vez de crearlos aca
     TreeData(int nRes, size_t cols, size_t rows, size_t depth, std::istream& input_file, std::string& output_file);
 
     const unsigned int nres;
@@ -40,9 +33,9 @@ public:
     long int cont;         // cantidad de estructuras exitosas hasta el momento
     bool hubo_algun_exito; // si encendido, dice que hubo al menos una rama que llego al final
 
-    const std::auto_ptr<Grillado>                  grilla;       // Utilizamos el grillado para aproximar el volumen parcial
-    const std::auto_ptr<prot_filer::AnglesMapping> angles_mapping;
-    const std::auto_ptr<prot_filer::AnglesData>    angles_data; // Used only when writing compressed data.
+    Grillado grilla;       // Utilizamos el grillado para aproximar el volumen parcial
+    prot_filer::AnglesMapping angles_mapping;
+    prot_filer::AnglesData    angles_data; // Used only when writing compressed data.
 
     prot_filer::FragmentIds fragment_ids;
 

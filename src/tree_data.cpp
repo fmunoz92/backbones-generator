@@ -2,16 +2,14 @@
 
 TreeData::TreeData(int nRes, size_t cols, size_t rows, size_t depth, std::istream& input_file, std::string& output_file)
     : nres(nRes),
-      // Maximun gyration radius and maximun CA-CA distance.
-      // Both equations constructed from database analisys.
-      rgmax(2.72 * mili::cubic_root(nres) + 5.0),
-      dmax2(mili::square(8.0 * mili::cubic_root(nres) + 25.0)),
+      rgmax(2.72 * mili::cubic_root(nres) + 5.0),              // Maximun gyration radius and maximun CA-CA distance.
+      dmax2(mili::square(8.0 * mili::cubic_root(nres) + 25.0)),// Both equations constructed from database analisys.
       atm(Atoms(nres * 3)),
       cont(0),
       hubo_algun_exito(false),
-      grilla(new Grillado(cols, rows, depth)),
-      angles_mapping(new prot_filer::AnglesMapping(nres)),
-      angles_data(new prot_filer::AnglesData(nres, angles_mapping.get())),
+      grilla(cols, rows, depth),
+      angles_mapping(nres),
+      angles_data(nres, &angles_mapping),
       output_file(output_file)
 {
     readdata(input_file);
@@ -31,7 +29,8 @@ void TreeData::readdata(std::istream& filer)
             sinfi.push_back(sin(mili::deg2rad(fi)));
             cossi.push_back(cos(mili::deg2rad(si)));
             sinsi.push_back(sin(mili::deg2rad(si)));
-            angles_mapping->set_mapping(fi, si);
+
+            angles_mapping.set_mapping(fi, si);
         }
         ++i;
     }

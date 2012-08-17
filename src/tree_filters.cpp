@@ -24,7 +24,7 @@ void TreeFilters::setr(float rn, float rca, float rc, float scal_1_4, float scal
     }
 }
 
-FilterResultType TreeFilters::calcRdG(const Atoms& patm, int nres, float rgmax) const
+TreeFilters::FilterResultType TreeFilters::calcRdG(const Atoms& patm, int nres, float rgmax) const
 {
     float Rcm, xcm, ycm, zcm;
 
@@ -39,6 +39,7 @@ FilterResultType TreeFilters::calcRdG(const Atoms& patm, int nres, float rgmax) 
     xcm /= nres;
     ycm /= nres;
     zcm /= nres;
+
     for (int i = 1; i <= (nres * 3) - 2; i += 3)
     {
         const float dx2 = square(patm[i].x - xcm);
@@ -56,7 +57,7 @@ FilterResultType TreeFilters::calcRdG(const Atoms& patm, int nres, float rgmax) 
         return FILTER_OK;
 }
 
-FilterResultType TreeFilters::islong(const Atoms& patm, int at, float dmax2) const
+TreeFilters::FilterResultType TreeFilters::islong(const Atoms& patm, int at, float dmax2) const
 {
     // Until we reach residue #5, the check for long chain is meaningless
     // at=13 is the CA of residue #5
@@ -82,7 +83,7 @@ FilterResultType TreeFilters::islong(const Atoms& patm, int at, float dmax2) con
     return FILTER_OK;
 }
 
-FilterResultType TreeFilters::isclash(const Atoms& patm, int at) const
+TreeFilters::FilterResultType TreeFilters::isclash(const Atoms& patm, int at) const
 {
     //This is to check for the so-called 1-4 clashes,
     //i.e. a clash between atom at position i with atom at position i+3
@@ -133,7 +134,7 @@ FilterResultType TreeFilters::isclash(const Atoms& patm, int at) const
     return FILTER_OK;
 }
 
-FilterResultType TreeFilters::volumen_en_rango(int nres, Volume vol_parcial) const
+TreeFilters::FilterResultType TreeFilters::volumen_en_rango(int nres, Volume vol_parcial) const
 {
     // Valores obtenidos a partir de pruebas de un set de datos en Grillado.
     static const float cota_maxima_volumen = 177.65f;
@@ -145,4 +146,16 @@ FilterResultType TreeFilters::volumen_en_rango(int nres, Volume vol_parcial) con
     cout << "Maximun Volume allowed per a.a  =" << volumen_max_aa << ". Volumen in this chain=" << chain_volumen << endl;
 #endif
     return in_range(chain_volumen, volumen_min_aa, volumen_max_aa) ? FILTER_OK : FILTER_FAIL;
+}
+
+
+ClashFilter::ClashFilter(const TreeData& tree_data, const TreeFilters& tree_filters) :
+    tree_data(tree_data),
+    tree_filters(tree_filters)
+{}
+
+bool ClashFilter::operator()(unsigned int index, const Atoms& patm, int at) const
+{
+    const bool clash = tree_filters.isclash(patm, at) == TreeFilters::FILTER_FAIL;
+    return !clash && (index != 2 || (tree_filters.islong(patm, at, tree_data.dmax2) != TreeFilters::FILTER_FAIL));
 }

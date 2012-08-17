@@ -6,6 +6,13 @@
 class TreeFilters
 {
 public:
+
+    enum FilterResultType
+    {
+        FILTER_FAIL,
+        FILTER_OK
+    };
+
     void setr(float rn, float rca, float rc, float scal_1_4, float scal_1_5);
 
     //This function calculates the gyration radius of the CA atoms
@@ -30,6 +37,17 @@ private:
 
     float r[3][3][3];
 };
+
+class ClashFilter
+{
+public:
+    ClashFilter(const TreeData& tree_data, const TreeFilters& tree_filters);
+    bool operator()(unsigned int index, const Atoms& patm, int at) const;
+private:
+    const TreeData& tree_data;
+    const TreeFilters& tree_filters;
+};
+
 
 inline float TreeFilters::distance(const Atoms& patm, const int at, const int i)
 {
