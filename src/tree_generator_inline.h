@@ -25,10 +25,7 @@ inline void TreeGenerator<TOperator>::generate()
     while (treeOperator.putNextSeed(nivel, index_seed))
     {
         if (nivel < CANT_RES)
-        {
-            treeOperator.copyMatrix(R_inicial);//for changes generated in putNextSeed
-            expandTree(nivel, R_inicial, 0);
-        }
+            expandTree(nivel, 0);
         else
             processLeaf();
 
@@ -47,10 +44,13 @@ inline void TreeGenerator<TOperator>::generate()
             remove E
 */
 template <class TOperator>
-inline void TreeGenerator<TOperator>::expandTree(unsigned int nivel, const RMatrix R_inicial, unsigned int indice_nivel_anterior)
+inline void TreeGenerator<TOperator>::expandTree(unsigned int nivel, unsigned int indice_nivel_anterior)
 {
     bool ultimo_nivel_exitoso = false;//solo interesa si somos el anteultimo nivel
     unsigned int index_angles = 0;
+    RMatrix R_inicial;
+
+    treeOperator.copyMatrix(R_inicial);
 
     while (index_angles < CANT_ANGLES && !ultimo_nivel_exitoso)
     {
@@ -58,7 +58,7 @@ inline void TreeGenerator<TOperator>::expandTree(unsigned int nivel, const RMatr
 
         if (treeOperator.putFirst(nivel, index_angles, indice_nivel_anterior))
         {
-            if (nivel < CANT_RES)
+            if (nivel < CANT_RES + 1)
                 ultimo_nivel_exitoso = appendElements(nivel, index_angles);
             else
                 ultimo_nivel_exitoso = processLeaf();
@@ -74,7 +74,6 @@ template <class TOperator>
 inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigned int index)
 {
     typename TOperator::KeepRecursion resultRecursion;
-    RMatrix rLocal;
     bool result = false;
     unsigned int index_res = 0;
 
@@ -82,11 +81,8 @@ inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigne
     {
         if (resultRecursion == TOperator::DoRecursion)
         {
-            if (nivel < CANT_RES)
-            {
-                treeOperator.copyMatrix(rLocal);//for changes generated in putNext and putFirst
-                expandTree(nivel, rLocal, index);
-            }
+            if (nivel < CANT_RES + 1)
+                expandTree(nivel, index);
             else
                 result = processLeaf();
 
@@ -157,7 +153,7 @@ inline void TreeOperator<WriterHelper>::removeFirst(unsigned int& nivel)
 template <class WriterHelper>
 inline bool TreeOperator<WriterHelper>::lastLevelOk() const
 {
-    return (tree_helper.filtros_ultimo_nivel() == FILTER_OK);
+    return tree_helper.filtros_ultimo_nivel() == FILTER_OK;
 }
 
 template <class WriterHelper>
@@ -243,6 +239,7 @@ inline void ChainsTreeOperator<WriterHelper>::putSeed(prot_filer::AnglesData& ch
     std::list<Residuo> residuos;
 
     const unsigned int nextLevel = 2; //semilla is "level 1"
+
     this->tree_helper.clearatm();
 
     this->tree_helper.putSeed(this->R, residuo);
@@ -304,8 +301,6 @@ template <class WriterHelper>
 inline void ChainsTreeOperator<WriterHelper>::remove(unsigned int& nivel)
 {
     const unsigned int nivelesRetrocedidos = vectoresParaBorrar.back().size();
-
-    assert(nivelesRetrocedidos > 0);
 
     this->tree_helper.deleteRes(vectoresParaBorrar.back());
     this->tree_helper.deleteLastFragmentId();

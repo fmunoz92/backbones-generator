@@ -36,7 +36,7 @@ private:
     const TreeFilters& tree_filters;
 };
 
-class ClashFilter
+class ClashFilter //TODO: move to TreeFilters
 {
 public:
     ClashFilter(const TreeData& tree_data, const TreeFilters& tree_filters);

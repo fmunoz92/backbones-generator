@@ -17,7 +17,7 @@ public:
     inline void generate();
 
 private:
-    inline void expandTree(unsigned int nivel, const RMatrix R_inicial, unsigned int indice_nivel_anterior);
+    inline void expandTree(unsigned int nivel, unsigned int indice_nivel_anterior);
     inline bool processLeaf();
     inline bool appendElements(unsigned int nivel, unsigned int index);
 

@@ -48,7 +48,7 @@ int main(int argc, char** argv)
             g->generate(tree_helper, db.get());
         }
 
-        std::cout << "Number of chains generated=" << tree_data.cont << std::endl;
+        std::cout << "Number of chains generated = " << tree_data.cont << std::endl;
 
         prot_filer::Coord3DReaderFactory::destroy_instance();
         prot_filer::Coord3DSeqReaderFactory::destroy_instance();
@@ -86,16 +86,16 @@ bool CommandLineOptions::parse(int argc, char** argv)
     if (ops >> GetOpt::Option('r', "Nres", Nres))
     {
         ops
-                >> GetOpt::Option('n', "Rn", RN, 1.5f)
-                >> GetOpt::Option('a', "Rca", RCa, 1.7f)
-                >> GetOpt::Option('c', "Rc", RC, 1.6f)
-                >> GetOpt::Option('s', "Scal_1_4", Scal_1_4, 0.85f)
-                >> GetOpt::Option('l', "Scal_1_5", Scal_1_5, 1.0f)
-                >> GetOpt::Option('i', "input_file", data)
-                >> GetOpt::Option('o', "output_file", output_file, std::string("traj"))
-                >> GetOpt::Option('N', "rows", n, static_cast<size_t>(100))
-                >> GetOpt::Option('M', "cols", m, static_cast<size_t>(100))
-                >> GetOpt::Option('Z', "depth", z, static_cast<size_t>(100))
+                >> GetOpt::Option('n', "Rn",           RN,           1.5f)
+                >> GetOpt::Option('a', "Rca",          RCa,          1.7f)
+                >> GetOpt::Option('c', "Rc",           RC,           1.6f)
+                >> GetOpt::Option('s', "Scal_1_4",     Scal_1_4,     0.85f)
+                >> GetOpt::Option('l', "Scal_1_5",     Scal_1_5,     1.0f)
+                >> GetOpt::Option('i', "input_file",   data,         std::string("data"))
+                >> GetOpt::Option('o', "output_file",  output_file,  std::string("traj"))
+                >> GetOpt::Option('N', "rows",         n,            static_cast<size_t>(100))
+                >> GetOpt::Option('M', "cols",         m,            static_cast<size_t>(100))
+                >> GetOpt::Option('Z', "depth",        z,            static_cast<size_t>(100))
                 >> GetOpt::Option('w', "write_format", write_format, std::string("xtc"));
 
         const bool chains = ops >> GetOpt::Option("chains_input", input_files);
