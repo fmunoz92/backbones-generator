@@ -13,9 +13,9 @@ void TreeFilters::setr(float rn, float rca, float rc, float scal_1_4, float scal
     radio[1] = rca;
     radio[2] = rc;
 
-    for (int i = 0; i <= 2; i++)
+    for (unsigned int i = 0; i <= 2; i++)
     {
-        for (int j = 0; j <= 2; j++)
+        for (unsigned int j = 0; j <= 2; j++)
         {
             r[i][j][0] = square(radio[i] + radio[j]) * scal_1_4 * scal_1_4;
             r[i][j][1] = square(radio[i] + radio[j]) * scal_1_5 * scal_1_5;
@@ -24,13 +24,13 @@ void TreeFilters::setr(float rn, float rca, float rc, float scal_1_4, float scal
     }
 }
 
-TreeFilters::FilterResultType TreeFilters::calcRdG(const Atoms& patm, int nres, float rgmax) const
+TreeFilters::FilterResultType TreeFilters::calcRdG(const Atoms& patm, unsigned int nres, float rgmax) const
 {
     float Rcm, xcm, ycm, zcm;
 
     Rcm = xcm = ycm = zcm = 0;
 
-    for (int i = 1; i <= (nres * 3) - 2; i += 3)
+    for (unsigned int i = 1; i <= (nres * 3) - 2; i += 3)
     {
         xcm += patm[i].x;
         ycm += patm[i].y;
@@ -39,8 +39,7 @@ TreeFilters::FilterResultType TreeFilters::calcRdG(const Atoms& patm, int nres, 
     xcm /= nres;
     ycm /= nres;
     zcm /= nres;
-
-    for (int i = 1; i <= (nres * 3) - 2; i += 3)
+    for (unsigned int i = 1; i <= (nres * 3) - 2; i += 3)
     {
         const float dx2 = square(patm[i].x - xcm);
         const float dy2 = square(patm[i].y - ycm);
@@ -57,7 +56,7 @@ TreeFilters::FilterResultType TreeFilters::calcRdG(const Atoms& patm, int nres, 
         return FILTER_OK;
 }
 
-TreeFilters::FilterResultType TreeFilters::islong(const Atoms& patm, int at, float dmax2) const
+TreeFilters::FilterResultType TreeFilters::islong(const Atoms& patm, unsigned int at, float dmax2) const
 {
     // Until we reach residue #5, the check for long chain is meaningless
     // at=13 is the CA of residue #5
@@ -83,7 +82,7 @@ TreeFilters::FilterResultType TreeFilters::islong(const Atoms& patm, int at, flo
     return FILTER_OK;
 }
 
-TreeFilters::FilterResultType TreeFilters::isclash(const Atoms& patm, int at) const
+TreeFilters::FilterResultType TreeFilters::isclash(const Atoms& patm, unsigned int at) const
 {
     //This is to check for the so-called 1-4 clashes,
     //i.e. a clash between atom at position i with atom at position i+3
@@ -134,7 +133,7 @@ TreeFilters::FilterResultType TreeFilters::isclash(const Atoms& patm, int at) co
     return FILTER_OK;
 }
 
-TreeFilters::FilterResultType TreeFilters::volumen_en_rango(int nres, Volume vol_parcial) const
+TreeFilters::FilterResultType TreeFilters::volumen_en_rango(unsigned int nres, Volume vol_parcial) const
 {
     // Valores obtenidos a partir de pruebas de un set de datos en Grillado.
     static const float cota_maxima_volumen = 177.65f;
@@ -154,7 +153,7 @@ ClashFilter::ClashFilter(const TreeData& tree_data, const TreeFilters& tree_filt
     tree_filters(tree_filters)
 {}
 
-bool ClashFilter::operator()(unsigned int index, const Atoms& patm, int at) const
+bool ClashFilter::operator()(unsigned int index, const Atoms& patm, unsigned int at) const
 {
     const bool clash = tree_filters.isclash(patm, at) == TreeFilters::FILTER_FAIL;
     return !clash && (index != 2 || (tree_filters.islong(patm, at, tree_data.dmax2) != TreeFilters::FILTER_FAIL));

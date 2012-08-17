@@ -2,7 +2,7 @@ Import ('env')
 
 name = 'backbones-generator'
 inc = env.Dir('../src')
-src = env.Glob('*.cpp'), env.File('../src/grillado.cpp'), env.File('../src/tree_helper.cpp'), env.File('../src/readdata.cpp'), env.File('../src/tree_filters.cpp'), env.File('../src/tree_data.cpp')
+src = env.Glob('*.cpp'), env.File('../src/grillado.cpp'), env.File('../src/tree_helper.cpp'), env.File('../src/tree_filters.cpp'), env.File('../src/tree_data.cpp')
 deps = ['backbones-generator', 'gmock','gtest_main', 'prot-filer']
 
 CXXFLAGS=['-Wall', '-Wextra', '-Wno-sign-compare']
