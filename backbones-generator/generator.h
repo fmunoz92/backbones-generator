@@ -29,7 +29,11 @@ class GeneratorSimple : public IGeneratorSimple
 public:
     virtual ~GeneratorSimple() {}
 private:
-    inline virtual void generate(TreeHelper& tree_helper);
+    inline virtual void generate(TreeHelper& tree_helper)
+    {
+        TreeGenerator<SimpleTreeOperator<Writer> > generator(tree_helper, NULL);
+        generator.generate();
+    }
 };
 
 template <class Writer>
@@ -38,22 +42,11 @@ class GeneratorChains : public IGeneratorChains
 public:
     virtual ~GeneratorChains() {}
 private:
-    inline virtual void generate(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader);
+    inline virtual void generate(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader)
+    {
+        TreeGenerator<ChainsTreeOperator<Writer> > generator(tree_helper, reader);
+        generator.generate();
+    }
 };
-
-//move to _inline
-template <class Writer>
-inline void GeneratorSimple<Writer>::generate(TreeHelper& tree_helper)
-{
-    TreeGenerator<SimpleTreeOperator<Writer> > generator(tree_helper, NULL);
-    generator.generate();
-}
-
-template <class Writer>
-inline void GeneratorChains<Writer>::generate(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader)
-{
-    TreeGenerator<ChainsTreeOperator<Writer> > generator(tree_helper, reader);
-    generator.generate();
-}
 
 #endif

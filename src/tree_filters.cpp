@@ -26,9 +26,10 @@ void TreeFilters::setr(float rn, float rca, float rc, float scal_1_4, float scal
 
 TreeFilters::FilterResultType TreeFilters::calcRdG(const Atoms& patm, unsigned int nres, float rgmax) const
 {
-    float Rcm, xcm, ycm, zcm;
-
-    Rcm = xcm = ycm = zcm = 0;
+    float Rcm = 0;
+    float xcm = 0;
+    float ycm = 0;
+    float zcm = 0;
 
     for (unsigned int i = 1; i <= (nres * 3) - 2; i += 3)
     {
@@ -36,9 +37,11 @@ TreeFilters::FilterResultType TreeFilters::calcRdG(const Atoms& patm, unsigned i
         ycm += patm[i].y;
         zcm += patm[i].z;
     }
+
     xcm /= nres;
     ycm /= nres;
     zcm /= nres;
+
     for (unsigned int i = 1; i <= (nres * 3) - 2; i += 3)
     {
         const float dx2 = square(patm[i].x - xcm);
@@ -50,10 +53,8 @@ TreeFilters::FilterResultType TreeFilters::calcRdG(const Atoms& patm, unsigned i
 #ifdef VERBOSE
     printf("Raduis of gyration= %f. Maximun allowed=%f\n", sqrt(Rcm / nres), rgmax);
 #endif
-    if (sqrt(Rcm / nres) > rgmax)
-        return FILTER_FAIL ;
-    else
-        return FILTER_OK;
+
+	return (sqrt(Rcm / nres) > rgmax)? FILTER_FAIL : FILTER_OK;
 }
 
 TreeFilters::FilterResultType TreeFilters::islong(const Atoms& patm, unsigned int at, float dmax2) const
@@ -123,6 +124,7 @@ TreeFilters::FilterResultType TreeFilters::isclash(const Atoms& patm, unsigned i
         d2 = distance(patm, at, i);
         if (d2 < r[patm[at].vdw][patm[i].vdw][2])
         {
+
 #ifdef VERBOSE
             printf("Clash > 1-5 between atmom=%i and atom=%i distancia=%2.3f\n", at, i, sqrt(d2));
 #endif
@@ -139,11 +141,14 @@ TreeFilters::FilterResultType TreeFilters::volumen_en_rango(unsigned int nres, V
     static const float cota_maxima_volumen = 177.65f;
     static const float pendiente_empirica = -0.0882f;
     static const float volumen_min_aa = 110.0f;
+
     const float volumen_max_aa = pendiente_empirica * float(nres) + cota_maxima_volumen;
     const float chain_volumen = float(vol_parcial) / float(nres);
+
 #ifdef VERBOSE
     cout << "Maximun Volume allowed per a.a  =" << volumen_max_aa << ". Volumen in this chain=" << chain_volumen << endl;
 #endif
+
     return in_range(chain_volumen, volumen_min_aa, volumen_max_aa) ? FILTER_OK : FILTER_FAIL;
 }
 
@@ -156,5 +161,6 @@ ClashFilter::ClashFilter(const TreeData& tree_data, const TreeFilters& tree_filt
 bool ClashFilter::operator()(unsigned int index, const Atoms& patm, unsigned int at) const
 {
     const bool clash = tree_filters.isclash(patm, at) == TreeFilters::FILTER_FAIL;
-    return !clash && (index != 2 || (tree_filters.islong(patm, at, tree_data.dmax2) != TreeFilters::FILTER_FAIL));
+
+    return !clash && (index != 2 || (tree_filters.islong(patm, at, tree_data.dmax2) == TreeFilters::FILTER_OK));
 }

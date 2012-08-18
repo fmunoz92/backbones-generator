@@ -9,7 +9,8 @@ template <class WriterHelper>
 inline TreeOperator<WriterHelper>::TreeOperator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader)
     : tree_helper(tree_helper),
       writer_helper(tree_helper, reader)//call constructor adapter
-{}
+{
+}
 
 template <class WriterHelper>
 inline TreeOperator<WriterHelper>::TreeOperator(TreeHelper& tree_helper)

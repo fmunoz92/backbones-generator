@@ -54,6 +54,7 @@ TreeFilters::FilterResultType TreeHelper::putRes(float* pR, const unsigned int r
 #else
     ClashFilter filter(tree_data, tree_filters);
 #endif
+
     bool success = backbones_utils::poneres(pR, cossi, sinsi, cosfi, sinfi, patm, resN, filter);
 
     if (!success)
@@ -62,6 +63,7 @@ TreeFilters::FilterResultType TreeHelper::putRes(float* pR, const unsigned int r
     }
 
     const prot_filer::ATOM& atm = patm[3 * (resN - 1) + 1];
+
     residuo.at2 = tree_data.grilla.agregar_esfera(atm.x, atm.y, atm.z);
 
     return TreeFilters::FILTER_OK;

@@ -73,7 +73,7 @@ inline void TreeGenerator<TOperator>::expandTree(unsigned int nivel, unsigned in
 }
 
 template <class TOperator>
-inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigned int index)
+inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigned int index_angles)
 {
     typename TOperator::KeepRecursion resultRecursion;
     bool result = false;
@@ -84,7 +84,7 @@ inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigne
         if (resultRecursion == TOperator::DoRecursion)
         {
             if (nivel < CANT_RES + 1)
-                expandTree(nivel, index);
+                expandTree(nivel, index_angles);
             else
                 result = processLeaf();
 

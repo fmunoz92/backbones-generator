@@ -248,6 +248,7 @@ void Grillado::reset()
         for (size_t n = 0; n < w; n++)
             for (size_t Z = 0; Z < z; Z++)
                 matriz[m][n][Z] = 0;
+
     esferas = 0;
     intersecciones = 0;
 }

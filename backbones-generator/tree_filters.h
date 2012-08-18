@@ -48,7 +48,6 @@ private:
     const TreeFilters& tree_filters;
 };
 
-
 inline float TreeFilters::distance(const Atoms& patm, const unsigned int at, const unsigned int i)
 {
     const float dx2 = square(patm[at].x - patm[i].x);
@@ -57,6 +56,5 @@ inline float TreeFilters::distance(const Atoms& patm, const unsigned int at, con
 
     return dx2 + dy2 + dz2;
 }
-
 
 #endif
