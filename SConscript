@@ -1,7 +1,7 @@
 Import ('env')
 
 name = 'backbones-generator'
-inc = env.Dir('src')
+inc = env.Dir('.')
 src = env.Glob('src/*.cpp')
 deps = ['prot-filer', 'mili', 'getoptpp']
 

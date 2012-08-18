@@ -1,4 +1,4 @@
-#include "generator.h"
+#include "backbones-generator/generator.h"
 
 /* REGISTER_FACTORIZABLE_CLASS TAKE A TYPEDEF IF DERIVED CLASS IS A TEMPLATE-CLASS*/
 typedef GeneratorChains<CompressedWriterHelper> ChainsFormatGeneratorCompressedWriter;

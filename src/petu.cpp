@@ -5,13 +5,13 @@
 
 #include "getoptpp/getopt_pp.h"
 
-#include "petu.h"
+#include "backbones-generator/petu.h"
 
-#include "generator.h"
-#include "factory_reader_chains.h"
-#include "tree_filters.h"
-#include "tree_data.h"
-#include "tree_helper.h"
+#include "backbones-generator/generator.h"
+#include "backbones-generator/factory_reader_chains.h"
+#include "backbones-generator/tree_filters.h"
+#include "backbones-generator/tree_data.h"
+#include "backbones-generator/tree_helper.h"
 
 int main(int argc, char** argv)
 {

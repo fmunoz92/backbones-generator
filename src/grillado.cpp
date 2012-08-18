@@ -19,7 +19,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "grillado.h"
+#include "backbones-generator/grillado.h"
 
 using namespace std;
 

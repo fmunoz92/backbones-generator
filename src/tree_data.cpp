@@ -1,4 +1,4 @@
-#include "tree_data.h"
+#include "backbones-generator/tree_data.h"
 
 TreeData::TreeData(int nRes, size_t cols, size_t rows, size_t depth, std::istream& input_file, std::string& output_file)
     : nres(nRes),
