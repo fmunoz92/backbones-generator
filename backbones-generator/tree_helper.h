@@ -11,6 +11,7 @@ public:
 
     TreeHelper(TreeData& tree_data, TreeFilters& tree_filters);
 
+    //TODO: use RMATRIX(typedef for R)
     void                          putSeed(float* R, Residuo& residuo);
     TreeFilters::FilterResultType putRes(float* pR, const unsigned int resN, Residuo& residuo, unsigned int si_index, unsigned int fi_index);
     TreeFilters::FilterResultType putChain(float* pR, unsigned int resN, std::list<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chain_index);
@@ -24,10 +25,13 @@ public:
     void reportSuccess();
     void deleteLastFragmentId();
 
-    prot_filer::AnglesData&  getAnglesData()  const;
-    Atoms&                   getAtm()         const;
-    prot_filer::FragmentIds& getFragmentIds() const;
-    const std::string&       getOutputFile()  const;
+    Atoms& getAtm();
+
+    const prot_filer::AnglesData&  getAnglesData()  const;
+    const prot_filer::FragmentIds& getFragmentIds() const;
+
+    const std::string& getOutputFile()  const;
+
     unsigned int             getNRes()        const;
     unsigned int             getNAngles()     const;
     bool                     success()        const;

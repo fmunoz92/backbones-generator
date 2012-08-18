@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 #include "backbones-generator/tree_filters.h"
 
 using mili::square;
@@ -14,14 +15,12 @@ void TreeFilters::setr(float rn, float rca, float rc, float scal_1_4, float scal
     radio[2] = rc;
 
     for (unsigned int i = 0; i <= 2; i++)
-    {
         for (unsigned int j = 0; j <= 2; j++)
         {
             r[i][j][0] = square(radio[i] + radio[j]) * scal_1_4 * scal_1_4;
             r[i][j][1] = square(radio[i] + radio[j]) * scal_1_5 * scal_1_5;
             r[i][j][2] = square(radio[i] + radio[j]);
         }
-    }
 }
 
 TreeFilters::FilterResultType TreeFilters::calcRdG(const Atoms& patm, unsigned int nres, float rgmax) const
@@ -51,10 +50,10 @@ TreeFilters::FilterResultType TreeFilters::calcRdG(const Atoms& patm, unsigned i
     }
 
 #ifdef VERBOSE
-    printf("Raduis of gyration= %f. Maximun allowed=%f\n", sqrt(Rcm / nres), rgmax);
+    std::cout << "Raduis of gyration = " << sqrt(Rcm / nres) << " Maximun allowed = " << rgmax << std::endl;
 #endif
 
-	return (sqrt(Rcm / nres) > rgmax)? FILTER_FAIL : FILTER_OK;
+    return (sqrt(Rcm / nres) > rgmax) ? FILTER_FAIL : FILTER_OK;
 }
 
 TreeFilters::FilterResultType TreeFilters::islong(const Atoms& patm, unsigned int at, float dmax2) const
@@ -72,10 +71,11 @@ TreeFilters::FilterResultType TreeFilters::islong(const Atoms& patm, unsigned in
         const float dy2 = square(patm[at].y - patm[i].y);
         const float dz2 = square(patm[at].z - patm[i].z);
         const float d2  = dx2 + dy2 + dz2;
+
         if (d2 > dmax2)
         {
 #ifdef VERBOSE
-            printf("Chain length = %f, while Dmax is= %f \n", sqrt(d2), sqrt(dmax2));
+            std::cout << "Chain length = " << sqrt(d2) << ", while Dmax is = " << sqrt(dmax2) << std::endl;
 #endif
             return FILTER_FAIL;
         }
@@ -93,7 +93,7 @@ TreeFilters::FilterResultType TreeFilters::isclash(const Atoms& patm, unsigned i
     if (d2 < r[patm[at].vdw][patm[i].vdw][0])
     {
 #ifdef VERBOSE
-        printf("Clash 1-4 between atmom=%i and atom=%i distancia=%2.3f\n", at, i, sqrt(d2));
+        std::cout << "Clash 1-4 between atmom = " << at << " and atom = " << i << " distancia= " <<  sqrt(d2) << std::endl;
 #endif
         return FILTER_FAIL;
     }
@@ -109,7 +109,7 @@ TreeFilters::FilterResultType TreeFilters::isclash(const Atoms& patm, unsigned i
     if (d2 < r[patm[at].vdw][patm[i].vdw][1])
     {
 #ifdef VERBOSE
-        printf("Clash 1-5 between atmom=%i and atom=%i distancia=%2.3f\n", at, i, sqrt(d2));
+        std::cout << "Clash 1-5 between atmom = " << at << " and atom = " << i << " distancia= " <<  sqrt(d2) << std::endl;
 #endif
         return FILTER_FAIL;
     }
@@ -124,9 +124,8 @@ TreeFilters::FilterResultType TreeFilters::isclash(const Atoms& patm, unsigned i
         d2 = distance(patm, at, i);
         if (d2 < r[patm[at].vdw][patm[i].vdw][2])
         {
-
 #ifdef VERBOSE
-            printf("Clash > 1-5 between atmom=%i and atom=%i distancia=%2.3f\n", at, i, sqrt(d2));
+            std::cout << "Clash 1-5 between atmom = " << at << " and atom = " << i << " distancia= " <<  sqrt(d2) << std::endl;
 #endif
             return FILTER_FAIL;
         }
@@ -146,7 +145,7 @@ TreeFilters::FilterResultType TreeFilters::volumen_en_rango(unsigned int nres, V
     const float chain_volumen = float(vol_parcial) / float(nres);
 
 #ifdef VERBOSE
-    cout << "Maximun Volume allowed per a.a  =" << volumen_max_aa << ". Volumen in this chain=" << chain_volumen << endl;
+    std::cout << "Maximun Volume allowed per a.a  =" << volumen_max_aa << ". Volumen in this chain=" << chain_volumen << endl;
 #endif
 
     return in_range(chain_volumen, volumen_min_aa, volumen_max_aa) ? FILTER_OK : FILTER_FAIL;

@@ -117,7 +117,7 @@ void TreeHelper::deleteLastFragmentId()
     tree_data.fragment_ids.pop_back();
 }
 
-prot_filer::AnglesData&  TreeHelper::getAnglesData() const
+const prot_filer::AnglesData&  TreeHelper::getAnglesData() const
 {
     return tree_data.angles_data;
 }
@@ -127,7 +127,7 @@ Atoms& TreeHelper::getAtm() const
     return tree_data.atm;
 }
 
-prot_filer::FragmentIds& TreeHelper::getFragmentIds() const
+const prot_filer::FragmentIds& TreeHelper::getFragmentIds() const
 {
     return tree_data.fragment_ids;
 }
