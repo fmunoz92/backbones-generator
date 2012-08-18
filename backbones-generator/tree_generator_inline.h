@@ -2,7 +2,7 @@
 #error Internal header file, DO NOT include this.
 #endif
 
-#include "tree_operator.h" //for RMatrix
+#include "backbones-generator/tree_operator.h" //for RMatrix
 
 template <class TOperator>
 inline TreeGenerator<TOperator>::TreeGenerator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader)

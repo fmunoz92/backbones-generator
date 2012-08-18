@@ -1,7 +1,7 @@
 #ifndef TREE_OPERATOR_H
 #define TREE_OPERATOR_H
 
-#include "tree_helper.h"
+#include "backbones-generator/tree_helper.h"
 
 template <class WriterHelper>
 class TreeOperator

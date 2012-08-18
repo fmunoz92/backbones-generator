@@ -3,9 +3,9 @@
 
 #include <mili/mili.h>
 
-#include "tree_generator.h"
-#include "tree_helper.h"
-#include "filer.h"
+#include "backbones-generator/tree_generator.h"
+#include "backbones-generator/tree_helper.h"
+#include "backbones-generator/filer.h"
 
 struct IGeneratorSimple
 {

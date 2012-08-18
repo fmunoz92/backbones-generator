@@ -5,7 +5,7 @@
 #include <fstream>
 #include <string>
 
-#include "tree_data.h"// for global typedef FullCachedAnglesSeqReader
+#include "backbones-generator/tree_data.h"// for global typedef FullCachedAnglesSeqReader
 
 struct FactoryReaderChains
 {

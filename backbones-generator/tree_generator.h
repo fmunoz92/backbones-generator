@@ -5,7 +5,7 @@
 #include <list>
 #include <mili/mili.h>
 
-#include "tree_helper.h"
+#include "backbones-generator/tree_helper.h"
 
 
 template <class TOperator>

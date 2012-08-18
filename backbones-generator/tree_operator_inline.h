@@ -2,8 +2,8 @@
 #error Internal header file, DO NOT include this.
 #endif
 
-#include "filer.h"
-#include "tree_filters.h"
+#include "backbones-generator/filer.h"
+#include "backbones-generator/tree_filters.h"
 
 template <class WriterHelper>
 inline TreeOperator<WriterHelper>::TreeOperator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader)

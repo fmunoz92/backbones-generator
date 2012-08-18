@@ -13,7 +13,7 @@ using namespace std;
 TEST(TestReadData, read_data)
 {
     istringstream inputFile("-60 -40\n");
-    
+
     string outputFile("");
 
     TreeData tree_data(1, 4, 4, 4, inputFile, outputFile);

@@ -2,8 +2,8 @@
 #define TREE_HELPER_H
 
 #include <list>
-#include "tree_data.h"
-#include "tree_filters.h"
+#include "backbones-generator/tree_data.h"
+#include "backbones-generator/tree_filters.h"
 
 class TreeHelper
 {

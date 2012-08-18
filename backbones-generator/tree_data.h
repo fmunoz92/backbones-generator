@@ -7,7 +7,7 @@
 #include "prot-filer/format_filer.h"
 #include "prot-filer/cached_reader.h"
 
-#include "grillado.h"
+#include "backbones-generator/grillado.h"
 
 typedef prot_filer::CachedReader<prot_filer::FullCache, prot_filer::SimpleAnglesReader, prot_filer::AnglesData> FullCachedAnglesSeqReader;
 typedef prot_filer::BasicProtein Atoms;
