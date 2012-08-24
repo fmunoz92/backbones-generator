@@ -122,7 +122,7 @@ const prot_filer::AnglesData&  TreeHelper::getAnglesData() const
     return tree_data.angles_data;
 }
 
-Atoms& TreeHelper::getAtm() const
+Atoms& TreeHelper::getAtm()
 {
     return tree_data.atm;
 }
