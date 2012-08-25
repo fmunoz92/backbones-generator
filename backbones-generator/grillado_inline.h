@@ -50,10 +50,9 @@ inline Volume Grillado::calc_vol(Length radio)
 inline GridCoord modulo(int a, int m)
 {
     a = (a % m);
+
     if (a < 0)
-    {
         a += m;
-    }
 
     return static_cast<unsigned int>(a);
 }

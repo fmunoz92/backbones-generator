@@ -46,6 +46,7 @@ TreeFilters::FilterResultType TreeFilters::calcRdG(const Atoms& patm, unsigned i
         const float dx2 = square(patm[i].x - xcm);
         const float dy2 = square(patm[i].y - ycm);
         const float dz2 = square(patm[i].z - zcm);
+        
         Rcm += (dx2 + dy2 + dz2);
     }
 

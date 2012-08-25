@@ -37,11 +37,10 @@ void TreeHelper::deleteRes(const std::list<Residuo>& residuos)
 
 TreeFilters::FilterResultType TreeHelper::putRes(float* pR, const unsigned int resN, Residuo& residuo, unsigned int si_index, unsigned int fi_index)
 {
-    float cossi = tree_data.cossi[si_index];
-    float sinsi = tree_data.sinsi[si_index];
-    float cosfi = tree_data.cosfi[fi_index];
-    float sinfi = tree_data.sinfi[fi_index];
-    Atoms& patm = tree_data.atm;
+    const float cossi = tree_data.cossi[si_index];
+    const float sinsi = tree_data.sinsi[si_index];
+    const float cosfi = tree_data.cosfi[fi_index];
+    const float sinfi = tree_data.sinfi[fi_index];
 
     const unsigned int i = resN - 2;
 
@@ -55,18 +54,15 @@ TreeFilters::FilterResultType TreeHelper::putRes(float* pR, const unsigned int r
     ClashFilter filter(tree_data, tree_filters);
 #endif
 
-    bool success = backbones_utils::poneres(pR, cossi, sinsi, cosfi, sinfi, patm, resN, filter);
+    bool success = backbones_utils::poneres(pR, cossi, sinsi, cosfi, sinfi, tree_data.atm, resN, filter);
 
-    if (!success)
+    if (success)
     {
-        return TreeFilters::FILTER_FAIL;
+		const prot_filer::ATOM& atm = tree_data.atm[3 * (resN - 1) + 1];
+		residuo.at2 = tree_data.grilla.agregar_esfera(atm.x, atm.y, atm.z);
     }
 
-    const prot_filer::ATOM& atm = patm[3 * (resN - 1) + 1];
-
-    residuo.at2 = tree_data.grilla.agregar_esfera(atm.x, atm.y, atm.z);
-
-    return TreeFilters::FILTER_OK;
+    return success ? TreeFilters::FILTER_OK : TreeFilters::FILTER_FAIL;
 }
 
 TreeFilters::FilterResultType TreeHelper::putChain(float* pR, unsigned int resN, std::list<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chain_index)
