@@ -58,8 +58,8 @@ TreeFilters::FilterResultType TreeHelper::putRes(float* pR, const unsigned int r
 
     if (success)
     {
-		const prot_filer::ATOM& atm = tree_data.atm[3 * (resN - 1) + 1];
-		residuo.at2 = tree_data.grilla.agregar_esfera(atm.x, atm.y, atm.z);
+        const prot_filer::ATOM& atm = tree_data.atm[3 * (resN - 1) + 1];
+        residuo.at2 = tree_data.grilla.agregar_esfera(atm.x, atm.y, atm.z);
     }
 
     return success ? TreeFilters::FILTER_OK : TreeFilters::FILTER_FAIL;
