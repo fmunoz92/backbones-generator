@@ -10,12 +10,12 @@ class TreeHelper
 {
 public:
 
-    TreeHelper(TreeData& tree_data, TreeFilters& tree_filters);
+    TreeHelper(TreeData& treeData, TreeFilters& treeFilters);
 
     //TODO: use RMATRIX(typedef for R)
     void                          putSeed(float* R, Residuo& residuo);
-    TreeFilters::FilterResultType putRes(float* pR, const unsigned int resN, Residuo& residuo, unsigned int si_index, unsigned int fi_index);
-    TreeFilters::FilterResultType putChain(float* pR, unsigned int resN, std::list<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chain_index);
+    TreeFilters::FilterResultType putRes(float* pR, const unsigned int resN, Residuo& residuo, unsigned int siIndex, unsigned int fiIndex);
+    TreeFilters::FilterResultType putChain(float* pR, unsigned int resN, std::list<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chainIndex);
 
     void deleteRes(const Residuo& residuo);
     void deleteRes(const std::list<Residuo>& residuos);
@@ -31,15 +31,15 @@ public:
     const prot_filer::AnglesData&  getAnglesData()  const;
     const prot_filer::FragmentIds& getFragmentIds() const;
 
-    const std::string& getOutputFile()  const;
+    const std::string& getOutputFile() const;
 
-    unsigned int             getNRes()        const;
-    unsigned int             getNAngles()     const;
-    bool                     success()        const;
+    unsigned int getNRes()        const;
+    unsigned int getNAngles()     const;
+    bool         success()        const;
 
 private:
-    TreeData& tree_data;
-    const TreeFilters& tree_filters;
+    TreeData& treeData;
+    const TreeFilters& treeFilters;
 };
 
 #endif

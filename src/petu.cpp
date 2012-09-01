@@ -21,35 +21,35 @@ int main(int argc, char** argv)
     {
         std::ifstream filer(o.data.c_str());
 
-        TreeData tree_data(o.Nres, o.m, o.n, o.z, filer, o.output_file);
-        TreeFilters tree_filters;
+        TreeData treeData(o.Nres, o.m, o.n, o.z, filer, o.outputFile);
+        TreeFilters treeFilters;
 
         // Fill r[][][] with the minimun squared distance between atoms
-        tree_filters.setr(o.RN, o.RCa, o.RC, o.Scal_1_4, o.Scal_1_5);
+        treeFilters.setr(o.RN, o.RCa, o.RC, o.Scal_1_4, o.Scal_1_5);
 
-        TreeHelper tree_helper(tree_data, tree_filters);
+        TreeHelper treeHelper(treeData, treeFilters);
 
-        std::cout << "Number of fi-si combinations in file=" << tree_helper.getNAngles() << std::endl;
+        std::cout << "Number of fi-si combinations in file=" << treeHelper.getNAngles() << std::endl;
 
-        if (o.residues_input.empty())
+        if (o.residuesInput.empty())
         {
-            IGeneratorSimple* const generatorPtr = IGeneratorSimple::Factory::new_class(o.write_format);
+            IGeneratorSimple* const generatorPtr = IGeneratorSimple::Factory::new_class(o.writeFormat);
             std::auto_ptr<IGeneratorSimple> g(generatorPtr);
 
-            g->generate(tree_helper);
+            g->generate(treeHelper);
         }
         else
         {
-            FullCachedAnglesSeqReader* readerPtr = FactoryReaderChains::new_class(o.input_format, o.residues_input, o.fragments_file);
-            IGeneratorChains* const generatorPtr = IGeneratorChains::Factory::new_class(o.write_format);
+            FullCachedAnglesSeqReader* readerPtr = FactoryReaderChains::new_class(o.inputFormat, o.residuesInput, o.fragmentsFile);
+            IGeneratorChains* const generatorPtr = IGeneratorChains::Factory::new_class(o.writeFormat);
 
             std::auto_ptr<FullCachedAnglesSeqReader> db(readerPtr);
             std::auto_ptr<IGeneratorChains> g(generatorPtr);
 
-            g->generate(tree_helper, db.get());
+            g->generate(treeHelper, db.get());
         }
 
-        std::cout << "Number of chains generated = " << tree_data.cont << std::endl;
+        std::cout << "Number of chains generated = " << treeData.cont << std::endl;
 
         prot_filer::Coord3DReaderFactory::destroy_instance();
         prot_filer::Coord3DSeqReaderFactory::destroy_instance();
@@ -82,24 +82,24 @@ void CommandLineOptions::show_usage()
 bool CommandLineOptions::parse(int argc, char** argv)
 {
     GetOpt::GetOpt_pp ops(argc, argv);
-    std::vector<std::string> input_files;
+    std::vector<std::string> inputFiles;
 
     if (ops >> GetOpt::Option('r', "Nres", Nres))
     {
         ops
-                >> GetOpt::Option('n', "Rn",           RN,           1.5f)
-                >> GetOpt::Option('a', "Rca",          RCa,          1.7f)
-                >> GetOpt::Option('c', "Rc",           RC,           1.6f)
-                >> GetOpt::Option('s', "Scal_1_4",     Scal_1_4,     0.85f)
-                >> GetOpt::Option('l', "Scal_1_5",     Scal_1_5,     1.0f)
-                >> GetOpt::Option('i', "input_file",   data,         std::string("data"))
-                >> GetOpt::Option('o', "output_file",  output_file,  std::string("traj"))
-                >> GetOpt::Option('N', "rows",         n,            static_cast<size_t>(100))
-                >> GetOpt::Option('M', "cols",         m,            static_cast<size_t>(100))
-                >> GetOpt::Option('Z', "depth",        z,            static_cast<size_t>(100))
-                >> GetOpt::Option('w', "write_format", write_format, std::string("xtc"));
+                >> GetOpt::Option('n', "Rn",           RN,          1.5f)
+                >> GetOpt::Option('a', "Rca",          RCa,         1.7f)
+                >> GetOpt::Option('c', "Rc",           RC,          1.6f)
+                >> GetOpt::Option('s', "Scal_1_4",     Scal_1_4,    0.85f)
+                >> GetOpt::Option('l', "Scal_1_5",     Scal_1_5,    1.0f)
+                >> GetOpt::Option('i', "input_file",   data,        std::string("data"))
+                >> GetOpt::Option('o', "output_file",  outputFile,  std::string("traj"))
+                >> GetOpt::Option('N', "rows",         n,           static_cast<size_t>(100))
+                >> GetOpt::Option('M', "cols",         m,           static_cast<size_t>(100))
+                >> GetOpt::Option('Z', "depth",        z,           static_cast<size_t>(100))
+                >> GetOpt::Option('w', "write_format", writeFormat, std::string("xtc"));
 
-        const bool chains = ops >> GetOpt::Option("chains_input", input_files);
+        const bool chains = ops >> GetOpt::Option("chains_input", inputFiles);
 
         if (Nres == 0)
         {
@@ -107,37 +107,37 @@ bool CommandLineOptions::parse(int argc, char** argv)
             return false;
         }
 
-        if (!chains && write_format == "fragments")
+        if (!chains && writeFormat == "fragments")
         {
             std::cerr << "Error: fragments output format cannot be used without chains input" << std::endl;
             return false;
         }
         if (chains)
         {
-            ops >> GetOpt::Option('f', "input_format", input_format, "compressed");
-            if (input_format == "compressed")
+            ops >> GetOpt::Option('f', "input_format", inputFormat, "compressed");
+            if (inputFormat == "compressed")
             {
-                if (input_files.size() == 0)
+                if (inputFiles.size() == 0)
                 {
                     std::cerr << "Error: Compressed input file required" << std::endl;
                     return false;
                 }
                 else
                 {
-                    residues_input = input_files[0];
+                    residuesInput = inputFiles[0];
                 }
             }
-            else if (input_format == "fragments")
+            else if (inputFormat == "fragments")
             {
-                if (input_files.size() < 2)
+                if (inputFiles.size() < 2)
                 {
                     std::cerr << "Error: Fragments input format, requires both fragments files" << std::endl;
                     return false;
                 }
                 else
                 {
-                    fragments_file = input_files[0];
-                    residues_input = input_files[1];
+                    fragmentsFile = inputFiles[0];
+                    residuesInput = inputFiles[1];
                 }
             }
         }

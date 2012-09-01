@@ -12,14 +12,14 @@ template <class TOperator>
 class TreeGenerator
 {
 public:
-    inline TreeGenerator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader);
+    inline TreeGenerator(TreeHelper& treeHelper, FullCachedAnglesSeqReader* const reader);
 
     inline void generate();
 
 private:
-    inline void expandTree(unsigned int nivel, unsigned int indice_nivel_anterior);
+    inline void expandTree(unsigned int level, unsigned int previousLevelIndex);
 
-    inline bool appendElements(unsigned int nivel, unsigned int index);
+    inline bool appendElements(unsigned int level, unsigned int indexAngles);
 
     inline bool processLeaf();
 

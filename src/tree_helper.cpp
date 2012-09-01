@@ -1,32 +1,32 @@
 #include "backbones-generator/tree_helper.h"
 
-TreeHelper::TreeHelper(TreeData& tree_data, TreeFilters& tree_filters)
-    : tree_data(tree_data),
-      tree_filters(tree_filters)
+TreeHelper::TreeHelper(TreeData& treeData, TreeFilters& treeFilters)
+    : treeData(treeData),
+      treeFilters(treeFilters)
 {}
 
 void TreeHelper::putSeed(float* R, Residuo& residuo)
 {
-    backbones_utils::semilla(tree_data.atm, R);
+    backbones_utils::semilla(treeData.atm, R);
 
-    tree_data.angles_data.seed[0] = tree_data.atm[0];
-    tree_data.angles_data.seed[1] = tree_data.atm[1];
-    tree_data.angles_data.seed[2] = tree_data.atm[2];
+    treeData.anglesData.seed[0] = treeData.atm[0];
+    treeData.anglesData.seed[1] = treeData.atm[1];
+    treeData.anglesData.seed[2] = treeData.atm[2];
 
-    residuo.at2 = tree_data.grilla.agregar_esfera(tree_data.atm[1].x, tree_data.atm[1].y, tree_data.atm[1].z);
+    residuo.at2 = treeData.grilla.agregar_esfera(treeData.atm[1].x, treeData.atm[1].y, treeData.atm[1].z);
 }
 
 bool TreeHelper::filterLastLevelOk()
 {
-    bool ok = tree_filters.calcRdG(tree_data.atm, tree_data.nres, tree_data.rgmax) == TreeFilters::FILTER_OK &&
-              tree_filters.volumen_en_rango(tree_data.nres, tree_data.grilla.obtener_vol_parcial()) == TreeFilters::FILTER_OK;
+    bool ok = treeFilters.calcRdG(treeData.atm, treeData.nres, treeData.rgmax) == TreeFilters::FILTER_OK &&
+              treeFilters.volumen_en_rango(treeData.nres, treeData.grilla.obtener_vol_parcial()) == TreeFilters::FILTER_OK;
 
     return ok;
 }
 
 void TreeHelper::deleteRes(const Residuo& residuo)
 {
-    tree_data.grilla.sacar_esfera(residuo.at2);
+    treeData.grilla.sacar_esfera(residuo.at2);
 }
 
 void TreeHelper::deleteRes(const std::list<Residuo>& residuos)
@@ -35,42 +35,42 @@ void TreeHelper::deleteRes(const std::list<Residuo>& residuos)
         deleteRes(*it);
 }
 
-TreeFilters::FilterResultType TreeHelper::putRes(float* pR, const unsigned int resN, Residuo& residuo, unsigned int si_index, unsigned int fi_index)
+TreeFilters::FilterResultType TreeHelper::putRes(float* pR, const unsigned int resN, Residuo& residuo, unsigned int siIndex, unsigned int fiIndex)
 {
-    const float cossi = tree_data.cossi[si_index];
-    const float sinsi = tree_data.sinsi[si_index];
-    const float cosfi = tree_data.cosfi[fi_index];
-    const float sinfi = tree_data.sinfi[fi_index];
+    const float cossi = treeData.cossi[siIndex];
+    const float sinsi = treeData.sinsi[siIndex];
+    const float cosfi = treeData.cosfi[fiIndex];
+    const float sinfi = treeData.sinfi[fiIndex];
 
     const unsigned int i = resN - 2;
 
-    tree_data.angles_data.angles[i].si = si_index;
-    tree_data.angles_data.angles[i].fi = fi_index;
+    treeData.anglesData.angles[i].si = siIndex;
+    treeData.anglesData.angles[i].fi = fiIndex;
 
 #ifdef COMBINATIONS_DEBUG
 #include "prot-filer/backbones_utils.h"
     backbones_utils::DummyFilter filter;
 #else
-    ClashFilter filter(tree_data, tree_filters);
+    ClashFilter filter(treeData, treeFilters);
 #endif
 
-    bool success = backbones_utils::poneres(pR, cossi, sinsi, cosfi, sinfi, tree_data.atm, resN, filter);
+    bool success = backbones_utils::poneres(pR, cossi, sinsi, cosfi, sinfi, treeData.atm, resN, filter);
 
     if (success)
     {
-        const prot_filer::ATOM& atm = tree_data.atm[3 * (resN - 1) + 1];
-        residuo.at2 = tree_data.grilla.agregar_esfera(atm.x, atm.y, atm.z);
+        const prot_filer::ATOM& atm = treeData.atm[3 * (resN - 1) + 1];
+        residuo.at2 = treeData.grilla.agregar_esfera(atm.x, atm.y, atm.z);
     }
 
     return success ? TreeFilters::FILTER_OK : TreeFilters::FILTER_FAIL;
 }
 
-TreeFilters::FilterResultType TreeHelper::putChain(float* pR, unsigned int resN, std::list<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chain_index)
+TreeFilters::FilterResultType TreeHelper::putChain(float* pR, unsigned int resN, std::list<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chainIndex)
 {
     TreeFilters::FilterResultType result = TreeFilters::FILTER_OK;
     unsigned int i = 0;
 
-    while (result == TreeFilters::FILTER_OK  && ((i + 1) < chain.nres) && ((resN + i) < tree_data.nres))
+    while (result == TreeFilters::FILTER_OK  && ((i + 1) < chain.nres) && ((resN + i) < treeData.nres))
     {
         Residuo residuo;
         result = putRes(pR, resN + i, residuo, chain.angles[i].si, chain.angles[i].fi);
@@ -82,63 +82,63 @@ TreeFilters::FilterResultType TreeHelper::putChain(float* pR, unsigned int resN,
     }
 
     if (result == TreeFilters::FILTER_OK)
-        tree_data.fragment_ids.push_back(chain_index);
+        treeData.fragmentIds.push_back(chainIndex);
 
     return result;
 }
 
 void TreeHelper::clearatm()
 {
-    for (unsigned int i = 0; i < 3 * tree_data.nres; i++)
+    for (unsigned int i = 0; i < 3 * treeData.nres; i++)
     {
-        tree_data.atm[i].x = 0.0;
-        tree_data.atm[i].y = 0.0;
-        tree_data.atm[i].z = 0.0;
+        treeData.atm[i].x = 0.0;
+        treeData.atm[i].y = 0.0;
+        treeData.atm[i].z = 0.0;
     }
 }
 
 bool TreeHelper::success() const
 {
-    return tree_data.hubo_algun_exito;
+    return treeData.hubo_algun_exito;
 }
 
 void TreeHelper::reportSuccess()
 {
-    tree_data.cont++;
-    tree_data.hubo_algun_exito = true;
+    treeData.cont++;
+    treeData.hubo_algun_exito = true;
 }
 
 void TreeHelper::deleteLastFragmentId()
 {
-    tree_data.fragment_ids.pop_back();
+    treeData.fragmentIds.pop_back();
 }
 
 const prot_filer::AnglesData&  TreeHelper::getAnglesData() const
 {
-    return tree_data.angles_data;
+    return treeData.anglesData;
 }
 
 Atoms& TreeHelper::getAtm()
 {
-    return tree_data.atm;
+    return treeData.atm;
 }
 
 const prot_filer::FragmentIds& TreeHelper::getFragmentIds() const
 {
-    return tree_data.fragment_ids;
+    return treeData.fragmentIds;
 }
 
 const std::string& TreeHelper::getOutputFile() const
 {
-    return tree_data.output_file;
+    return treeData.outputFile;
 }
 
 unsigned int TreeHelper::getNRes() const
 {
-    return tree_data.nres;
+    return treeData.nres;
 }
 
 unsigned int TreeHelper::getNAngles() const
 {
-    return tree_data.cossi.size();
+    return treeData.cossi.size();
 }

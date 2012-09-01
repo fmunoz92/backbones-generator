@@ -5,32 +5,32 @@
 #include "backbones-generator/tree_operator.h" //for RMatrix
 
 template <class TOperator>
-inline TreeGenerator<TOperator>::TreeGenerator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader)
-    : treeOperator(tree_helper, reader),
-      CANT_RES(tree_helper.getNRes()),
-      CANT_ANGLES(tree_helper.getNAngles())
+inline TreeGenerator<TOperator>::TreeGenerator(TreeHelper& treeHelper, FullCachedAnglesSeqReader* const reader)
+    : treeOperator(treeHelper, reader),
+      CANT_RES(treeHelper.getNRes()),
+      CANT_ANGLES(treeHelper.getNAngles())
 {
 }
 
 template <class TOperator>
 inline void TreeGenerator<TOperator>::generate()
 {
-    typename TOperator::RMatrix R_inicial;
-    unsigned int nivel = 1;
-    unsigned int index_seed = 0;
+    typename TOperator::RMatrix rInicial;
+    unsigned int level = 1;
+    unsigned int indexSeed = 0;
 
-    treeOperator.initMatrix(R_inicial);
+    treeOperator.initMatrix(rInicial);
 
-    while (treeOperator.putNextSeed(nivel, index_seed))
+    while (treeOperator.putNextSeed(level, indexSeed))
     {
-        if (nivel < CANT_RES)
-            expandTree(nivel, 0);
+        if (level < CANT_RES)
+            expandTree(level, 0);
         else
             processLeaf();
 
-        treeOperator.removeSeed(nivel);
+        treeOperator.removeSeed(level);
 
-        index_seed++;
+        indexSeed++;
     }
 }
 
@@ -46,52 +46,52 @@ inline void TreeGenerator<TOperator>::generate()
  * indice_nivel_anterior es siempre igual al index_angles de la llamada anterior
  */
 template <class TOperator>
-inline void TreeGenerator<TOperator>::expandTree(unsigned int nivel, unsigned int indice_nivel_anterior)
+inline void TreeGenerator<TOperator>::expandTree(unsigned int level, unsigned int previousLevelIndex)
 {
-    bool ultimo_nivel_exitoso = false;//solo interesa si somos el anteultimo nivel
-    unsigned int index_angles = 0;
-    typename TOperator::RMatrix R_inicial;
+    bool lastLevelSuccess = false;//solo interesa si somos el anteultimo nivel
+    unsigned int indexAngles = 0;
+    typename TOperator::RMatrix rInicial;
 
-    treeOperator.copyMatrix(R_inicial);
+    treeOperator.copyMatrix(rInicial);
 
-    while (index_angles < CANT_ANGLES && !ultimo_nivel_exitoso)
+    while (indexAngles < CANT_ANGLES && !lastLevelSuccess)
     {
-        treeOperator.initMatrix(R_inicial);
+        treeOperator.initMatrix(rInicial);
 
-        if (treeOperator.putFirst(nivel, index_angles, indice_nivel_anterior))
+        if (treeOperator.putFirst(level, indexAngles, previousLevelIndex))
         {
-            if (nivel < CANT_RES + 1)
-                ultimo_nivel_exitoso = appendElements(nivel, index_angles);
+            if (level < CANT_RES + 1)
+                lastLevelSuccess = appendElements(level, indexAngles);
             else
-                ultimo_nivel_exitoso = processLeaf();
+                lastLevelSuccess = processLeaf();
 
-            treeOperator.removeFirst(nivel);
+            treeOperator.removeFirst(level);
         }
 
-        index_angles++;
+        indexAngles++;
     }
 }
 
 template <class TOperator>
-inline bool TreeGenerator<TOperator>::appendElements(unsigned int nivel, unsigned int index_angles)
+inline bool TreeGenerator<TOperator>::appendElements(unsigned int level, unsigned int indexAngles)
 {
     typename TOperator::KeepRecursion resultRecursion;
     bool result = false;
-    unsigned int index_res = 0;
+    unsigned int indexRes = 0;
 
-    while (treeOperator.putNext(nivel, index_res, resultRecursion))
+    while (treeOperator.putNext(level, indexRes, resultRecursion))
     {
         if (resultRecursion == TOperator::DoRecursion)
         {
-            if (nivel < CANT_RES + 1)
-                expandTree(nivel, index_angles);
+            if (level < CANT_RES + 1)
+                expandTree(level, indexAngles);
             else
                 result = processLeaf();
 
-            treeOperator.remove(nivel);
+            treeOperator.remove(level);
         }
 
-        index_res++;
+        indexRes++;
     }
 
     return result;
@@ -102,4 +102,3 @@ inline bool TreeGenerator<TOperator>::processLeaf()
 {
     return treeOperator.write();
 }
-

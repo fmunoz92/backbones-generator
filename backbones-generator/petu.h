@@ -12,11 +12,11 @@ struct CommandLineOptions
     float Scal_1_4;   // Scaling factor for the radii. Used to check for 1-4 clashes.
     float Scal_1_5;   // Scaling factor for the radii. Used to check for 1-5 clashes.
     std::string data;      // Name of the input file.
-    std::string output_file; // Name of the output file.
-    std::string write_format;
-    std::string residues_input; //Name of the residue chains file.
-    std::string input_format;
-    std::string fragments_file;
+    std::string outputFile; // Name of the output file.
+    std::string writeFormat;
+    std::string residuesInput; //Name of the residue chains file.
+    std::string inputFormat;
+    std::string fragmentsFile;
     size_t m; // They indicate the size of each dimention of the grid.
     size_t n;
     size_t z;

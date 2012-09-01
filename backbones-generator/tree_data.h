@@ -2,7 +2,6 @@
 #define TREE_DATA_H
 
 #include <string>
-#include <memory>
 
 #include "prot-filer/format_filer.h"
 #include "prot-filer/cached_reader.h"
@@ -16,7 +15,7 @@ typedef prot_filer::BasicProtein Atoms;
 class TreeData
 {
 public:
-    TreeData(int nRes, size_t cols, size_t rows, size_t depth, std::istream& input_file, std::string& output_file);
+    TreeData(int nRes, size_t cols, size_t rows, size_t depth, std::istream& inputFile, std::string& outputFile);
 
     const unsigned int nres;
 
@@ -34,12 +33,12 @@ public:
     bool hubo_algun_exito; // si encendido, dice que hubo al menos una rama que llego al final
 
     Grillado grilla;       // Utilizamos el grillado para aproximar el volumen parcial
-    prot_filer::AnglesMapping angles_mapping;
-    prot_filer::AnglesData    angles_data; // Used only when writing compressed data.
+    prot_filer::AnglesMapping anglesMapping;
+    prot_filer::AnglesData    anglesData; // Used only when writing compressed data.
 
-    prot_filer::FragmentIds fragment_ids;
+    prot_filer::FragmentIds fragmentIds;
 
-    const std::string output_file;
+    const std::string outputFile;
 
 private:
     void readdata(std::istream& filer);
