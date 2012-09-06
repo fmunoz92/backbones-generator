@@ -16,6 +16,8 @@
 int main(int argc, char** argv)
 {
     CommandLineOptions o;
+    
+    std::cout << mili::getGPL3LicenseText("Backbones-generator", "2.0", "Facundo Muñoz, Daniel Gutson, Hugo Arregui", "2012") << std::endl;
 
     if (o.parse(argc, argv))
     {
@@ -67,7 +69,7 @@ int main(int argc, char** argv)
 
 void CommandLineOptions::show_usage()
 {
-    std::string indent = "                  ";
+    const std::string indent = "                  ";
     std::cerr << "Usage: " << std::endl;
     std::cerr << indent << "[ -i <data_file> ], default = data" << std::endl;
     std::cerr << indent << "[ -o <output file name> ], default = traj" << std::endl;
