@@ -2,9 +2,11 @@ Import ('env')
 
 name = 'backbones-generator'
 inc = env.Dir('.')
-src = env.Glob('src/*.cpp')
 deps = ['prot-filer', 'mili', 'getoptpp']
 
-env.AppendUnique(CPPFLAGS = ['-DMILI_NAMESPACE'])
-env.CreateProgram(name, inc, src, deps)
+src = env.Glob('src/*.cpp')
+src.remove(env.File('src/petu.cpp'))
+env.CreateObject('backbones-generator-objects', inc, src, deps)
 
+deps += ['backbones-generator-objects']
+env.CreateProgram(name, inc, ['src/petu.cpp'], deps)
