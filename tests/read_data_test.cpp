@@ -14,9 +14,8 @@ TEST(TestReadData, read_data)
 {
     istringstream inputFile("-60 -40\n");
 
-    string outputFile("");
-
-    TreeData treeData(1, 4, 4, 4, inputFile, outputFile);
+    TreeData treeData(1, 4, 4, 4);
+    treeData.readData(inputFile);
 
     ASSERT_EQ(1, treeData.anglesMapping.get_mapping_size());
     ASSERT_EQ(-60, treeData.anglesMapping.get_fi_value(0));

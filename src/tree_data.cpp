@@ -1,6 +1,8 @@
+#include <cmath>
+
 #include "backbones-generator/tree_data.h"
 
-TreeData::TreeData(int nRes, size_t cols, size_t rows, size_t depth, std::istream& inputFile, std::string& outputFile)
+TreeData::TreeData(int nRes, size_t cols, size_t rows, size_t depth)
     : nres(nRes),
       rgmax(2.72 * mili::cubic_root(nres) + 5.0),              // Maximun gyration radius and maximun CA-CA distance.
       dmax2(mili::square(8.0 * mili::cubic_root(nres) + 25.0)),// Both equations constructed from database analisys.
@@ -9,13 +11,10 @@ TreeData::TreeData(int nRes, size_t cols, size_t rows, size_t depth, std::istrea
       hubo_algun_exito(false),
       grilla(cols, rows, depth),
       anglesMapping(nres),
-      anglesData(nres, &anglesMapping),
-      outputFile(outputFile)
-{
-    readdata(inputFile);
-}
+      anglesData(nres, &anglesMapping)
+{}
 
-void TreeData::readdata(std::istream& filer)
+void TreeData::readData(std::istream& filer)
 {
     float fi = 0.0f;
     float si = 0.0f;
@@ -25,10 +24,10 @@ void TreeData::readdata(std::istream& filer)
     {
         if (filer >> fi && filer >> si)
         {
-            cosfi.push_back(cos(mili::deg2rad(fi)));
-            sinfi.push_back(sin(mili::deg2rad(fi)));
-            cossi.push_back(cos(mili::deg2rad(si)));
-            sinsi.push_back(sin(mili::deg2rad(si)));
+            cosfi.push_back(std::cos(mili::deg2rad(fi)));
+            sinfi.push_back(std::sin(mili::deg2rad(fi)));
+            cossi.push_back(std::cos(mili::deg2rad(si)));
+            sinsi.push_back(std::sin(mili::deg2rad(si)));
 
             anglesMapping.set_mapping(fi, si);
         }

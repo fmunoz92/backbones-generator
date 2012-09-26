@@ -1,8 +1,9 @@
 #include "backbones-generator/tree_helper.h"
 
-TreeHelper::TreeHelper(TreeData& treeData, TreeFilters& treeFilters)
+TreeHelper::TreeHelper(TreeData& treeData, TreeFilters& treeFilters, const std::string&  outputFile)
     : treeData(treeData),
-      treeFilters(treeFilters)
+      treeFilters(treeFilters),
+      outputFile(outputFile)
 {}
 
 void TreeHelper::putSeed(float* R, Residuo& residuo)
@@ -130,7 +131,7 @@ const prot_filer::FragmentIds& TreeHelper::getFragmentIds() const
 
 const std::string& TreeHelper::getOutputFile() const
 {
-    return treeData.outputFile;
+    return outputFile;
 }
 
 unsigned int TreeHelper::getNRes() const

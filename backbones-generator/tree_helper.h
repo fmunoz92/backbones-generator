@@ -10,7 +10,7 @@ class TreeHelper
 {
 public:
 
-    TreeHelper(TreeData& treeData, TreeFilters& treeFilters);
+    TreeHelper(TreeData& treeData, TreeFilters& treeFilters, const std::string&  outputFile);
 
     //TODO: use RMATRIX(typedef for R)
     void                          putSeed(float* R, Residuo& residuo);
@@ -40,6 +40,7 @@ public:
 private:
     TreeData& treeData;
     const TreeFilters& treeFilters;
+    const std::string&  outputFile;
 };
 
 #endif

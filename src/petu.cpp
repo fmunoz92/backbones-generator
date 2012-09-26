@@ -23,13 +23,15 @@ int main(int argc, char** argv)
     {
         std::ifstream filer(o.data.c_str());
 
-        TreeData treeData(o.Nres, o.m, o.n, o.z, filer, o.outputFile);
+        TreeData treeData(o.Nres, o.m, o.n, o.z);
+        treeData.readData(filer);
+
         TreeFilters treeFilters;
 
         // Fill r[][][] with the minimun squared distance between atoms
         treeFilters.setr(o.RN, o.RCa, o.RC, o.Scal_1_4, o.Scal_1_5);
 
-        TreeHelper treeHelper(treeData, treeFilters);
+        TreeHelper treeHelper(treeData, treeFilters, o.outputFile);
 
         std::cout << "Number of fi-si combinations in file=" << treeHelper.getNAngles() << std::endl;
 
