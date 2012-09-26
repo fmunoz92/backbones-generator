@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 {
     CommandLineOptions o;
     
-    std::cout << mili::getGPL3LicenseText("Backbones-generator", "2.0", "Facundo Muñoz, Daniel Gutson, Hugo Arregui", "2012") << std::endl;
+    std::cout << mili::getGPL3LicenseText("Backbones-generator", "2.0", "Facundo Muñoz, Daniel Gutson, Hugo Arregui, Marcos Villarreal, Rodrigo Castaño", "2006-2012");
 
     if (o.parse(argc, argv))
     {
