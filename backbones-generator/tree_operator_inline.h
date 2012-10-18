@@ -214,6 +214,6 @@ inline void ChainsTreeOperator<WriterHelper>::remove(unsigned int& level)
 template <class WriterHelper>
 inline void ChainsTreeOperator<WriterHelper>::removeSeed(unsigned int& level)
 {
-    this->removeFirst(level);
     remove(level);
+    this->removeFirst(level);
 }

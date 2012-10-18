@@ -135,7 +135,7 @@ TreeFilters::FilterResultType TreeFilters::isclash(const Atoms& patm, unsigned i
     return FILTER_OK;
 }
 
-TreeFilters::FilterResultType TreeFilters::volumen_en_rango(unsigned int nres, Volume vol_parcial) const
+TreeFilters::FilterResultType TreeFilters::volumenEnRango(unsigned int nres, Volume vol_parcial) const
 {
     // Valores obtenidos a partir de pruebas de un set de datos en Grillado.
     static const float cota_maxima_volumen = 177.65f;

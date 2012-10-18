@@ -37,8 +37,6 @@ struct TreeData
 
     prot_filer::FragmentIds fragmentIds;
 
-    const std::string outputFile;
-
     void readData(std::istream& filer);
 };
 

@@ -37,6 +37,7 @@ inline void TreeGenerator<TOperator>::generate()
 /*
     given a chain C of elements
     for every angles pair P
+        put single element oriented to P
         for every element E in the collection
             append E in C oriented to P
             recurse
@@ -52,15 +53,15 @@ inline void TreeGenerator<TOperator>::expandTree(unsigned int level, unsigned in
     unsigned int indexAngles = 0;
     typename TOperator::RMatrix rInicial;
 
-    treeOperator.copyMatrix(rInicial);
+    treeOperator.copyMatrix(rInicial);//is a get method
 
     while (indexAngles < CANT_ANGLES && !lastLevelSuccess)
     {
-        treeOperator.initMatrix(rInicial);
-
+        treeOperator.initMatrix(rInicial);//first time copy the same matrix
+			
         if (treeOperator.putFirst(level, indexAngles, previousLevelIndex))
         {
-            if (level < CANT_RES + 1)
+            if (level < CANT_RES)
                 lastLevelSuccess = appendElements(level, indexAngles);
             else
                 lastLevelSuccess = processLeaf();
@@ -78,12 +79,12 @@ inline bool TreeGenerator<TOperator>::appendElements(unsigned int level, unsigne
     typename TOperator::KeepRecursion resultRecursion;
     bool result = false;
     unsigned int indexRes = 0;
-
+ 
     while (treeOperator.putNext(level, indexRes, resultRecursion))
     {
         if (resultRecursion == TOperator::DoRecursion)
         {
-            if (level < CANT_RES + 1)
+            if (level < CANT_RES)
                 expandTree(level, indexAngles);
             else
                 result = processLeaf();

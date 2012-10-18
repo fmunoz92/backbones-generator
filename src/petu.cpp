@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 {
     CommandLineOptions o;
     
-    std::cout << mili::getGPL3LicenseText("Backbones-generator", "2.0", "Facundo Muñoz, Daniel Gutson, Hugo Arregui, Marcos Villarreal, Rodrigo Castaño", "2006-2012");
+    std::cout << mili::getGPL3LicenseText("Backbones-generator", "2.0", "Facundo Muñoz, Daniel Gutson, Hugo Arregui, Marcos Villarreal and Rodrigo Castaño", "2006-2012");
 
     if (o.parse(argc, argv))
     {
@@ -44,7 +44,7 @@ int main(int argc, char** argv)
         }
         else
         {
-            FullCachedAnglesSeqReader* readerPtr = FactoryReaderChains::new_class(o.inputFormat, o.residuesInput, o.fragmentsFile);
+            FullCachedAnglesSeqReader* const readerPtr = FactoryReaderChains::new_class(o.inputFormat, o.residuesInput, o.fragmentsFile);
             IGeneratorChains* const generatorPtr = IGeneratorChains::Factory::new_class(o.writeFormat);
 
             std::auto_ptr<FullCachedAnglesSeqReader> db(readerPtr);

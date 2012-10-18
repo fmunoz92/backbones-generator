@@ -27,7 +27,7 @@ public:
 
     FilterResultType isclash(const Atoms& patm, unsigned int at) const;
 
-    FilterResultType volumen_en_rango(unsigned int nres, Volume vol_parcial) const;
+    FilterResultType volumenEnRango(unsigned int nres, Volume vol_parcial) const;
 private:
 
     //This function detect colitions between atoms

@@ -19,8 +19,8 @@ void TreeHelper::putSeed(float* R, Residuo& residuo)
 
 bool TreeHelper::filterLastLevelOk()
 {
-    bool ok = treeFilters.calcRdG(treeData.atm, treeData.nres, treeData.rgmax) == TreeFilters::FILTER_OK &&
-              treeFilters.volumen_en_rango(treeData.nres, treeData.grilla.obtener_vol_parcial()) == TreeFilters::FILTER_OK;
+    const bool ok = treeFilters.calcRdG(treeData.atm, treeData.nres, treeData.rgmax) == TreeFilters::FILTER_OK &&
+              treeFilters.volumenEnRango(treeData.nres, treeData.grilla.obtener_vol_parcial()) == TreeFilters::FILTER_OK;
 
     return ok;
 }
