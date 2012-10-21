@@ -1,7 +1,6 @@
 #include "tree_generator.h"
 #include "poneres.h"
 #include "utils.h"
-#include "canary.h"
 
 const std::string output_file = "traj.xtc";
 
@@ -156,14 +155,11 @@ void ChainsTreeGenerator<Writer>::generate()
 template<class Writer>
 void ChainsTreeGenerator<Writer>::generar_nivel_intermedio(const unsigned int nivel, const float R_inicial[16], const unsigned int indice_nivel_anterior)
 {
-	Canary c1;
     float R_local[16];
     FilterResultType resultado;
     bool exito = false; // solo aplicable si somos anteultimo nivel
-    Residuo residuo;
-    Canary c2;
-
     assert(nivel > 1);  // pre condicion
+    Residuo residuo;
 
     unsigned int i = 0;
     while (i < tree_data.cossi.size() && !exito)
@@ -221,9 +217,7 @@ bool ChainsTreeGenerator<Writer>::procesar_ultimo_nivel()
     tree_data.cont++;
     return false;
 #else
-    Canary c1;
     bool exito = false;
-    Canary c2;
 
     if (TreeHelper::filtros_ultimo_nivel(tree_data) == FILTER_OK)
     {
@@ -231,7 +225,6 @@ bool ChainsTreeGenerator<Writer>::procesar_ultimo_nivel()
         tree_data.cont++;
         tree_data.hubo_algun_exito = exito = true;
     }
-
     return exito;
 #endif
 }

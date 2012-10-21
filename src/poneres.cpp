@@ -1,6 +1,5 @@
 #include "utils.h"
 #include "poneres.h"
-#include "canary.h"
 
 class ClashFilter
 {
@@ -19,7 +18,6 @@ private:
 
 FilterResultType poneres(float* pR, const unsigned int resN, TreeData& tree_data, Residuo& residuo, unsigned int si_index, unsigned int fi_index)
 {
-	Canary c1;
     float cossi = tree_data.cossi[si_index];
     float sinsi = tree_data.sinsi[si_index];
     float cosfi = tree_data.cosfi[fi_index];
@@ -27,8 +25,6 @@ FilterResultType poneres(float* pR, const unsigned int resN, TreeData& tree_data
     Atoms& patm = tree_data.atm;
 
     const unsigned int i = resN - 2;
-    Canary c2;
-
     tree_data.angles_data->angles[i].si = si_index;
     tree_data.angles_data->angles[i].fi = fi_index;
 
