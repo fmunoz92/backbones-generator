@@ -47,9 +47,8 @@ inline void TreeGenerator<TOperator>::generate()
  * indice_nivel_anterior es siempre igual al index_angles de la llamada anterior
  */
 template <class TOperator>
-inline void TreeGenerator<TOperator>::expandTree(unsigned int level_arg, unsigned int previousLevelIndex)
+inline void TreeGenerator<TOperator>::expandTree(unsigned int level, unsigned int previousLevelIndex)
 {
-	unsigned int level = level_arg;
     bool lastLevelSuccess = false;//solo interesa si somos el anteultimo nivel
     unsigned int indexAngles = 0;
     typename TOperator::RMatrix rInicial;
