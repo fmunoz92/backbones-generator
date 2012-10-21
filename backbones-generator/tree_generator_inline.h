@@ -23,7 +23,7 @@ inline void TreeGenerator<TOperator>::generate()
 
     while (treeOperator.putNextSeed(level, indexSeed))
     {
-        if (level < CANT_RES)
+        if (level < CANT_RES)//if (level < CANT_RES + 1) para que ande igual en singlemode
             expandTree(level, 0);
         else
             processLeaf();
@@ -47,8 +47,9 @@ inline void TreeGenerator<TOperator>::generate()
  * indice_nivel_anterior es siempre igual al index_angles de la llamada anterior
  */
 template <class TOperator>
-inline void TreeGenerator<TOperator>::expandTree(unsigned int level, unsigned int previousLevelIndex)
+inline void TreeGenerator<TOperator>::expandTree(unsigned int level_arg, unsigned int previousLevelIndex)
 {
+	unsigned int level = level_arg;
     bool lastLevelSuccess = false;//solo interesa si somos el anteultimo nivel
     unsigned int indexAngles = 0;
     typename TOperator::RMatrix rInicial;
@@ -57,34 +58,34 @@ inline void TreeGenerator<TOperator>::expandTree(unsigned int level, unsigned in
 
     while (indexAngles < CANT_ANGLES && !lastLevelSuccess)
     {
-        treeOperator.initMatrix(rInicial);//first time copy the same matrix
-			
         if (treeOperator.putFirst(level, indexAngles, previousLevelIndex))
         {
-            if (level < CANT_RES)
+            if (level < CANT_RES)//if (level < CANT_RES + 1) para que ande igual en singlemode
                 lastLevelSuccess = appendElements(level, indexAngles);
             else
                 lastLevelSuccess = processLeaf();
 
             treeOperator.removeFirst(level);
         }
-
+        
+        treeOperator.initMatrix(rInicial);//restore the original matrix
         indexAngles++;
     }
 }
 
 template <class TOperator>
-inline bool TreeGenerator<TOperator>::appendElements(unsigned int level, unsigned int indexAngles)
+inline bool TreeGenerator<TOperator>::appendElements(unsigned int level_arg, unsigned int indexAngles)
 {
+	unsigned int level = level_arg;
     typename TOperator::KeepRecursion resultRecursion;
     bool result = false;
     unsigned int indexRes = 0;
- 
+
     while (treeOperator.putNext(level, indexRes, resultRecursion))
     {
         if (resultRecursion == TOperator::DoRecursion)
         {
-            if (level < CANT_RES)
+            if (level < CANT_RES)//if (level < CANT_RES + 1) para que ande igual en singlemode
                 expandTree(level, indexAngles);
             else
                 result = processLeaf();

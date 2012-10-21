@@ -55,7 +55,7 @@ TreeFilters::FilterResultType TreeHelper::putRes(float* pR, const unsigned int r
     ClashFilter filter(treeData, treeFilters);
 #endif
 
-    bool success = backbones_utils::poneres(pR, cossi, sinsi, cosfi, sinfi, treeData.atm, resN, filter);
+    const bool success = backbones_utils::poneres(pR, cossi, sinsi, cosfi, sinfi, treeData.atm, resN, filter);
 
     if (success)
     {
