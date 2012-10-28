@@ -4,6 +4,7 @@
 #include <mili/mili.h>
 
 #include "backbones-generator/tree_generator.h"
+#include "backbones-generator/tree_operator.h"
 #include "backbones-generator/tree_helper.h"
 #include "backbones-generator/filer.h"
 

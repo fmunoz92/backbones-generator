@@ -1,9 +1,13 @@
 #include "backbones-generator/tree_helper.h"
 
+#define COMBINATIONS_DEBUG 1
+#include <fstream>
+
 TreeHelper::TreeHelper(TreeData& treeData, TreeFilters& treeFilters, const std::string&  outputFile)
     : treeData(treeData),
       treeFilters(treeFilters),
-      outputFile(outputFile)
+      outputFile(outputFile),
+      os("log.csv", std::ios::out)
 {}
 
 void TreeHelper::putSeed(float* R, Residuo& residuo)
@@ -66,14 +70,24 @@ TreeFilters::FilterResultType TreeHelper::putRes(float* pR, const unsigned int r
     return success ? TreeFilters::FILTER_OK : TreeFilters::FILTER_FAIL;
 }
 
-TreeFilters::FilterResultType TreeHelper::putChain(float* pR, unsigned int resN, std::list<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chainIndex)
-{
-    TreeFilters::FilterResultType result = TreeFilters::FILTER_OK;
-    unsigned int i = 0;
 
-    while (result == TreeFilters::FILTER_OK  && ((i + 1) < chain.nres) && ((resN + i) < treeData.nres))
+TreeFilters::FilterResultType TreeHelper::putChain
+    (float* pR, unsigned int resN, std::list<Residuo>& residuos,
+     const prot_filer::AnglesData& chain, unsigned int chainIndex,
+     unsigned int firstSi, unsigned int firstFi)
+{
+    TreeFilters::FilterResultType result;
+    Residuo residuo;
+
+	result = putRes(pR, resN, residuo, firstSi, firstFi);
+	++resN;
+
+	if (result == TreeFilters::FILTER_OK)
+		mili::insert_into(residuos, residuo);
+    
+    unsigned int i = 0;
+    while (result == TreeFilters::FILTER_OK  && ((i + 1) < chain.nres) && ((resN + i) < (treeData.nres + 1)))
     {
-        Residuo residuo;
         result = putRes(pR, resN + i, residuo, chain.angles[i].si, chain.angles[i].fi);
 
         if (result == TreeFilters::FILTER_OK)
@@ -81,7 +95,7 @@ TreeFilters::FilterResultType TreeHelper::putChain(float* pR, unsigned int resN,
 
         ++i;
     }
-
+    
     if (result == TreeFilters::FILTER_OK)
         treeData.fragmentIds.push_back(chainIndex);
 
@@ -105,8 +119,10 @@ bool TreeHelper::success() const
 
 void TreeHelper::reportSuccess()
 {
-    treeData.cont++;
+    ++treeData.cont;
+#ifndef COMBINATIONS_DEBUG
     treeData.hubo_algun_exito = true;
+#endif
 }
 
 void TreeHelper::deleteLastFragmentId()

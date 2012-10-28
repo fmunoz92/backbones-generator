@@ -8,7 +8,7 @@ TreeData::TreeData(int nRes, size_t cols, size_t rows, size_t depth)
       dmax2(mili::square(8.0 * mili::cubic_root(nres) + 25.0)),// Both equations constructed from database analisys.
       atm(Atoms(nres * 3)),
       cont(0),
-      hubo_algun_exito(false),
+      //hubo_algun_exito(false),
       grilla(cols, rows, depth),
       anglesMapping(nres),
       anglesData(nres, &anglesMapping)

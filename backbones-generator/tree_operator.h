@@ -22,16 +22,14 @@ public:
     inline void initMatrix(const RMatrix rMatrix);
     inline void copyMatrix(RMatrix rInicial) const;
 
-    inline bool putFirst(unsigned int& level, unsigned int fiIndex, unsigned int siIndex);
-    inline void removeFirst(unsigned int& levell);
-
+    inline void putSeed();
+    inline void removeSeed();
     inline bool write();
 
 protected:
+    Residuo semilla;
     RMatrix R;
-    std::list<Residuo> residuos;
     TreeHelper& treeHelper;
-
 private:
     inline bool lastLevelOk() const;
     WriterHelper writerHelper;
@@ -45,11 +43,11 @@ class SimpleTreeOperator : public TreeOperator<WriterHelper>
 public:
     inline SimpleTreeOperator(TreeHelper& treeHelper, FullCachedAnglesSeqReader* reader);
 
-    inline bool putNextSeed(unsigned int& level, unsigned int indexSeed);
-    inline bool putNext(unsigned int& level, unsigned int indexRes, typename TreeOperator<WriterHelper>::KeepRecursion& resultRecursion);
+    inline bool putNext(unsigned int& level, unsigned int /*indexRes*/, unsigned int indexAngles, unsigned int previousLevelIndex, typename TreeOperator<WriterHelper>::KeepRecursion& resultRecursion);
 
     inline void remove(unsigned int& level);
-    inline void removeSeed(unsigned int& level);
+private:
+    std::list<Residuo> residuos;
 };
 
 /**********************************************************************/
@@ -59,19 +57,17 @@ class ChainsTreeOperator : public TreeOperator<WriterHelper>
 {
 public:
     inline ChainsTreeOperator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader);
-
-    inline bool putNextSeed(unsigned int& level, unsigned int indexSeed);
-    inline bool putNext(unsigned int& level, unsigned int indexRes, typename TreeOperator<WriterHelper>::KeepRecursion& resultRecursion);
-
+    inline bool putNext(unsigned int& level, unsigned int /*indexRes*/, unsigned int indexAngles, unsigned int previousLevelIndex, typename TreeOperator<WriterHelper>::KeepRecursion& resultRecursion);
     inline void remove(unsigned int& level);
-    inline void removeSeed(unsigned int& level);
 
 private:
-    inline void putChain(prot_filer::AnglesData& chain, unsigned int& level, unsigned int indexRes, typename TreeOperator<WriterHelper>::KeepRecursion& recursion);
-    inline void putSeed(prot_filer::AnglesData& chain, unsigned int& level, unsigned int indexSeed);
+    inline void putChain(prot_filer::AnglesData& chain, unsigned int& level, const unsigned int indexRes, unsigned int firstSi, unsigned int firstFi, typename TreeOperator<WriterHelper>::KeepRecursion& recursion);
 
-    std::list<std::list<Residuo> > vectoresParaBorrar;
+    typedef std::list<Residuo> ChainsRes;
+    typedef std::list<ChainsRes > StackChainRes;
+
     FullCachedAnglesSeqReader* const reader;
+    StackChainRes stackChainRes;
 };
 
 #define TREE_OPERATOR_INLINE_H

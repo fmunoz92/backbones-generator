@@ -1,9 +1,12 @@
 #ifndef TREE_GENERATOR_INLINE_H
 #error Internal header file, DO NOT include this.
 #endif
+// modo cadenas:
+// fragmentos = 4, angulos = 2, chain_size = 3, nres = 9
+// cadenas = ceil(nres / chain_size)
+// soluciones = fragmentos^cadenas * angulos^(cadenas - 1)
 
-#include "backbones-generator/tree_operator.h" //for RMatrix
-
+        
 template <class TOperator>
 inline TreeGenerator<TOperator>::TreeGenerator(TreeHelper& treeHelper, FullCachedAnglesSeqReader* const reader)
     : treeOperator(treeHelper, reader),
@@ -16,22 +19,19 @@ template <class TOperator>
 inline void TreeGenerator<TOperator>::generate()
 {
     typename TOperator::RMatrix rInicial;
-    unsigned int level = 1;
-    unsigned int indexSeed = 0;
+    const unsigned int level = 2;
+    const unsigned int indexAngles = 0;
+    const unsigned int previousLevelIndex = 0;
 
     treeOperator.initMatrix(rInicial);
+    treeOperator.putSeed();
 
-    while (treeOperator.putNextSeed(level, indexSeed))
-    {
-        if (level < CANT_RES)//if (level < CANT_RES + 1) para que ande igual en singlemode
-            expandTree(level, 0);
-        else
-            processLeaf();
+    if (level < CANT_RES + 1)
+        appendElements(level, indexAngles, previousLevelIndex);
+    else
+        processLeaf();
 
-        treeOperator.removeSeed(level);
-
-        indexSeed++;
-    }
+    treeOperator.removeSeed();
 }
 
 /*
@@ -57,34 +57,25 @@ inline void TreeGenerator<TOperator>::expandTree(unsigned int level, unsigned in
 
     while (indexAngles < CANT_ANGLES && !lastLevelSuccess)
     {
-        if (treeOperator.putFirst(level, indexAngles, previousLevelIndex))
-        {
-            if (level < CANT_RES)//if (level < CANT_RES + 1) para que ande igual en singlemode
-                lastLevelSuccess = appendElements(level, indexAngles);
-            else
-                lastLevelSuccess = processLeaf();
+        lastLevelSuccess = appendElements(level, indexAngles, previousLevelIndex);
 
-            treeOperator.removeFirst(level);
-        }
-        
         treeOperator.initMatrix(rInicial);//restore the original matrix
-        indexAngles++;
+        ++indexAngles;
     }
 }
 
 template <class TOperator>
-inline bool TreeGenerator<TOperator>::appendElements(unsigned int level_arg, unsigned int indexAngles)
+inline bool TreeGenerator<TOperator>::appendElements(unsigned int level, unsigned int indexAngles, unsigned int previousLevelIndex)
 {
-	unsigned int level = level_arg;
     typename TOperator::KeepRecursion resultRecursion;
     bool result = false;
     unsigned int indexRes = 0;
 
-    while (treeOperator.putNext(level, indexRes, resultRecursion))
+    while (treeOperator.putNext(level, indexRes, indexAngles, previousLevelIndex, resultRecursion))
     {
         if (resultRecursion == TOperator::DoRecursion)
         {
-            if (level < CANT_RES)//if (level < CANT_RES + 1) para que ande igual en singlemode
+            if (level < CANT_RES + 1)
                 expandTree(level, indexAngles);
             else
                 result = processLeaf();

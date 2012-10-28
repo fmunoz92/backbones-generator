@@ -19,7 +19,7 @@ public:
 private:
     inline void expandTree(unsigned int level, unsigned int previousLevelIndex);
 
-    inline bool appendElements(unsigned int level, unsigned int indexAngles);
+    inline bool appendElements(unsigned int level, unsigned int indexAngles, unsigned int previousLevelIndex);
 
     inline bool processLeaf();
 
