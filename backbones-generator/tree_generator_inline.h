@@ -1,12 +1,7 @@
 #ifndef TREE_GENERATOR_INLINE_H
 #error Internal header file, DO NOT include this.
 #endif
-// modo cadenas:
-// fragmentos = 4, angulos = 2, chain_size = 3, nres = 9
-// cadenas = ceil(nres / chain_size)
-// soluciones = fragmentos^cadenas * angulos^(cadenas - 1)
 
-        
 template <class TOperator>
 inline TreeGenerator<TOperator>::TreeGenerator(TreeHelper& treeHelper, FullCachedAnglesSeqReader* const reader)
     : treeOperator(treeHelper, reader),
@@ -19,14 +14,14 @@ template <class TOperator>
 inline void TreeGenerator<TOperator>::generate()
 {
     typename TOperator::RMatrix rInicial;
-    const unsigned int level = 2;
+    const unsigned int level = 1;//seed is level 0
     const unsigned int indexAngles = 0;
     const unsigned int previousLevelIndex = 0;
 
     treeOperator.initMatrix(rInicial);
     treeOperator.putSeed();
 
-    if (level < CANT_RES + 1)
+    if (level < CANT_RES)
         appendElements(level, indexAngles, previousLevelIndex);
     else
         processLeaf();
@@ -37,15 +32,11 @@ inline void TreeGenerator<TOperator>::generate()
 /*
     given a chain C of elements
     for every angles pair P
-        put single element oriented to P
         for every element E in the collection
             append E in C oriented to P
             recurse
             remove E
 */
-/*
- * indice_nivel_anterior es siempre igual al index_angles de la llamada anterior
- */
 template <class TOperator>
 inline void TreeGenerator<TOperator>::expandTree(unsigned int level, unsigned int previousLevelIndex)
 {
@@ -75,7 +66,7 @@ inline bool TreeGenerator<TOperator>::appendElements(unsigned int level, unsigne
     {
         if (resultRecursion == TOperator::DoRecursion)
         {
-            if (level < CANT_RES + 1)
+            if (level < CANT_RES)
                 expandTree(level, indexAngles);
             else
                 result = processLeaf();

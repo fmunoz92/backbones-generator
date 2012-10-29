@@ -6,8 +6,7 @@
 TreeHelper::TreeHelper(TreeData& treeData, TreeFilters& treeFilters, const std::string&  outputFile)
     : treeData(treeData),
       treeFilters(treeFilters),
-      outputFile(outputFile),
-      os("log.csv", std::ios::out)
+      outputFile(outputFile)
 {}
 
 void TreeHelper::putSeed(float* R, Residuo& residuo)
@@ -24,7 +23,7 @@ void TreeHelper::putSeed(float* R, Residuo& residuo)
 bool TreeHelper::filterLastLevelOk()
 {
     const bool ok = treeFilters.calcRdG(treeData.atm, treeData.nres, treeData.rgmax) == TreeFilters::FILTER_OK &&
-              treeFilters.volumenEnRango(treeData.nres, treeData.grilla.obtener_vol_parcial()) == TreeFilters::FILTER_OK;
+                    treeFilters.volumeInRange(treeData.nres, treeData.grilla.obtener_vol_parcial()) == TreeFilters::FILTER_OK;
 
     return ok;
 }
@@ -40,17 +39,17 @@ void TreeHelper::deleteRes(const std::list<Residuo>& residuos)
         deleteRes(*it);
 }
 
-TreeFilters::FilterResultType TreeHelper::putRes(float* pR, const unsigned int resN, Residuo& residuo, unsigned int siIndex, unsigned int fiIndex)
+bool TreeHelper::putRes(float* pR, const unsigned int resN, Residuo& residuo, unsigned int siIndex, unsigned int fiIndex)
 {
     const float cossi = treeData.cossi[siIndex];
     const float sinsi = treeData.sinsi[siIndex];
     const float cosfi = treeData.cosfi[fiIndex];
     const float sinfi = treeData.sinfi[fiIndex];
 
-    const unsigned int i = resN - 2;
+    const unsigned int angle = resN - 1;//la semilla no se considera
 
-    treeData.anglesData.angles[i].si = siIndex;
-    treeData.anglesData.angles[i].fi = fiIndex;
+    treeData.anglesData.angles[angle].si = siIndex;
+    treeData.anglesData.angles[angle].fi = fiIndex;
 
 #ifdef COMBINATIONS_DEBUG
 #include "prot-filer/backbones_utils.h"
@@ -59,44 +58,56 @@ TreeFilters::FilterResultType TreeHelper::putRes(float* pR, const unsigned int r
     ClashFilter filter(treeData, treeFilters);
 #endif
 
-    const bool success = backbones_utils::poneres(pR, cossi, sinsi, cosfi, sinfi, treeData.atm, resN, filter);
+    const unsigned int RES_N = resN + 1;//prot_filer comienza desde 1
+    const bool success = backbones_utils::poneres(pR, cossi, sinsi, cosfi, sinfi, treeData.atm, RES_N, filter);
 
     if (success)
     {
-        const prot_filer::ATOM& atm = treeData.atm[3 * (resN - 1) + 1];
+        const prot_filer::ATOM& atm = treeData.atm[3 * (RES_N - 1) + 1];
         residuo.at2 = treeData.grilla.agregar_esfera(atm.x, atm.y, atm.z);
     }
 
-    return success ? TreeFilters::FILTER_OK : TreeFilters::FILTER_FAIL;
+    return success;
 }
 
-
-TreeFilters::FilterResultType TreeHelper::putChain
-    (float* pR, unsigned int resN, std::list<Residuo>& residuos,
-     const prot_filer::AnglesData& chain, unsigned int chainIndex,
-     unsigned int firstSi, unsigned int firstFi)
+bool TreeHelper::putResOfChain(float* pR, const unsigned int resN, Residuo& residuo, unsigned int siIndex, unsigned int fiIndex, std::list<Residuo>& residuos)
 {
-    TreeFilters::FilterResultType result;
+    const bool result = putRes(pR, resN, residuo, siIndex, fiIndex);
+    if (result)
+        mili::insert_into(residuos, residuo);
+
+    return result;
+}
+
+bool TreeHelper::putChain(float* pR, unsigned int resN, std::list<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chainIndex,
+                          unsigned int firstSi, unsigned int firstFi)
+{
+    const unsigned int LENGTH_OF_CHAIN = chain.nres - 1;
+    bool result;
     Residuo residuo;
+    unsigned int fi;
+    unsigned int si;
 
-	result = putRes(pR, resN, residuo, firstSi, firstFi);
-	++resN;
+    //the first residue replaces the fragment's seed
+    result = putResOfChain(pR, resN, residuo, firstSi, firstFi, residuos);
+    ++resN;
 
-	if (result == TreeFilters::FILTER_OK)
-		mili::insert_into(residuos, residuo);
-    
-    unsigned int i = 0;
-    while (result == TreeFilters::FILTER_OK  && ((i + 1) < chain.nres) && ((resN + i) < (treeData.nres + 1)))
+    // iterate on the angles of the fragment (angles between residues).
+    unsigned int angle = 1;//we start from the 2nd pair of angles, since the
+    // first pair is the angle between the seed and the 1st residue. We don't
+    // consider the seed from the fragments.
+    while (result  && (angle < LENGTH_OF_CHAIN) && (resN < treeData.nres))
     {
-        result = putRes(pR, resN + i, residuo, chain.angles[i].si, chain.angles[i].fi);
+        fi = chain.angles[angle].fi;
+        si = chain.angles[angle].si;
 
-        if (result == TreeFilters::FILTER_OK)
-            mili::insert_into(residuos, residuo);
+        result = putResOfChain(pR, resN, residuo, si, fi, residuos);
 
-        ++i;
+        ++resN;
+        ++angle;
     }
-    
-    if (result == TreeFilters::FILTER_OK)
+
+    if (result)
         treeData.fragmentIds.push_back(chainIndex);
 
     return result;

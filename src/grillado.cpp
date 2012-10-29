@@ -84,13 +84,13 @@ Grillado::Grillado(size_t M, size_t N, size_t Z, Length R, Length D) throw(radiu
         throw sizeParamException();
     }
     matriz = new unsigned int** [M];
-    for (size_t m = 0; m < M; m++)
+    for (size_t m = 0; m < M; ++m)
     {
         matriz[m] = new unsigned int* [N];
-        for (size_t n = 0; n < N; n++)
+        for (size_t n = 0; n < N; ++n)
         {
             matriz[m][n] = new unsigned int[Z];
-            for (size_t x = 0; x < Z; x++)
+            for (size_t x = 0; x < Z; ++x)
             {
                 matriz[m][n][x] = 0;
             }
@@ -127,9 +127,9 @@ void Grillado::info_grillado() const
 // All memory resources are released.
 Grillado::~Grillado()
 {
-    for (size_t m = 0; m < v; m++)
+    for (size_t m = 0; m < v; ++m)
     {
-        for (size_t n = 0; n < w; n++)
+        for (size_t n = 0; n < w; ++n)
             delete [] matriz[m][n];
 
         delete [] matriz[m];

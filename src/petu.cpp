@@ -6,7 +6,6 @@
 #include "getoptpp/getopt_pp.h"
 
 #include "backbones-generator/petu.h"
-
 #include "backbones-generator/generator.h"
 #include "backbones-generator/factory_reader_chains.h"
 #include "backbones-generator/tree_filters.h"
@@ -16,7 +15,7 @@
 int main(int argc, char** argv)
 {
     CommandLineOptions o;
-    
+
     std::cout << mili::getGPL3LicenseText("Backbones-generator", "2.0", "Facundo Muñoz, Daniel Gutson, Hugo Arregui, Marcos Villarreal and Rodrigo Castaño", "2006-2012");
 
     if (o.parse(argc, argv))
@@ -88,67 +87,60 @@ bool CommandLineOptions::parse(int argc, char** argv)
     GetOpt::GetOpt_pp ops(argc, argv);
     std::vector<std::string> inputFiles;
 
-    if (ops >> GetOpt::Option('r', "Nres", Nres))
+    //loadDefaultOptions
+    ops
+            >> GetOpt::Option('n', "Rn",           RN,          1.5f)
+            >> GetOpt::Option('a', "Rca",          RCa,         1.7f)
+            >> GetOpt::Option('c', "Rc",           RC,          1.6f)
+            >> GetOpt::Option('s', "Scal_1_4",     Scal_1_4,    0.85f)
+            >> GetOpt::Option('l', "Scal_1_5",     Scal_1_5,    1.0f)
+            >> GetOpt::Option('i', "input_file",   data,        std::string("data"))
+            >> GetOpt::Option('o', "output_file",  outputFile,  std::string("traj"))
+            >> GetOpt::Option('N', "rows",         n,           static_cast<size_t>(100))
+            >> GetOpt::Option('M', "cols",         m,           static_cast<size_t>(100))
+            >> GetOpt::Option('Z', "depth",        z,           static_cast<size_t>(100))
+            >> GetOpt::Option('w', "write_format", writeFormat, std::string("xtc"));
+
+    bool result;
+    result = ops >> GetOpt::Option('r', "Nres", Nres);
+
+    result = result && Nres != 0;
+    if (Nres == 0)
+        std::cerr << "Error: the amount of residues must be greater than zero" << std::endl;
+
+    const bool chains = ops >> GetOpt::Option("chains_input", inputFiles);
+
+    result = result && (chains || writeFormat != "fragments");
+    if (!chains && writeFormat == "fragments")
+        std::cerr << "Error: fragments output format cannot be used without chains input" << std::endl;
+
+    if (result && chains)
     {
-        ops
-                >> GetOpt::Option('n', "Rn",           RN,          1.5f)
-                >> GetOpt::Option('a', "Rca",          RCa,         1.7f)
-                >> GetOpt::Option('c', "Rc",           RC,          1.6f)
-                >> GetOpt::Option('s', "Scal_1_4",     Scal_1_4,    0.85f)
-                >> GetOpt::Option('l', "Scal_1_5",     Scal_1_5,    1.0f)
-                >> GetOpt::Option('i', "input_file",   data,        std::string("data"))
-                >> GetOpt::Option('o', "output_file",  outputFile,  std::string("traj"))
-                >> GetOpt::Option('N', "rows",         n,           static_cast<size_t>(100))
-                >> GetOpt::Option('M', "cols",         m,           static_cast<size_t>(100))
-                >> GetOpt::Option('Z', "depth",        z,           static_cast<size_t>(100))
-                >> GetOpt::Option('w', "write_format", writeFormat, std::string("xtc"));
-
-        const bool chains = ops >> GetOpt::Option("chains_input", inputFiles);
-
-        if (Nres == 0)
+        ops >> GetOpt::Option('f', "input_format", inputFormat, "compressed");
+        if (inputFormat == "compressed")
         {
-            std::cerr << "Error: the amount of residues must be greater than zero" << std::endl;
-            return false;
-        }
-
-        if (!chains && writeFormat == "fragments")
-        {
-            std::cerr << "Error: fragments output format cannot be used without chains input" << std::endl;
-            return false;
-        }
-        if (chains)
-        {
-            ops >> GetOpt::Option('f', "input_format", inputFormat, "compressed");
-            if (inputFormat == "compressed")
+            if (inputFiles.size() == 0)
             {
-                if (inputFiles.size() == 0)
-                {
-                    std::cerr << "Error: Compressed input file required" << std::endl;
-                    return false;
-                }
-                else
-                {
-                    residuesInput = inputFiles[0];
-                }
+                std::cerr << "Error: Compressed input file required" << std::endl;
+                result = false;
             }
-            else if (inputFormat == "fragments")
+            else
+                residuesInput = inputFiles[0];
+        }
+        else if (inputFormat == "fragments")
+        {
+            if (inputFiles.size() < 2)
             {
-                if (inputFiles.size() < 2)
-                {
-                    std::cerr << "Error: Fragments input format, requires both fragments files" << std::endl;
-                    return false;
-                }
-                else
-                {
-                    fragmentsFile = inputFiles[0];
-                    residuesInput = inputFiles[1];
-                }
+                std::cerr << "Error: Fragments input format, requires both fragments files" << std::endl;
+                result = false;
+            }
+            else
+            {
+                fragmentsFile = inputFiles[0];
+                residuesInput = inputFiles[1];
             }
         }
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    }//end chain
+
+    return result;
 }

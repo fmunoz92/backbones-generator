@@ -13,9 +13,9 @@ public:
     TreeHelper(TreeData& treeData, TreeFilters& treeFilters, const std::string&  outputFile);
 
     //TODO: use RMATRIX(typedef for R)
-    void                          putSeed(float* R, Residuo& residuo);
-    TreeFilters::FilterResultType putRes(float* pR, const unsigned int resN, Residuo& residuo, unsigned int siIndex, unsigned int fiIndex);
-    TreeFilters::FilterResultType putChain(float* pR, unsigned int resN, std::list<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chainIndex, unsigned int firstSi, unsigned int firstFi);
+    void putSeed(float* R, Residuo& residuo);
+    bool putRes(float* pR, const unsigned int resN, Residuo& residuo, unsigned int siIndex, unsigned int fiIndex);
+    bool putChain(float* pR, unsigned int resN, std::list<Residuo>& residuos, const prot_filer::AnglesData& chain, unsigned int chainIndex, unsigned int firstSi, unsigned int firstFi);
 
     void deleteRes(const Residuo& residuo);
     void deleteRes(const std::list<Residuo>& residuos);
@@ -38,10 +38,10 @@ public:
     bool         success()        const;
 
 private:
+    bool putResOfChain(float* pR, const unsigned int resN, Residuo& residuo, unsigned int siIndex, unsigned int fiIndex, std::list<Residuo>& residuos);
     TreeData& treeData;
     const TreeFilters& treeFilters;
     const std::string&  outputFile;
-    std::ofstream os;
 };
 
 #endif

@@ -1,73 +1,192 @@
-/*
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
-#include <iostream>
-#include <mili/mili.h>
-#include "prot-filer/angles.h"
-#include "petu.h"
-#include "tree_generator.h"
-#include "utils.h"
-#include "readdata.h"
-using namespace std;
-using namespace prot_filer;
-using mili::insert_into;
-using namespace testing;
-using testing::A;
-using testing::_;
-using ::testing::Expectation;
+#include <math.h>
+#include <memory>
+#include <fstream>
 
-class MockWriteHelper : public XtcWriterHelper
+#include <gtest/gtest.h>
+#include <mili/mili.h>
+
+#define COMBINATIONS_DEBUG 1
+
+#include "backbones-generator/generator.h"
+#include "backbones-generator/factory_reader_chains.h"
+#include "backbones-generator/tree_filters.h"
+#include "backbones-generator/tree_data.h"
+#include "backbones-generator/tree_helper.h"
+
+#define COMBINATIONS_DEBUG 0
+
+/*
+ *
+ * debug en modo cadenas:
+ * cadenas = ceil(nres / chain_size)
+ * soluciones = fragmentos^cadenas * angulos^(cadenas - 1)
+ *
+ * debug en modo simple:
+ * equivalencia con modo cadenas: fragmentos = 1, chain_size = 1, cadenas = nres
+ * soluciones = angulos^(cadenas - 2)// menos 2 xq la semilla aca cuenta
+ *
+ */
+
+struct TestHelperSingleMode
 {
-public:
-    MOCK_METHOD1(write, void(TreeData& tree_data));
-    virtual ~MockWriteHelper()
-    {};
+    static unsigned int count(unsigned int angles, unsigned int residues)
+    {
+        unsigned int result;
+        if (residues < 3)
+            result = 1;
+        else
+            result = std::pow(angles, (residues - 2));
+
+        return result;
+    }
+
+    static unsigned int testCount(unsigned int nres, std::istream& inputFile)
+    {
+        const float radius = 0.5;
+        const float scal = 1;
+        const std::string outputFile("testSimpleMode");
+        TreeData treeData(nres, 100, 100, 100);
+        treeData.readData(inputFile);
+
+        TreeFilters treeFilters;
+        treeFilters.setr(radius, radius, radius, scal, scal);
+        TreeHelper treeHelper(treeData, treeFilters, outputFile);
+
+        IGeneratorSimple* const generatorPtr = IGeneratorSimple::Factory::new_class("compressed");
+        std::auto_ptr<IGeneratorSimple> g(generatorPtr);
+        g->generate(treeHelper);
+
+        return treeData.cont;
+    }
+
 };
 
-bool eq(const AnglesData& d1, const AnglesData& d2)
+struct TestHelperChainMode
 {
-    AngleIdPair* expected_pair = d1.angles;
-    AngleIdPair* data_pair = d2.angles;
-    unsigned int i = 0;
-    bool match;
-    do
+    static unsigned int testCount(unsigned int nres, std::istream& inputFile, const std::string& residuesInput)
     {
-        match = (expected_pair[i].fi == data_pair[i].fi) && (expected_pair[i].si == data_pair[i].si);
-        ++i;
+        const float radius = 0.5;
+        const float scal = 1;
+        const std::string outputFile("testChainMode");
+        TreeData treeData(nres, 100, 100, 100);
+        treeData.readData(inputFile);
+
+        TreeFilters treeFilters;
+        treeFilters.setr(radius, radius, radius, scal, scal);
+        TreeHelper treeHelper(treeData, treeFilters, outputFile);
+
+        FullCachedAnglesSeqReader* const readerPtr = FactoryReaderChains::new_class("compressed", residuesInput, "");
+        IGeneratorChains* const generatorPtr = IGeneratorChains::Factory::new_class("xtc");
+
+        std::auto_ptr<FullCachedAnglesSeqReader> db(readerPtr);
+        std::auto_ptr<IGeneratorChains> g(generatorPtr);
+
+        g->generate(treeHelper, db.get());
+
+        return treeData.cont;
     }
-    while ((i < d1.nres - 1) && match);
-    return match;
-}
 
-MATCHER_P(CheckData, d, "")
+    static void generateSimple(const std::string& outputFile, std::istream& inputFile, unsigned int nres)
+    {
+        const float radius = 0.5;
+        const float scal = 1;
+        TreeData treeData(nres, 100, 100, 100);
+        treeData.readData(inputFile);
+
+        TreeFilters treeFilters;
+        treeFilters.setr(radius, radius, radius, scal, scal);
+        TreeHelper treeHelper(treeData, treeFilters, outputFile);
+
+        IGeneratorSimple* const generatorPtr = IGeneratorSimple::Factory::new_class("compressed");
+        std::auto_ptr<IGeneratorSimple> g(generatorPtr);
+        g->generate(treeHelper);
+    }
+
+    static unsigned int count(unsigned int fragments,  unsigned int chainSize, unsigned int angles, unsigned int residues)
+    {
+        const unsigned int amountChains = (residues / chainSize);//ceil?
+        return std::pow(fragments, amountChains) * std::pow(angles, (amountChains - 1));
+    }
+};
+
+TEST(TestTreeGenerator, CountSingleMode_NRES_2)
 {
-    return eq(d, *(arg.angles_data));
+    const unsigned int ANGLES = 2;
+    const unsigned int NRES = 2;
+
+    std::stringstream inputFile("0 0\n0 90\n");
+
+    const unsigned int amountGenerated = TestHelperSingleMode::testCount(NRES, inputFile);
+    ASSERT_EQ(amountGenerated, TestHelperSingleMode::count(ANGLES, NRES));
 }
 
-TEST(Test, simple_generator)
+TEST(TestTreeGenerator, CountSingleMode_NRES_4)
 {
-    const unsigned int nres = 3;
+    const unsigned int ANGLES = 2;
+    const unsigned int NRES = 4;
 
-    AnglesData d1(nres);
-    d1.angles[0] = AngleIdPair(0, 0);
-    d1.angles[1] = AngleIdPair(0, 0);
-    AnglesData d2(nres);
-    d2.angles[0] = AngleIdPair(2, 0);
-    d2.angles[1] = AngleIdPair(0, 2);
+    std::stringstream inputFile("0 0\n0 90\n");
 
-    Grillado* grilla = new Grillado(100, 100, 100);
-    TreeData tree_data(nres, grilla);
-    istringstream f("-60  -40\n-60  140\n-130 140\n60   30");
-    readdata(f, tree_data);
-    tree_data.angles_data = new AnglesData(tree_data.nres, tree_data.angles_mapping);
-    MockWriteHelper mock_helper;
-
-    Expectation e1 = EXPECT_CALL(mock_helper, write(CheckData(d1))).Times(1);
-    EXPECT_CALL(mock_helper, write(CheckData(d2))).Times(1).After(e1);
-
-    SimpleTreeOperator st(tree_data);
-    TreeGenerator g(tree_data, mock_helper, st);
-    g.generate();
-    ASSERT_EQ(2, tree_data.cont);
+    const unsigned int amountGenerated = TestHelperSingleMode::testCount(NRES, inputFile);
+    ASSERT_EQ(amountGenerated, TestHelperSingleMode::count(ANGLES, NRES));
 }
-*/
+
+TEST(TestTreeGenerator, CountSingleMode_NRES_10)
+{
+    const unsigned int ANGLES = 2;
+    const unsigned int NRES = 10;
+
+    std::stringstream inputFile("0 0\n0 90\n");
+
+    const unsigned int amountGenerated = TestHelperSingleMode::testCount(NRES, inputFile);
+    ASSERT_EQ(amountGenerated, TestHelperSingleMode::count(ANGLES, NRES));
+}
+
+TEST(TestTreeGenerator, CountChainMode_NRES_9)
+{
+    const unsigned int NRES = 9;
+    const unsigned int ANGLES = 2;
+
+    const unsigned int NRES_SINGLE = 4;
+    const unsigned int ANGLES_SINGLE = 2;
+
+    const unsigned int CHAIN_SIZE = NRES_SINGLE - 1;
+    const unsigned int FRAGMENTS = TestHelperSingleMode::count(ANGLES_SINGLE, NRES_SINGLE);
+
+    const std::string outputFileSingleMode("salidaSimple");
+
+    std::stringstream inputFileSimple("0 0\n0 90\n");
+
+    TestHelperChainMode::generateSimple(outputFileSingleMode, inputFileSimple, NRES_SINGLE);
+
+    const std::string residuesInput = outputFileSingleMode + ".cps";
+
+    std::stringstream inputFile("0 0\n0 90\n");
+    const unsigned int amountGenerated = TestHelperChainMode::testCount(NRES, inputFile, residuesInput);
+
+    ASSERT_EQ(amountGenerated, TestHelperChainMode::count(FRAGMENTS, CHAIN_SIZE, ANGLES, NRES));
+}
+
+TEST(TestTreeGenerator, CountChainMode_NRES_9_WHIT_DIFERENTS_ANGLES)
+{
+    const unsigned int ANGLES = 3;
+    const unsigned int NRES = 9;
+
+    const unsigned int ANGLES_SINGLE = 2;
+    const unsigned int NRES_SINGLE = 4;
+
+    const unsigned int CHAIN_SIZE = NRES_SINGLE - 1;
+    const unsigned int FRAGMENTS = TestHelperSingleMode::count(ANGLES_SINGLE, NRES_SINGLE);
+
+    const std::string outputFileSingleMode("salidaSimple");
+    std::stringstream inputFileSimple("0 0\n0 90\n");
+
+    TestHelperChainMode::generateSimple(outputFileSingleMode, inputFileSimple, NRES_SINGLE);
+
+    const std::string residuesInput = outputFileSingleMode + ".cps";
+
+    std::stringstream inputFile("0 0\n0 90\n90 0\n");
+    const unsigned int amountGenerated = TestHelperChainMode::testCount(NRES, inputFile, residuesInput);
+
+    ASSERT_EQ(amountGenerated, TestHelperChainMode::count(FRAGMENTS, CHAIN_SIZE, ANGLES, NRES));
+}

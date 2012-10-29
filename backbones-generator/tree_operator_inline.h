@@ -49,7 +49,7 @@ inline void TreeOperator<WriterHelper>::removeSeed()
 
 template <class WriterHelper>
 inline bool TreeOperator<WriterHelper>::write()
-{   
+{
 #ifdef COMBINATIONS_DEBUG // En el modo DEBUG se deshabilitan los chequeos.
     const bool success = false;
     writerHelper.write();
@@ -90,7 +90,7 @@ inline bool SimpleTreeOperator<WriterHelper>::putNext(unsigned int& level, unsig
     {
         Residuo residuo;
 
-        result = this->treeHelper.putRes(this->R, level, residuo, indexAngles, previousLevelIndex) == TreeFilters::FILTER_OK;
+        result = this->treeHelper.putRes(this->R, level, residuo, indexAngles, previousLevelIndex);
 
         if (result)
         {
@@ -125,7 +125,7 @@ inline void ChainsTreeOperator<WriterHelper>::putChain(prot_filer::AnglesData& c
 {
     ChainsRes residuos;
 
-    const bool isOk = this->treeHelper.putChain(this->R, level, residuos, chain, indexRes, firstSi, firstFi) == TreeFilters::FILTER_OK;
+    const bool isOk = this->treeHelper.putChain(this->R, level, residuos, chain, indexRes, firstSi, firstFi);
 
     if (isOk)
     {
