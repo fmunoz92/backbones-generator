@@ -1,6 +1,5 @@
 #include "backbones-generator/tree_helper.h"
 
-#define COMBINATIONS_DEBUG 1
 #include <fstream>
 
 TreeHelper::TreeHelper(TreeData& treeData, TreeFilters& treeFilters, const std::string&  outputFile)

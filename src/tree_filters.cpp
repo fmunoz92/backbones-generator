@@ -3,6 +3,7 @@
 #include "backbones-generator/tree_filters.h"
 
 using mili::square;
+using mili::in_range;
 
 void TreeFilters::setr(float rn, float rca, float rc, float scal_1_4, float scal_1_5)
 {
@@ -60,66 +61,97 @@ TreeFilters::FilterResultType TreeFilters::islong(const Atoms& patm, unsigned in
 {
     // Until we reach residue #5, the check for long chain is meaningless
     // at=13 is the CA of residue #5
-    const bool isNesessaryCheck = (at >= 13);
+    if (at < 13)
+        return FILTER_OK;
 
     // at-12 is the CA atom that is four residues down the chain
     // at=1 is the first CA in the chain
-    int i = at - 12;
-    bool result = isNesessaryCheck;
-    while (i >= 1 && result)
+    for (int i = at - 12; i >= 1; i -= 3)
     {
         const float dx2 = square(patm[at].x - patm[i].x);
         const float dy2 = square(patm[at].y - patm[i].y);
         const float dz2 = square(patm[at].z - patm[i].z);
         const float d2  = dx2 + dy2 + dz2;
 
-        result = (d2 <= dmax2);
-        i -= 3;
+        if (d2 > dmax2)
+        {
 #ifdef VERBOSE
-        if (result)
             std::cout << "Chain length = " << sqrt(d2) << ", while Dmax is = " << sqrt(dmax2) << std::endl;
 #endif
+            return FILTER_FAIL;
+        }
     }
-
-    return (result || !isNesessaryCheck) ? FILTER_OK : FILTER_FAIL;
-}
-
-bool TreeFilters::isParticularClash(const Atoms& patm, unsigned int x, unsigned int y, unsigned int z) const
-{
-    float d2 = distance(patm, x, y);
-    const bool result = (d2 < r[patm[x].vdw][patm[y].vdw][z]);
-#ifdef VERBOSE
-    if (result)
-        std::cout << "Clash between atmom = " << x << " and atom = " << z << " distancia= " <<  sqrt(d2) << std::endl;
-#endif
-
-    return result;
+    return FILTER_OK;
 }
 
 TreeFilters::FilterResultType TreeFilters::isclash(const Atoms& patm, unsigned int at) const
 {
     //This is to check for the so-called 1-4 clashes,
     //i.e. a clash between atom at position i with atom at position i+3
-
-    bool result = true;
-    unsigned int z = 0;
     int i  = at - 3;
+    float d2 = distance(patm, at, i);
 
-    while (i >= 0 && result)
+    if (d2 < r[patm[at].vdw][patm[i].vdw][0])
     {
-        //If this is atom #3 and passes the check for 1-4 clashes or this is atom #4 and passes
-        //check for 1-4 and 1-5 clashes, then there is nothing else to check.
-        const bool nothingElseToCheck = (i == 0) || (i == 1);
-
-        result = isParticularClash(patm, at, i, z) && !nothingElseToCheck;
-
-        --i;
-        if (z < 2)
-            ++z;
+#ifdef VERBOSE
+        std::cout << "Clash 1-4 between atmom = " << at << " and atom = " << i << " distancia= " <<  sqrt(d2) << std::endl;
+#endif
+        return FILTER_FAIL;
     }
 
-    return (result) ? FILTER_OK : FILTER_FAIL;
+    //If this is atom #3 and passes the check for 1-4 clashes, then there is nothing else to check.
+    if (at == 3)
+        return FILTER_OK;
+
+    //This is to check for the so-called 1-5 clashes;
+    //i.e. a clash between atom at position i with atom at position i+4
+    i = at - 4;
+    d2 = distance(patm, at, i);
+    if (d2 < r[patm[at].vdw][patm[i].vdw][1])
+    {
+#ifdef VERBOSE
+        std::cout << "Clash 1-5 between atmom = " << at << " and atom = " << i << " distancia= " <<  sqrt(d2) << std::endl;
+#endif
+        return FILTER_FAIL;
+    }
+
+    //If this is atom #4 and passes check for 1-4 and 1-5 clashes, then there is nothing else to check.
+    if (at == 4)
+        return FILTER_OK;
+
+    //The rest of the clashes until the end of the chain.
+    for (i = at - 5; i >= 0; i--)
+    {
+        d2 = distance(patm, at, i);
+        if (d2 < r[patm[at].vdw][patm[i].vdw][2])
+        {
+#ifdef VERBOSE
+            std::cout << "Clash 1-5 between atmom = " << at << " and atom = " << i << " distancia= " <<  sqrt(d2) << std::endl;
+#endif
+            return FILTER_FAIL;
+        }
+    }
+
+    return FILTER_OK;
 }
+
+TreeFilters::FilterResultType TreeFilters::volumeInRange(unsigned int nres, Volume vol_parcial) const
+{
+    // Valores obtenidos a partir de pruebas de un set de datos en Grillado.
+    static const float cota_maxima_volumen = 177.65f;
+    static const float pendiente_empirica = -0.0882f;
+    static const float volumen_min_aa = 110.0f;
+
+    const float volumen_max_aa = pendiente_empirica * float(nres) + cota_maxima_volumen;
+    const float chain_volumen = float(vol_parcial) / float(nres);
+
+#ifdef VERBOSE
+    std::cout << "Maximun Volume allowed per a.a  =" << volumen_max_aa << ". Volumen in this chain=" << chain_volumen << endl;
+#endif
+
+    return in_range(chain_volumen, volumen_min_aa, volumen_max_aa) ? FILTER_OK : FILTER_FAIL;
+}
+
 
 ClashFilter::ClashFilter(const TreeData& tree_data, const TreeFilters& tree_filters) :
     tree_data(tree_data),

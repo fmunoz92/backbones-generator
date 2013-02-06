@@ -6,8 +6,6 @@
 #include "backbones-generator/tree_filters.h"
 
 
-#define COMBINATIONS_DEBUG 1
-
 template <class WriterHelper>
 inline TreeOperator<WriterHelper>::TreeOperator(TreeHelper& treeHelper, FullCachedAnglesSeqReader* reader)
     : treeHelper(treeHelper),

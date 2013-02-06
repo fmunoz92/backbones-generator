@@ -28,7 +28,7 @@ struct TreeData
 
     Atoms atm; // estructura parcial
 
-    long int cont;         // cantidad de estructuras exitosas hasta el momento
+    long unsigned int cont;         // cantidad de estructuras exitosas hasta el momento
     bool hubo_algun_exito; // si encendido, dice que hubo al menos una rama que llego al final
 
     Grillado grilla;       // Utilizamos el grillado para aproximar el volumen parcial

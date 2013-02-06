@@ -5,15 +5,11 @@
 #include <gtest/gtest.h>
 #include <mili/mili.h>
 
-#define COMBINATIONS_DEBUG 1
-
 #include "backbones-generator/generator.h"
 #include "backbones-generator/factory_reader_chains.h"
 #include "backbones-generator/tree_filters.h"
 #include "backbones-generator/tree_data.h"
 #include "backbones-generator/tree_helper.h"
-
-#define COMBINATIONS_DEBUG 0
 
 /*
  *
