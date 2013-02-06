@@ -1,9 +1,9 @@
 Import ('env')
 
 name = 'backbones-generator'
-inc = env.Dir('../src')
+inc = env.Dir('../')
 src = env.Glob('*.cpp')
 
-deps = ['backbones-generator', 'gmock','gtest_main', 'gtest', 'prot-filer', 'backbones-generator-objects']
+deps = ['gmock','gtest_main', 'gtest', 'prot-filer', 'bbgen-combinations-test']
 
 env.CreateTest(name, inc, src, deps)
