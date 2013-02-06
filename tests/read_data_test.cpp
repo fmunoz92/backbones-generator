@@ -14,7 +14,9 @@ TEST(TestReadData, read_data)
 {
     stringstream inputFile("-60 -40\n0 90\n");
 
-    TreeData treeData(1, 4, 4, 4);
+    TreeFilters treeFilters;
+    IncrementalBackbone incrementalBackbone(0, treeFilters);
+    TreeData treeData(1, 4, 4, 4, incrementalBackbone);
     treeData.readData(inputFile);
 
     ASSERT_EQ(2, treeData.anglesMapping.get_mapping_size());

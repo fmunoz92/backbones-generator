@@ -2,6 +2,9 @@
 #define TREE_FILTERS_H
 
 #include "backbones-generator/tree_data.h"
+#include "backbones-generator/grillado.h"
+
+class TreeData;
 
 class TreeFilters
 {

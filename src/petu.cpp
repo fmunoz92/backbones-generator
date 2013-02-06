@@ -23,15 +23,20 @@ int main(int argc, char** argv)
     {
         std::ifstream filer(o.data.c_str());
 
-        TreeData treeData(o.Nres, o.m, o.n, o.z);
+        TreeFilters treeFilters;
+
+        IncrementalBackbone incrementalBackbone(o.Nres * 3, treeFilters);
+
+        TreeData treeData(o.Nres, o.m, o.n, o.z, incrementalBackbone);
         treeData.readData(filer);
 
-        TreeFilters treeFilters;
+        BareBackbone::treeData = &treeData;
 
         // Fill r[][][] with the minimun squared distance between atoms
         treeFilters.setr(o.RN, o.RCa, o.RC, o.Scal_1_4, o.Scal_1_5);
 
-        TreeHelper treeHelper(treeData, treeFilters, o.outputFile);
+        //o.outputFile
+        TreeHelper treeHelper(treeData, treeFilters);
 
         std::cout << "Number of fi-si combinations in file=" << treeHelper.getNAngles() << std::endl;
 

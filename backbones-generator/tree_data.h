@@ -6,39 +6,15 @@
 #include "prot-filer/format_filer.h"
 #include "prot-filer/cached_reader.h"
 
+//TODO: move to "definitions.h"
+typedef prot_filer::BasicProtein Atoms;
+typedef prot_filer::CachedReader<prot_filer::FullCache, prot_filer::SimpleAnglesReader, prot_filer::AnglesData> FullCachedAnglesSeqReader;
+
+#include "backbones-generator/tree_filters.h"
 #include "backbones-generator/grillado.h"
 
-typedef prot_filer::CachedReader<prot_filer::FullCache, prot_filer::SimpleAnglesReader, prot_filer::AnglesData> FullCachedAnglesSeqReader;
-typedef prot_filer::BasicProtein Atoms;
-
-// Datos a compartir por todos los niveles:
-struct TreeData
-{
-    TreeData(int nRes, size_t cols, size_t rows, size_t depth);
-
-    const unsigned int nres;
-
-    const float rgmax;
-    const float dmax2;
-
-    std::vector<float> cosfi;
-    std::vector<float> cossi;
-    std::vector<float> sinfi;
-    std::vector<float> sinsi;
-
-    Atoms atm; // estructura parcial
-
-    long unsigned int cont;         // cantidad de estructuras exitosas hasta el momento
-    bool hubo_algun_exito; // si encendido, dice que hubo al menos una rama que llego al final
-
-    Grillado grilla;       // Utilizamos el grillado para aproximar el volumen parcial
-    prot_filer::AnglesMapping anglesMapping;
-    prot_filer::AnglesData    anglesData; // Used only when writing compressed data.
-
-    prot_filer::FragmentIds fragmentIds;
-
-    void readData(std::istream& filer);
-};
+struct TreeData;
+struct TreeFilters;
 
 struct Residuo
 {
@@ -60,5 +36,65 @@ struct Residuo
     esferaId at2;
     esferaId at3;
 };
+
+
+struct BareBackbone : public Atoms
+{
+    BareBackbone(unsigned int size, TreeFilters& treeFilters);
+
+    void putSeed(float* R, Residuo& residuo);
+
+    bool putRes(float* pR, const unsigned int resN, Residuo& residuo, unsigned int siIndex, unsigned int fiIndex);
+
+    void deleteRes(const Residuo& residuo);
+
+    void deleteRes(const std::list<Residuo>& residuos);
+
+    void clear();//This function puts 0 in all the atoms coordinates
+
+    static TreeData* treeData;
+protected:
+    TreeFilters& treeFilters;
+};
+
+struct IncrementalBackbone : public BareBackbone
+{
+    IncrementalBackbone(unsigned int size, TreeFilters& treeFilters);
+
+    bool filterLastLevelOk();
+};
+
+// Datos a compartir por todos los niveles:
+struct TreeData
+{
+    TreeData(int nRes, size_t cols, size_t rows, size_t depth, IncrementalBackbone& incrementalBackbone);
+    /*
+     * "Statics" members
+     * */
+    const unsigned int nres;
+    const float rgmax;
+    const float dmax2;
+    std::vector<float> cosfi;
+    std::vector<float> cossi;
+    std::vector<float> sinfi;
+    std::vector<float> sinsi;
+    /*
+     * "Dynamics" members
+     */
+    IncrementalBackbone& incrementalBackbone; // estructura parcial
+    Grillado grilla;       // Utilizamos el grillado para aproximar el volumen parcial
+    prot_filer::AnglesMapping anglesMapping;
+    prot_filer::AnglesData    anglesData; // Used only when writing compressed data.
+    prot_filer::FragmentIds fragmentIds;
+
+    long unsigned int cont;         // cantidad de estructuras exitosas hasta el momento
+    bool hubo_algun_exito; // si encendido, dice que hubo al menos una rama que llego al final
+    /*
+     * public methods
+     */
+    void readData(std::istream& filer);
+};
+
+
 
 #endif

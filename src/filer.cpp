@@ -2,11 +2,14 @@
 
 #include "backbones-generator/filer.h"
 
+
+//TODO: usar el nombre de la salida que quiere el usuario
+
 XtcWriterHelper::XtcWriterHelper(TreeHelper& tree_helper)
     : tree_helper(tree_helper)
 {
     const std::string XTC_EXTENSION = ".xtc";
-    writer.open(tree_helper.getOutputFile() + XTC_EXTENSION);
+    writer.open("traj" + XTC_EXTENSION);
 }
 
 XtcWriterHelper::~XtcWriterHelper()
@@ -23,7 +26,7 @@ CompressedWriterHelper::CompressedWriterHelper(TreeHelper& tree_helper)
     : tree_helper(tree_helper)
 {
     const std::string COMPRESSED_EXTENSION = ".cps";
-    writer.open(tree_helper.getOutputFile() + COMPRESSED_EXTENSION);
+    writer.open("traj" + COMPRESSED_EXTENSION);
 }
 
 CompressedWriterHelper::~CompressedWriterHelper()
@@ -41,7 +44,7 @@ FragmentsWriterHelper::FragmentsWriterHelper(TreeHelper& tree_helper, FullCached
       reader(reader)
 {
     const std::string FRAGMENSTS_EXTENSION = ".fgs";
-    writer.open(tree_helper.getOutputFile() + FRAGMENSTS_EXTENSION);
+    writer.open("traj" + FRAGMENSTS_EXTENSION);
 }
 
 FragmentsWriterHelper::~FragmentsWriterHelper()
