@@ -40,7 +40,7 @@ const prot_filer::FragmentIds& BareBackbone::getFragmentIds() const
 
 prot_filer::AnglesData& BareBackbone::getAnglesData()
 {
-  return anglesData;
+    return anglesData;
 }
 
 void BareBackbone::deleteRes(const Residuo& residuo)

@@ -45,7 +45,7 @@ struct TestHelperSingleMode
         TreeFilters treeFilters;
         Grillado grilla(100, 100, 100);
         prot_filer::AnglesMapping anglesMapping(nres);
-        prot_filer::AnglesData anglesData(nres, &anglesMapping);        
+        prot_filer::AnglesData anglesData(nres, &anglesMapping);
         IncrementalBackbone incrementalBackbone(nres, grilla, anglesData, anglesMapping, treeFilters);
         TreeData treeData(nres, incrementalBackbone);
         BareBackbone::treeData = &treeData;
@@ -73,7 +73,7 @@ struct TestHelperChainMode
         TreeFilters treeFilters;
         Grillado grilla(100, 100, 100);
         prot_filer::AnglesMapping anglesMapping(nres);
-        prot_filer::AnglesData anglesData(nres, &anglesMapping);        
+        prot_filer::AnglesData anglesData(nres, &anglesMapping);
         IncrementalBackbone incrementalBackbone(nres, grilla, anglesData, anglesMapping, treeFilters);
         TreeData treeData(nres, incrementalBackbone);
         BareBackbone::treeData = &treeData;
@@ -100,7 +100,7 @@ struct TestHelperChainMode
         TreeFilters treeFilters;
         Grillado grilla(100, 100, 100);
         prot_filer::AnglesMapping anglesMapping(nres);
-        prot_filer::AnglesData anglesData(nres, &anglesMapping);        
+        prot_filer::AnglesData anglesData(nres, &anglesMapping);
         IncrementalBackbone incrementalBackbone(nres, grilla, anglesData, anglesMapping, treeFilters);
         TreeData treeData(nres, incrementalBackbone);
         BareBackbone::treeData = &treeData;

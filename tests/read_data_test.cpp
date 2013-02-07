@@ -19,7 +19,7 @@ TEST(TestReadData, read_data)
     TreeFilters treeFilters;
     Grillado grilla(10, 10, 10);
     prot_filer::AnglesMapping anglesMapping(10);
-    prot_filer::AnglesData anglesData(10, &anglesMapping); 
+    prot_filer::AnglesData anglesData(10, &anglesMapping);
     IncrementalBackbone incrementalBackbone(10, grilla, anglesData, anglesMapping, treeFilters);
     TreeData treeData(10, incrementalBackbone);
     BareBackbone::treeData = &treeData;

@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 
         prot_filer::AnglesMapping anglesMapping(o.Nres);
         prot_filer::AnglesData anglesData(o.Nres, &anglesMapping);
-        
+
         IncrementalBackbone incrementalBackbone(o.Nres, grilla, anglesData, anglesMapping, treeFilters);
 
         TreeData treeData(o.Nres, incrementalBackbone);
