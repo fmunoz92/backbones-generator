@@ -51,15 +51,11 @@ inline bool TreeOperator<WriterHelper>::write()
 #ifdef COMBINATIONS_DEBUG // En el modo DEBUG se deshabilitan los chequeos.
     const bool success = false;
     writerHelper.write();
-    treeHelper.reportSuccess();
 #else
     const bool success = treeHelper.getAtm().filterLastLevelOk();
 #endif
     if (success)
-    {
         writerHelper.write();
-        treeHelper.reportSuccess();
-    }
 
     return success;
 }
@@ -151,7 +147,7 @@ inline bool ChainsTreeOperator<WriterHelper>::putChain(float* pR,
     unsigned int angle = 1;//we start from the 2nd pair of angles, since the
     // first pair is the angle between the seed and the 1st residue. We don't
     // consider the seed from the fragments.
-    while (result  && (angle < LENGTH_OF_CHAIN) && (resN < this->treeHelper.getNRes()))
+    while (result  && (angle < LENGTH_OF_CHAIN) && (resN < this->treeHelper.getData().nRes))
     {
         fi = chain.angles[angle].fi;
         si = chain.angles[angle].si;

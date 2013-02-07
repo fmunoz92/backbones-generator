@@ -9,23 +9,13 @@
 class TreeHelper
 {
 public:
-
-    TreeHelper(TreeData& treeData, TreeFilters& treeFilters);
-
-    void reportSuccess();
+    TreeHelper(TreeData& treeData, IncrementalBackbone& incrementalBackbone);
 
     IncrementalBackbone& getAtm();
-
-    const prot_filer::AnglesData&  getAnglesData()  const;
-    const prot_filer::FragmentIds& getFragmentIds() const;
-
-    unsigned int getNRes()        const;
-    unsigned int getNAngles()     const;
-    bool         success()        const;
-
+    TreeData& getData();
 private:
     TreeData& treeData;
-    const TreeFilters& treeFilters;
+    IncrementalBackbone& incrementalBackbone; // estructura parcial
 };
 
 #endif

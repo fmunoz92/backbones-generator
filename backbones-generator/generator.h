@@ -12,7 +12,7 @@ struct IGeneratorSimple
 {
     typedef mili::FactoryRegistry<IGeneratorSimple, std::string> Factory;
 
-    virtual void generate(TreeHelper& tree_helper) = 0;
+    virtual unsigned int generate(TreeHelper& tree_helper) = 0;
     virtual ~IGeneratorSimple() {}
 };
 
@@ -20,7 +20,7 @@ struct IGeneratorChains
 {
     typedef mili::FactoryRegistry<IGeneratorChains, std::string> Factory;
 
-    virtual void generate(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader) = 0;
+    virtual unsigned int generate(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader) = 0;
     virtual ~IGeneratorChains() {}
 };
 
@@ -30,10 +30,10 @@ class GeneratorSimple : public IGeneratorSimple
 public:
     virtual ~GeneratorSimple() {}
 private:
-    inline virtual void generate(TreeHelper& tree_helper)
+    inline virtual unsigned int generate(TreeHelper& tree_helper)
     {
         TreeGenerator<SimpleTreeOperator<Writer> > generator(tree_helper, NULL);
-        generator.generate();
+        return generator.generate();
     }
 };
 
@@ -43,10 +43,10 @@ class GeneratorChains : public IGeneratorChains
 public:
     virtual ~GeneratorChains() {}
 private:
-    inline virtual void generate(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader)
+    inline virtual unsigned int generate(TreeHelper& tree_helper, FullCachedAnglesSeqReader* const reader)
     {
         TreeGenerator<ChainsTreeOperator<Writer> > generator(tree_helper, reader);
-        generator.generate();
+        return generator.generate();
     }
 };
 

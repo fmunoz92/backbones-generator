@@ -76,14 +76,12 @@ struct IncrementalBackbone : public BareBackbone
     bool filterLastLevelOk();
 };
 
-// Datos a compartir por todos los niveles:
 struct TreeData
 {
-    TreeData(int nRes, IncrementalBackbone& incrementalBackbone);
-    /*
-     * "Statics" members
-     * */
-    const unsigned int nres;
+    TreeData(unsigned int nRes);
+
+    const unsigned int nRes;
+    unsigned int nAngles; // assigned in readData(..)
 
     const float rgmax;
     const float dmax2;
@@ -92,13 +90,6 @@ struct TreeData
     std::vector<float> cossi;
     std::vector<float> sinfi;
     std::vector<float> sinsi;
-    /*
-     * "Dynamics" members
-     */
-    IncrementalBackbone& incrementalBackbone; // estructura parcial
-
-    long unsigned int cont;         // cantidad de estructuras exitosas hasta el momento
-    bool hubo_algun_exito; // si encendido, dice que hubo al menos una rama que llego al final
 };
 
 

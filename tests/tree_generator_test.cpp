@@ -27,13 +27,7 @@ struct TestHelperSingleMode
 {
     static unsigned int count(unsigned int angles, unsigned int residues)
     {
-        unsigned int result;
-        if (residues < 3)
-            result = 1;
-        else
-            result = std::pow(angles, (residues - 2));
-
-        return result;
+        return (residues < 3) ? 1 : std::pow(angles, (residues - 2));
     }
 
     static unsigned int testCount(unsigned int nres, std::istream& inputFile)
@@ -47,17 +41,18 @@ struct TestHelperSingleMode
         prot_filer::AnglesMapping anglesMapping(nres);
         prot_filer::AnglesData anglesData(nres, &anglesMapping);
         IncrementalBackbone incrementalBackbone(nres, grilla, anglesData, anglesMapping, treeFilters);
-        TreeData treeData(nres, incrementalBackbone);
+        TreeData treeData(nres);
         BareBackbone::treeData = &treeData;
         readData(inputFile, treeData, anglesMapping);
         treeFilters.setr(radius, radius, radius, scal, scal);
-        TreeHelper treeHelper(treeData, treeFilters);
+        TreeHelper treeHelper(treeData, incrementalBackbone);
 
         IGeneratorSimple* const generatorPtr = IGeneratorSimple::Factory::new_class("compressed");
         std::auto_ptr<IGeneratorSimple> g(generatorPtr);
-        g->generate(treeHelper);
 
-        return treeData.cont;
+        const  unsigned int count = g->generate(treeHelper);
+
+        return count;
     }
 
 };
@@ -75,11 +70,11 @@ struct TestHelperChainMode
         prot_filer::AnglesMapping anglesMapping(nres);
         prot_filer::AnglesData anglesData(nres, &anglesMapping);
         IncrementalBackbone incrementalBackbone(nres, grilla, anglesData, anglesMapping, treeFilters);
-        TreeData treeData(nres, incrementalBackbone);
+        TreeData treeData(nres);
         BareBackbone::treeData = &treeData;
         readData(inputFile, treeData, anglesMapping);
         treeFilters.setr(radius, radius, radius, scal, scal);
-        TreeHelper treeHelper(treeData, treeFilters);
+        TreeHelper treeHelper(treeData, incrementalBackbone);
 
         FullCachedAnglesSeqReader* const readerPtr = FactoryReaderChains::new_class("compressed", residuesInput, "");
         IGeneratorChains* const generatorPtr = IGeneratorChains::Factory::new_class("xtc");
@@ -87,9 +82,10 @@ struct TestHelperChainMode
         std::auto_ptr<FullCachedAnglesSeqReader> db(readerPtr);
         std::auto_ptr<IGeneratorChains> g(generatorPtr);
 
-        g->generate(treeHelper, db.get());
+        const unsigned int count = g->generate(treeHelper, db.get());
 
-        return treeData.cont;
+
+        return count;
     }
 
     static void generateSimple(const std::string& /*outputFile*/, std::istream& inputFile, unsigned int nres)
@@ -102,11 +98,11 @@ struct TestHelperChainMode
         prot_filer::AnglesMapping anglesMapping(nres);
         prot_filer::AnglesData anglesData(nres, &anglesMapping);
         IncrementalBackbone incrementalBackbone(nres, grilla, anglesData, anglesMapping, treeFilters);
-        TreeData treeData(nres, incrementalBackbone);
+        TreeData treeData(nres);
         BareBackbone::treeData = &treeData;
         readData(inputFile, treeData, anglesMapping);
         treeFilters.setr(radius, radius, radius, scal, scal);
-        TreeHelper treeHelper(treeData, treeFilters);
+        TreeHelper treeHelper(treeData, incrementalBackbone);
 
         IGeneratorSimple* const generatorPtr = IGeneratorSimple::Factory::new_class("compressed");
         std::auto_ptr<IGeneratorSimple> g(generatorPtr);

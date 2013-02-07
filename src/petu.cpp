@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 
         IncrementalBackbone incrementalBackbone(o.Nres, grilla, anglesData, anglesMapping, treeFilters);
 
-        TreeData treeData(o.Nres, incrementalBackbone);
+        TreeData treeData(o.Nres);
 
         BareBackbone::treeData = &treeData;
 
@@ -41,16 +41,18 @@ int main(int argc, char** argv)
         treeFilters.setr(o.RN, o.RCa, o.RC, o.Scal_1_4, o.Scal_1_5);
 
         //o.outputFile
-        TreeHelper treeHelper(treeData, treeFilters);
+        TreeHelper treeHelper(treeData, incrementalBackbone);
 
-        std::cout << "Number of fi-si combinations in file=" << treeHelper.getNAngles() << std::endl;
+        std::cout << "Number of fi-si combinations in file=" << treeData.nAngles << std::endl;
+
+        unsigned int count;
 
         if (o.residuesInput.empty())
         {
             IGeneratorSimple* const generatorPtr = IGeneratorSimple::Factory::new_class(o.writeFormat);
             std::auto_ptr<IGeneratorSimple> g(generatorPtr);
 
-            g->generate(treeHelper);
+            count = g->generate(treeHelper);
         }
         else
         {
@@ -60,10 +62,10 @@ int main(int argc, char** argv)
             std::auto_ptr<FullCachedAnglesSeqReader> db(readerPtr);
             std::auto_ptr<IGeneratorChains> g(generatorPtr);
 
-            g->generate(treeHelper, db.get());
+            count = g->generate(treeHelper, db.get());
         }
 
-        std::cout << "Number of chains generated = " << treeData.cont << std::endl;
+        std::cout << "Number of chains generated = " << count << std::endl;
 
         prot_filer::Coord3DReaderFactory::destroy_instance();
         prot_filer::Coord3DSeqReaderFactory::destroy_instance();

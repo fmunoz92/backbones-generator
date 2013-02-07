@@ -5,13 +5,14 @@
 template <class TOperator>
 inline TreeGenerator<TOperator>::TreeGenerator(TreeHelper& treeHelper, FullCachedAnglesSeqReader* const reader)
     : treeOperator(treeHelper, reader),
-      CANT_RES(treeHelper.getNRes()),
-      CANT_ANGLES(treeHelper.getNAngles())
+      CANT_RES(treeHelper.getData().nRes),
+      CANT_ANGLES(treeHelper.getData().nAngles),
+      count(0)
 {
 }
 
 template <class TOperator>
-inline void TreeGenerator<TOperator>::generate()
+inline unsigned int TreeGenerator<TOperator>::generate()
 {
     typename TOperator::RMatrix rInicial;
     const unsigned int level = 1;//seed is level 0
@@ -27,6 +28,8 @@ inline void TreeGenerator<TOperator>::generate()
         processLeaf();
 
     treeOperator.removeSeed();
+
+    return count;
 }
 
 /*
@@ -83,5 +86,15 @@ inline bool TreeGenerator<TOperator>::appendElements(unsigned int level, unsigne
 template <class TOperator>
 inline bool TreeGenerator<TOperator>::processLeaf()
 {
-    return treeOperator.write();
+    const bool success = treeOperator.write();
+
+#ifdef COMBINATIONS_DEBUG
+    ++count;
+#else
+    if (success)
+        ++count;
+#endif
+
+
+    return success;
 }

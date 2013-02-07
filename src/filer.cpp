@@ -2,7 +2,6 @@
 
 #include "backbones-generator/filer.h"
 
-
 //TODO: usar el nombre de la salida que quiere el usuario
 
 XtcWriterHelper::XtcWriterHelper(TreeHelper& tree_helper)
@@ -19,7 +18,7 @@ XtcWriterHelper::~XtcWriterHelper()
 
 void XtcWriterHelper::write()
 {
-    writer.write(tree_helper.getAtm(), tree_helper.getAnglesData());
+    writer.write(tree_helper.getAtm(), tree_helper.getAtm().getAnglesData());
 }
 
 CompressedWriterHelper::CompressedWriterHelper(TreeHelper& tree_helper)
@@ -36,7 +35,7 @@ CompressedWriterHelper::~CompressedWriterHelper()
 
 void CompressedWriterHelper::write()
 {
-    writer.write(tree_helper.getAnglesData());
+    writer.write(tree_helper.getAtm().getAnglesData());
 }
 
 FragmentsWriterHelper::FragmentsWriterHelper(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader)
@@ -56,5 +55,5 @@ void FragmentsWriterHelper::write()
 {
     const size_t fragment_nres = reader->get_reader().get_atom_number() / 3;
 
-    writer.write(fragment_nres, tree_helper.getFragmentIds(), tree_helper.getAnglesData());
+    writer.write(fragment_nres, tree_helper.getAtm().getFragmentIds(), tree_helper.getAtm().getAnglesData());
 }

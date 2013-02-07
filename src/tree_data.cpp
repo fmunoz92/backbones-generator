@@ -3,13 +3,10 @@
 #include "backbones-generator/tree_data.h"
 
 
-TreeData::TreeData(int nRes, IncrementalBackbone& incrementalBackbone)
-    : nres(nRes),
-      rgmax(2.72 * mili::cubic_root(nres) + 5.0),              // Maximun gyration radius and maximun CA-CA distance.
-      dmax2(mili::square(8.0 * mili::cubic_root(nres) + 25.0)),// Both equations constructed from database analisys.
-      incrementalBackbone(incrementalBackbone),
-      cont(0),
-      hubo_algun_exito(false)
+TreeData::TreeData(unsigned int nRes)
+    : nRes(nRes),
+      rgmax(2.72 * mili::cubic_root(nRes) + 5.0),              // Maximun gyration radius and maximun CA-CA distance.
+      dmax2(mili::square(8.0 * mili::cubic_root(nRes) + 25.0))// Both equations constructed from database analisys.
 {}
 
 BareBackbone::BareBackbone(unsigned int nRes, Grillado& grilla, prot_filer::AnglesData& anglesData, prot_filer::AnglesMapping& anglesMapping, TreeFilters& treeFilters)
@@ -116,8 +113,8 @@ IncrementalBackbone::IncrementalBackbone(unsigned int nRes, Grillado& grilla, pr
 
 bool IncrementalBackbone::filterLastLevelOk()
 {
-    const bool ok = this->treeFilters.calcRdG(*this, this->treeData->nres, this->treeData->rgmax) == TreeFilters::FILTER_OK &&
-                    this->treeFilters.volumeInRange(this->treeData->nres, this->grilla.obtener_vol_parcial()) == TreeFilters::FILTER_OK;
+    const bool ok = this->treeFilters.calcRdG(*this, this->treeData->nRes, this->treeData->rgmax) == TreeFilters::FILTER_OK &&
+                    this->treeFilters.volumeInRange(this->treeData->nRes, this->grilla.obtener_vol_parcial()) == TreeFilters::FILTER_OK;
 
     return ok;
 }
@@ -141,5 +138,6 @@ void readData(std::istream& filer, TreeData& treeData, prot_filer::AnglesMapping
         }
         ++i;
     }
+    treeData.nAngles = treeData.cosfi.size();
     // Nota a futuro: se deberia lanzar una Excepcion si el formato del archivo fuera equivocado.
 }
