@@ -3,19 +3,16 @@
 #include "backbones-generator/tree_data.h"
 
 
-TreeData::TreeData(int nRes, size_t cols, size_t rows, size_t depth, IncrementalBackbone& incrementalBackbone)
+TreeData::TreeData(int nRes, IncrementalBackbone& incrementalBackbone)
     : nres(nRes),
       rgmax(2.72 * mili::cubic_root(nres) + 5.0),              // Maximun gyration radius and maximun CA-CA distance.
       dmax2(mili::square(8.0 * mili::cubic_root(nres) + 25.0)),// Both equations constructed from database analisys.
       incrementalBackbone(incrementalBackbone),
-      grilla(cols, rows, depth),
-      anglesMapping(nres),
-      anglesData(nres, &anglesMapping),
       cont(0),
       hubo_algun_exito(false)
 {}
 
-void TreeData::readData(std::istream& filer)
+void TreeData::readData(std::istream& filer, prot_filer::AnglesMapping& anglesMapping)
 {
     float fi = 0.0f;
     float si = 0.0f;
@@ -38,17 +35,26 @@ void TreeData::readData(std::istream& filer)
 }
 
 
-BareBackbone::BareBackbone(unsigned int size, TreeFilters& treeFilters)
-    : prot_filer::BasicProtein(size),
-      treeFilters(treeFilters)
+BareBackbone::BareBackbone(unsigned int nRes, Grillado& grilla, prot_filer::AnglesData& anglesData, prot_filer::AnglesMapping& anglesMapping, TreeFilters& treeFilters)
+    : prot_filer::BasicProtein(nRes * 3),
+      treeFilters(treeFilters),
+      grilla(grilla),
+      anglesMapping(anglesMapping),
+      anglesData(anglesData)
 {
 }
 
 TreeData* BareBackbone::treeData = NULL;
 
+
+prot_filer::AnglesData& BareBackbone::getAnglesData()
+{
+  return anglesData;
+}
+
 void BareBackbone::deleteRes(const Residuo& residuo)
 {
-    treeData->grilla.sacar_esfera(residuo.at2);
+    grilla.sacar_esfera(residuo.at2);
 }
 
 void BareBackbone::deleteRes(const std::list<Residuo>& residuos)
@@ -61,8 +67,8 @@ bool BareBackbone::putRes(float* pR, const unsigned int resN, Residuo& residuo, 
 {
     const unsigned int angle = resN - 1;//la semilla no se considera
 
-    treeData->anglesData.angles[angle].si = siIndex;
-    treeData->anglesData.angles[angle].fi = fiIndex;
+    anglesData.angles[angle].si = siIndex;
+    anglesData.angles[angle].fi = fiIndex;
 
 #ifdef COMBINATIONS_DEBUG
 #include "prot-filer/backbones_utils.h"
@@ -83,7 +89,7 @@ bool BareBackbone::putRes(float* pR, const unsigned int resN, Residuo& residuo, 
     {
         const unsigned int RES_N = resN + 1;//prot_filer comienza desde 1
         const prot_filer::ATOM& atm = (*this)[3 * (RES_N - 1) + 1];
-        residuo.at2 = treeData->grilla.agregar_esfera(atm.x, atm.y, atm.z);
+        residuo.at2 = grilla.agregar_esfera(atm.x, atm.y, atm.z);
     }
 
     return success;
@@ -93,10 +99,10 @@ void BareBackbone::putSeed(float* R, Residuo& residuo)
 {
     backbones_utils::semilla(*this, R);
 
-    treeData->anglesData.seed[0] = (*this)[0];
-    treeData->anglesData.seed[1] = (*this)[1];
-    treeData->anglesData.seed[2] = (*this)[2];
-    residuo.at2 = treeData->grilla.agregar_esfera((*this)[1].x, (*this)[1].y, (*this)[1].z);
+    anglesData.seed[0] = (*this)[0];
+    anglesData.seed[1] = (*this)[1];
+    anglesData.seed[2] = (*this)[2];
+    residuo.at2 = grilla.agregar_esfera((*this)[1].x, (*this)[1].y, (*this)[1].z);
 }
 
 
@@ -110,8 +116,9 @@ void BareBackbone::clear()
     }
 }
 
-IncrementalBackbone::IncrementalBackbone(unsigned int size, TreeFilters& treeFilters)
-    : BareBackbone(size, treeFilters)
+
+IncrementalBackbone::IncrementalBackbone(unsigned int nRes, Grillado& grilla, prot_filer::AnglesData& anglesData, prot_filer::AnglesMapping& anglesMapping, TreeFilters& treeFilters)
+    : BareBackbone(nRes, grilla, anglesData, anglesMapping, treeFilters)
 {
 }
 
@@ -119,7 +126,7 @@ IncrementalBackbone::IncrementalBackbone(unsigned int size, TreeFilters& treeFil
 bool IncrementalBackbone::filterLastLevelOk()
 {
     const bool ok = this->treeFilters.calcRdG(*this, this->treeData->nres, this->treeData->rgmax) == TreeFilters::FILTER_OK &&
-                    this->treeFilters.volumeInRange(this->treeData->nres, this->treeData->grilla.obtener_vol_parcial()) == TreeFilters::FILTER_OK;
+                    this->treeFilters.volumeInRange(this->treeData->nres, this->grilla.obtener_vol_parcial()) == TreeFilters::FILTER_OK;
 
     return ok;
 }

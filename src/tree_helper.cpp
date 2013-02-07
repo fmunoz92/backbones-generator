@@ -7,7 +7,6 @@ TreeHelper::TreeHelper(TreeData& treeData, TreeFilters& treeFilters)
       treeFilters(treeFilters)
 {}
 
-
 bool TreeHelper::success() const
 {
     return treeData.hubo_algun_exito;
@@ -33,7 +32,7 @@ void TreeHelper::deleteLastFragmentId()
 
 const prot_filer::AnglesData&  TreeHelper::getAnglesData() const
 {
-    return treeData.anglesData;
+    return treeData.incrementalBackbone.getAnglesData();
 }
 
 

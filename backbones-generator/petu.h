@@ -25,4 +25,5 @@ struct CommandLineOptions
     void show_usage();
 };
 
+void readData(std::istream& filer);
 #endif

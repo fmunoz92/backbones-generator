@@ -40,7 +40,7 @@ struct Residuo
 
 struct BareBackbone : public Atoms
 {
-    BareBackbone(unsigned int size, TreeFilters& treeFilters);
+    BareBackbone(unsigned int nRes, Grillado& grilla, prot_filer::AnglesData& anglesData, prot_filer::AnglesMapping& anglesMapping, TreeFilters& treeFilters);
 
     void putSeed(float* R, Residuo& residuo);
 
@@ -50,16 +50,22 @@ struct BareBackbone : public Atoms
 
     void deleteRes(const std::list<Residuo>& residuos);
 
-    void clear();//This function puts 0 in all the atoms coordinates
+    void clear(); //This function puts 0 in all the atoms coordinates
+    
+    prot_filer::AnglesData& getAnglesData();
 
     static TreeData* treeData;
 protected:
     TreeFilters& treeFilters;
+
+    Grillado& grilla; // Utilizamos el grillado para aproximar el volumen parcial
+    prot_filer::AnglesMapping& anglesMapping;
+    prot_filer::AnglesData&    anglesData; // Used only when writing compressed data.
 };
 
 struct IncrementalBackbone : public BareBackbone
 {
-    IncrementalBackbone(unsigned int size, TreeFilters& treeFilters);
+    IncrementalBackbone(unsigned int nRes, Grillado& grilla, prot_filer::AnglesData& anglesData, prot_filer::AnglesMapping& anglesMapping, TreeFilters& treeFilters);
 
     bool filterLastLevelOk();
 };
@@ -67,13 +73,15 @@ struct IncrementalBackbone : public BareBackbone
 // Datos a compartir por todos los niveles:
 struct TreeData
 {
-    TreeData(int nRes, size_t cols, size_t rows, size_t depth, IncrementalBackbone& incrementalBackbone);
+    TreeData(int nRes, IncrementalBackbone& incrementalBackbone);
     /*
      * "Statics" members
      * */
     const unsigned int nres;
+
     const float rgmax;
     const float dmax2;
+
     std::vector<float> cosfi;
     std::vector<float> cossi;
     std::vector<float> sinfi;
@@ -82,9 +90,7 @@ struct TreeData
      * "Dynamics" members
      */
     IncrementalBackbone& incrementalBackbone; // estructura parcial
-    Grillado grilla;       // Utilizamos el grillado para aproximar el volumen parcial
-    prot_filer::AnglesMapping anglesMapping;
-    prot_filer::AnglesData    anglesData; // Used only when writing compressed data.
+
     prot_filer::FragmentIds fragmentIds;
 
     long unsigned int cont;         // cantidad de estructuras exitosas hasta el momento
@@ -92,9 +98,7 @@ struct TreeData
     /*
      * public methods
      */
-    void readData(std::istream& filer);
+    void readData(std::istream& filer, prot_filer::AnglesMapping& anglesMapping);
 };
-
-
 
 #endif

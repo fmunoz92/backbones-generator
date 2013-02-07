@@ -24,11 +24,15 @@ int main(int argc, char** argv)
         std::ifstream filer(o.data.c_str());
 
         TreeFilters treeFilters;
+        Grillado grilla(o.m, o.n, o.z);
 
-        IncrementalBackbone incrementalBackbone(o.Nres * 3, treeFilters);
+        prot_filer::AnglesMapping anglesMapping(o.Nres);
+        prot_filer::AnglesData anglesData(o.Nres, &anglesMapping);
+        
+        IncrementalBackbone incrementalBackbone(o.Nres, grilla, anglesData, anglesMapping, treeFilters);
 
-        TreeData treeData(o.Nres, o.m, o.n, o.z, incrementalBackbone);
-        treeData.readData(filer);
+        TreeData treeData(o.Nres, incrementalBackbone);
+        treeData.readData(filer, anglesMapping);
 
         BareBackbone::treeData = &treeData;
 

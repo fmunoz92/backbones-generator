@@ -43,10 +43,13 @@ struct TestHelperSingleMode
         //const std::string outputFile("testSimpleMode");
 
         TreeFilters treeFilters;
-        IncrementalBackbone incrementalBackbone(nres * 3, treeFilters);
-        TreeData treeData(nres, 100, 100, 100, incrementalBackbone);
+        Grillado grilla(100, 100, 100);
+        prot_filer::AnglesMapping anglesMapping(nres);
+        prot_filer::AnglesData anglesData(nres, &anglesMapping);        
+        IncrementalBackbone incrementalBackbone(nres, grilla, anglesData, anglesMapping, treeFilters);
+        TreeData treeData(nres, incrementalBackbone);
         BareBackbone::treeData = &treeData;
-        treeData.readData(inputFile);
+        treeData.readData(inputFile, anglesMapping);
         treeFilters.setr(radius, radius, radius, scal, scal);
         TreeHelper treeHelper(treeData, treeFilters);
 
@@ -68,10 +71,13 @@ struct TestHelperChainMode
         //const std::string outputFile("testChainMode");
 
         TreeFilters treeFilters;
-        IncrementalBackbone incrementalBackbone(nres * 3, treeFilters);
-        TreeData treeData(nres, 100, 100, 100, incrementalBackbone);
+        Grillado grilla(100, 100, 100);
+        prot_filer::AnglesMapping anglesMapping(nres);
+        prot_filer::AnglesData anglesData(nres, &anglesMapping);        
+        IncrementalBackbone incrementalBackbone(nres, grilla, anglesData, anglesMapping, treeFilters);
+        TreeData treeData(nres, incrementalBackbone);
         BareBackbone::treeData = &treeData;
-        treeData.readData(inputFile);
+        treeData.readData(inputFile, anglesMapping);
         treeFilters.setr(radius, radius, radius, scal, scal);
         TreeHelper treeHelper(treeData, treeFilters);
 
@@ -92,10 +98,13 @@ struct TestHelperChainMode
         const float scal = 1;
 
         TreeFilters treeFilters;
-        IncrementalBackbone incrementalBackbone(nres * 3, treeFilters);
-        TreeData treeData(nres, 100, 100, 100, incrementalBackbone);
+        Grillado grilla(100, 100, 100);
+        prot_filer::AnglesMapping anglesMapping(nres);
+        prot_filer::AnglesData anglesData(nres, &anglesMapping);        
+        IncrementalBackbone incrementalBackbone(nres, grilla, anglesData, anglesMapping, treeFilters);
+        TreeData treeData(nres, incrementalBackbone);
         BareBackbone::treeData = &treeData;
-        treeData.readData(inputFile);
+        treeData.readData(inputFile, anglesMapping);
         treeFilters.setr(radius, radius, radius, scal, scal);
         TreeHelper treeHelper(treeData, treeFilters);
 
