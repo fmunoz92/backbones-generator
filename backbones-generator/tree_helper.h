@@ -14,10 +14,6 @@ public:
 
     void reportSuccess();
 
-    void deleteLastFragmentId();
-
-    void pushChainIndex(unsigned int index);
-
     IncrementalBackbone& getAtm();
 
     const prot_filer::AnglesData&  getAnglesData()  const;

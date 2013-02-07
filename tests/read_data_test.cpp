@@ -23,7 +23,7 @@ TEST(TestReadData, read_data)
     IncrementalBackbone incrementalBackbone(10, grilla, anglesData, anglesMapping, treeFilters);
     TreeData treeData(10, incrementalBackbone);
     BareBackbone::treeData = &treeData;
-    treeData.readData(inputFile, anglesMapping);
+    readData(inputFile, treeData, anglesMapping);
 
     ASSERT_EQ(2, anglesMapping.get_mapping_size());
     ASSERT_EQ(-60, anglesMapping.get_fi_value(0));

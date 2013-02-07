@@ -3,6 +3,7 @@
 
 #include <string>
 
+
 struct CommandLineOptions
 {
     unsigned int Nres;// Number of amino acids in the chains to build.
@@ -25,5 +26,5 @@ struct CommandLineOptions
     void show_usage();
 };
 
-void readData(std::istream& filer);
+
 #endif

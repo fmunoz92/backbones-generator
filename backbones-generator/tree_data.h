@@ -51,8 +51,13 @@ struct BareBackbone : public Atoms
     void deleteRes(const std::list<Residuo>& residuos);
 
     void clear(); //This function puts 0 in all the atoms coordinates
-    
+
+    void deleteLastFragmentId();
+
+    void pushChainIndex(unsigned int index);
+
     prot_filer::AnglesData& getAnglesData();
+    const prot_filer::FragmentIds& getFragmentIds() const;
 
     static TreeData* treeData;
 protected:
@@ -61,6 +66,7 @@ protected:
     Grillado& grilla; // Utilizamos el grillado para aproximar el volumen parcial
     prot_filer::AnglesMapping& anglesMapping;
     prot_filer::AnglesData&    anglesData; // Used only when writing compressed data.
+    prot_filer::FragmentIds fragmentIds;
 };
 
 struct IncrementalBackbone : public BareBackbone
@@ -91,14 +97,14 @@ struct TreeData
      */
     IncrementalBackbone& incrementalBackbone; // estructura parcial
 
-    prot_filer::FragmentIds fragmentIds;
-
     long unsigned int cont;         // cantidad de estructuras exitosas hasta el momento
     bool hubo_algun_exito; // si encendido, dice que hubo al menos una rama que llego al final
     /*
      * public methods
      */
-    void readData(std::istream& filer, prot_filer::AnglesMapping& anglesMapping);
 };
+
+
+void readData(std::istream& filer, TreeData& treeData, prot_filer::AnglesMapping& anglesMapping);
 
 #endif

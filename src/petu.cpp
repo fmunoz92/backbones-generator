@@ -32,9 +32,10 @@ int main(int argc, char** argv)
         IncrementalBackbone incrementalBackbone(o.Nres, grilla, anglesData, anglesMapping, treeFilters);
 
         TreeData treeData(o.Nres, incrementalBackbone);
-        treeData.readData(filer, anglesMapping);
 
         BareBackbone::treeData = &treeData;
+
+        readData(filer, treeData, anglesMapping);//read angles
 
         // Fill r[][][] with the minimun squared distance between atoms
         treeFilters.setr(o.RN, o.RCa, o.RC, o.Scal_1_4, o.Scal_1_5);
@@ -88,6 +89,8 @@ void CommandLineOptions::show_usage()
     std::cerr << indent << "[ --chains_input [fragments_file] <input_file> ], default = No using chains" << std::endl;
     std::cerr << indent << "if using chains: [ {-f, --input_format} <compressed|fragments> ], default = compressed " << std::endl;
 }
+
+
 
 //TODO:
 // Hay que decidir si efectivamente estos valores queremos que se puedan configurar desde

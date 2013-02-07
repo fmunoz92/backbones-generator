@@ -163,7 +163,7 @@ inline bool ChainsTreeOperator<WriterHelper>::putChain(float* pR,
     }
 
     if (result)
-        this->treeHelper.pushChainIndex(chainIndex);
+        this->treeHelper.getAtm().pushChainIndex(chainIndex);
 
     return result;
 }
@@ -204,7 +204,7 @@ inline void ChainsTreeOperator<WriterHelper>::remove(unsigned int& level)
     const unsigned int nivelesRetrocedidos = stackChainRes.back().size();
 
     this->treeHelper.getAtm().deleteRes(stackChainRes.back());
-    this->treeHelper.deleteLastFragmentId();
+    this->treeHelper.getAtm().deleteLastFragmentId();
 
     level -= nivelesRetrocedidos;
     stackChainRes.pop_back();

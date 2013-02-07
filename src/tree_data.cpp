@@ -12,29 +12,6 @@ TreeData::TreeData(int nRes, IncrementalBackbone& incrementalBackbone)
       hubo_algun_exito(false)
 {}
 
-void TreeData::readData(std::istream& filer, prot_filer::AnglesMapping& anglesMapping)
-{
-    float fi = 0.0f;
-    float si = 0.0f;
-    unsigned int i = 0;
-
-    while (filer.good())
-    {
-        if (filer >> fi && filer >> si)
-        {
-            cosfi.push_back(std::cos(mili::deg2rad(fi)));
-            sinfi.push_back(std::sin(mili::deg2rad(fi)));
-            cossi.push_back(std::cos(mili::deg2rad(si)));
-            sinsi.push_back(std::sin(mili::deg2rad(si)));
-
-            anglesMapping.set_mapping(fi, si);
-        }
-        ++i;
-    }
-    // Nota a futuro: se deberia lanzar una Excepcion si el formato del archivo fuera equivocado.
-}
-
-
 BareBackbone::BareBackbone(unsigned int nRes, Grillado& grilla, prot_filer::AnglesData& anglesData, prot_filer::AnglesMapping& anglesMapping, TreeFilters& treeFilters)
     : prot_filer::BasicProtein(nRes * 3),
       treeFilters(treeFilters),
@@ -46,6 +23,20 @@ BareBackbone::BareBackbone(unsigned int nRes, Grillado& grilla, prot_filer::Angl
 
 TreeData* BareBackbone::treeData = NULL;
 
+void BareBackbone::pushChainIndex(unsigned int index)
+{
+    fragmentIds.push_back(index);
+}
+
+void BareBackbone::deleteLastFragmentId()
+{
+    fragmentIds.pop_back();
+}
+
+const prot_filer::FragmentIds& BareBackbone::getFragmentIds() const
+{
+    return fragmentIds;
+}
 
 prot_filer::AnglesData& BareBackbone::getAnglesData()
 {
@@ -129,4 +120,26 @@ bool IncrementalBackbone::filterLastLevelOk()
                     this->treeFilters.volumeInRange(this->treeData->nres, this->grilla.obtener_vol_parcial()) == TreeFilters::FILTER_OK;
 
     return ok;
+}
+
+void readData(std::istream& filer, TreeData& treeData, prot_filer::AnglesMapping& anglesMapping)
+{
+    float fi = 0.0f;
+    float si = 0.0f;
+    unsigned int i = 0;
+
+    while (filer.good())
+    {
+        if (filer >> fi && filer >> si)
+        {
+            treeData.cosfi.push_back(std::cos(mili::deg2rad(fi)));
+            treeData.sinfi.push_back(std::sin(mili::deg2rad(fi)));
+            treeData.cossi.push_back(std::cos(mili::deg2rad(si)));
+            treeData.sinsi.push_back(std::sin(mili::deg2rad(si)));
+
+            anglesMapping.set_mapping(fi, si);
+        }
+        ++i;
+    }
+    // Nota a futuro: se deberia lanzar una Excepcion si el formato del archivo fuera equivocado.
 }

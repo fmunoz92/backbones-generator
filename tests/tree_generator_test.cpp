@@ -49,7 +49,7 @@ struct TestHelperSingleMode
         IncrementalBackbone incrementalBackbone(nres, grilla, anglesData, anglesMapping, treeFilters);
         TreeData treeData(nres, incrementalBackbone);
         BareBackbone::treeData = &treeData;
-        treeData.readData(inputFile, anglesMapping);
+        readData(inputFile, treeData, anglesMapping);
         treeFilters.setr(radius, radius, radius, scal, scal);
         TreeHelper treeHelper(treeData, treeFilters);
 
@@ -77,7 +77,7 @@ struct TestHelperChainMode
         IncrementalBackbone incrementalBackbone(nres, grilla, anglesData, anglesMapping, treeFilters);
         TreeData treeData(nres, incrementalBackbone);
         BareBackbone::treeData = &treeData;
-        treeData.readData(inputFile, anglesMapping);
+        readData(inputFile, treeData, anglesMapping);
         treeFilters.setr(radius, radius, radius, scal, scal);
         TreeHelper treeHelper(treeData, treeFilters);
 
@@ -104,7 +104,7 @@ struct TestHelperChainMode
         IncrementalBackbone incrementalBackbone(nres, grilla, anglesData, anglesMapping, treeFilters);
         TreeData treeData(nres, incrementalBackbone);
         BareBackbone::treeData = &treeData;
-        treeData.readData(inputFile, anglesMapping);
+        readData(inputFile, treeData, anglesMapping);
         treeFilters.setr(radius, radius, radius, scal, scal);
         TreeHelper treeHelper(treeData, treeFilters);
 

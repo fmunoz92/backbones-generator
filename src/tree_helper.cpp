@@ -12,10 +12,6 @@ bool TreeHelper::success() const
     return treeData.hubo_algun_exito;
 }
 
-void TreeHelper::pushChainIndex(unsigned int index)
-{
-    treeData.fragmentIds.push_back(index);
-}
 
 void TreeHelper::reportSuccess()
 {
@@ -25,16 +21,11 @@ void TreeHelper::reportSuccess()
 #endif
 }
 
-void TreeHelper::deleteLastFragmentId()
-{
-    treeData.fragmentIds.pop_back();
-}
 
 const prot_filer::AnglesData&  TreeHelper::getAnglesData() const
 {
     return treeData.incrementalBackbone.getAnglesData();
 }
-
 
 IncrementalBackbone& TreeHelper::getAtm()
 {
@@ -43,7 +34,7 @@ IncrementalBackbone& TreeHelper::getAtm()
 
 const prot_filer::FragmentIds& TreeHelper::getFragmentIds() const
 {
-    return treeData.fragmentIds;
+    return treeData.incrementalBackbone.getFragmentIds();
 }
 
 unsigned int TreeHelper::getNRes() const
