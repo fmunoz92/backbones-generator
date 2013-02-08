@@ -14,8 +14,8 @@ public:
     IncrementalBackbone& getAtm();
     TreeData& getData();
 private:
-    TreeData& treeData;
-    IncrementalBackbone& incrementalBackbone; // estructura parcial
+    TreeData& treeData; // static data
+    IncrementalBackbone& incrementalBackbone; // partial structure
 };
 
 #endif
