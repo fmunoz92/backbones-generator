@@ -57,11 +57,15 @@ class ChainsTreeOperator : public TreeOperator<WriterHelper>
 {
 public:
     inline ChainsTreeOperator(TreeHelper& tree_helper, FullCachedAnglesSeqReader* reader);
-    inline bool putNext(unsigned int& level, unsigned int /*indexRes*/, unsigned int indexAngles, unsigned int previousLevelIndex, typename TreeOperator<WriterHelper>::KeepRecursion& resultRecursion);
+
+    inline bool putNext(unsigned int& level, unsigned int indexRes, unsigned int indexAngles, unsigned int previousLevelIndex, typename TreeOperator<WriterHelper>::KeepRecursion& resultRecursion);
     inline void remove(unsigned int& level);
 
 private:
-    inline void putChain(prot_filer::AnglesData& chain, unsigned int& level, const unsigned int indexRes, unsigned int firstSi, unsigned int firstFi, typename TreeOperator<WriterHelper>::KeepRecursion& recursion);
+    inline bool putChain(float* pR, unsigned int resN, std::list<Residuo>& residuos, const prot_filer::AnglesData& chain,
+                         unsigned int chainIndex, unsigned int firstSi, unsigned int firstFi);
+
+    inline bool putRes(float* pR, const unsigned int resN, Residuo& residuo, unsigned int siIndex, unsigned int fiIndex, std::list<Residuo>& residuos);
 
     typedef std::list<Residuo> ChainsRes;
     typedef std::list<ChainsRes > StackChainRes;

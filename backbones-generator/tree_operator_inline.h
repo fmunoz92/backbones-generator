@@ -35,14 +35,14 @@ inline void TreeOperator<WriterHelper>::initMatrix(const RMatrix newR)
 template <class WriterHelper>
 inline void TreeOperator<WriterHelper>::putSeed()
 {
-    this->treeHelper.clearatm();
-    this->treeHelper.putSeed(this->R, semilla);
+    this->treeHelper.getAtm().clear();
+    this->treeHelper.getAtm().putSeed(this->R, semilla);
 }
 
 template <class WriterHelper>
 inline void TreeOperator<WriterHelper>::removeSeed()
 {
-    treeHelper.deleteRes(semilla);
+    treeHelper.getAtm().deleteRes(semilla);
 }
 
 template <class WriterHelper>
@@ -51,15 +51,11 @@ inline bool TreeOperator<WriterHelper>::write()
 #ifdef COMBINATIONS_DEBUG // En el modo DEBUG se deshabilitan los chequeos.
     const bool success = false;
     writerHelper.write();
-    treeHelper.reportSuccess();
 #else
-    const bool success = treeHelper.filterLastLevelOk();
+    const bool success = treeHelper.getAtm().filterLastLevelOk();
 #endif
     if (success)
-    {
         writerHelper.write();
-        treeHelper.reportSuccess();
-    }
 
     return success;
 }
@@ -75,7 +71,7 @@ inline SimpleTreeOperator<WriterHelper>::SimpleTreeOperator(TreeHelper& t, FullC
 template <class WriterHelper>
 inline void SimpleTreeOperator<WriterHelper>::remove(unsigned int& level)
 {
-    this->treeHelper.deleteRes(residuos.back());
+    this->treeHelper.getAtm().deleteRes(residuos.back());
     level--;
     residuos.pop_back();
 }
@@ -88,7 +84,7 @@ inline bool SimpleTreeOperator<WriterHelper>::putNext(unsigned int& level, unsig
     {
         Residuo residuo;
 
-        result = this->treeHelper.putRes(this->R, level, residuo, indexAngles, previousLevelIndex);
+        result = this->treeHelper.getAtm().putRes(this->R, level, residuo, indexAngles, previousLevelIndex);
 
         if (result)
         {
@@ -119,24 +115,55 @@ inline ChainsTreeOperator<FragmentsWriterHelper>::ChainsTreeOperator(TreeHelper&
 }
 
 template <class WriterHelper>
-inline void ChainsTreeOperator<WriterHelper>::putChain(prot_filer::AnglesData& chain, unsigned int& level, const unsigned int indexRes, unsigned int firstSi, unsigned int firstFi, typename TreeOperator<WriterHelper>::KeepRecursion& recursion)
+inline bool ChainsTreeOperator<WriterHelper>::putRes(float* pR, const unsigned int resN, Residuo& residuo, unsigned int siIndex, unsigned int fiIndex, std::list<Residuo>& residuos)
 {
-    ChainsRes residuos;
+    const bool result = this->treeHelper.getAtm().putRes(pR, resN, residuo, siIndex, fiIndex);
+    if (result)
+        mili::insert_into(residuos, residuo);
 
-    const bool isOk = this->treeHelper.putChain(this->R, level, residuos, chain, indexRes, firstSi, firstFi);
-
-    if (isOk)
-    {
-        level += residuos.size();
-        stackChainRes.push_back(residuos);
-        recursion = TreeOperator<WriterHelper>::DoRecursion;
-    }
-    else
-    {
-        this->treeHelper.deleteRes(residuos);//saco residuos apendeados antes del primer residuo que genero FILTER_FAIL
-        recursion = TreeOperator<WriterHelper>::StopRecursion;
-    }
+    return result;
 }
+
+template <class WriterHelper>
+inline bool ChainsTreeOperator<WriterHelper>::putChain(float* pR,
+        unsigned int resN,
+        std::list<Residuo>& residuos,
+        const prot_filer::AnglesData& chain,
+        unsigned int chainIndex,
+        unsigned int firstSi,
+        unsigned int firstFi)
+{
+    const unsigned int LENGTH_OF_CHAIN = chain.nres - 1;
+    bool result;
+    Residuo residuo;
+    unsigned int fi;
+    unsigned int si;
+
+    //the first residue replaces the fragment's seed
+    result = putRes(pR, resN, residuo, firstSi, firstFi, residuos);
+    ++resN;
+
+    // iterate on the angles of the fragment (angles between residues).
+    unsigned int angle = 1;//we start from the 2nd pair of angles, since the
+    // first pair is the angle between the seed and the 1st residue. We don't
+    // consider the seed from the fragments.
+    while (result  && (angle < LENGTH_OF_CHAIN) && (resN < this->treeHelper.getData().nRes))
+    {
+        fi = chain.angles[angle].fi;
+        si = chain.angles[angle].si;
+
+        result = putRes(pR, resN, residuo, si, fi, residuos);
+
+        ++resN;
+        ++angle;
+    }
+
+    if (result)
+        this->treeHelper.getAtm().pushChainIndex(chainIndex);
+
+    return result;
+}
+
 
 template <class WriterHelper>
 inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& level, unsigned int indexRes, unsigned int indexAngles, unsigned int previousLevelIndex, typename TreeOperator<WriterHelper>::KeepRecursion& resultRecursion)
@@ -146,7 +173,23 @@ inline bool ChainsTreeOperator<WriterHelper>::putNext(unsigned int& level, unsig
     const bool result = chain != NULL;//vamos a ciclar mientras tengamos chains para leer
 
     if (result)
-        putChain(*chain, level, indexRes, indexAngles, previousLevelIndex, resultRecursion);
+    {
+        ChainsRes residuos;
+
+        const bool isOk = putChain(this->R, level, residuos, *chain, indexRes, indexAngles, previousLevelIndex);
+
+        if (isOk)
+        {
+            level += residuos.size();
+            stackChainRes.push_back(residuos);
+            resultRecursion = TreeOperator<WriterHelper>::DoRecursion;
+        }
+        else
+        {
+            this->treeHelper.getAtm().deleteRes(residuos);//saco residuos apendeados antes del primer residuo que genero FILTER_FAIL
+            resultRecursion = TreeOperator<WriterHelper>::StopRecursion;
+        }
+    }
 
     return result;
 }
@@ -156,8 +199,8 @@ inline void ChainsTreeOperator<WriterHelper>::remove(unsigned int& level)
 {
     const unsigned int nivelesRetrocedidos = stackChainRes.back().size();
 
-    this->treeHelper.deleteRes(stackChainRes.back());
-    this->treeHelper.deleteLastFragmentId();
+    this->treeHelper.getAtm().deleteRes(stackChainRes.back());
+    this->treeHelper.getAtm().deleteLastFragmentId();
 
     level -= nivelesRetrocedidos;
     stackChainRes.pop_back();

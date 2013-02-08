@@ -3,6 +3,7 @@
 
 #include <string>
 
+
 struct CommandLineOptions
 {
     unsigned int Nres;// Number of amino acids in the chains to build.
@@ -24,5 +25,6 @@ struct CommandLineOptions
     bool parse(int arg, char** argv);
     void show_usage();
 };
+
 
 #endif

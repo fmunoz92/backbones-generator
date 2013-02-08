@@ -23,24 +23,36 @@ int main(int argc, char** argv)
     {
         std::ifstream filer(o.data.c_str());
 
-        TreeData treeData(o.Nres, o.m, o.n, o.z);
-        treeData.readData(filer);
-
         TreeFilters treeFilters;
+        Grillado grilla(o.m, o.n, o.z);
+
+        prot_filer::AnglesMapping anglesMapping(o.Nres);
+        prot_filer::AnglesData anglesData(o.Nres, &anglesMapping);
+
+        IncrementalBackbone incrementalBackbone(o.Nres, grilla, anglesData, anglesMapping, treeFilters);
+
+        TreeData treeData(o.Nres);
+
+        BareBackbone::treeData = &treeData;
+
+        readData(filer, treeData, anglesMapping);//read angles
 
         // Fill r[][][] with the minimun squared distance between atoms
         treeFilters.setr(o.RN, o.RCa, o.RC, o.Scal_1_4, o.Scal_1_5);
 
-        TreeHelper treeHelper(treeData, treeFilters, o.outputFile);
+        //o.outputFile
+        TreeHelper treeHelper(treeData, incrementalBackbone);
 
-        std::cout << "Number of fi-si combinations in file=" << treeHelper.getNAngles() << std::endl;
+        std::cout << "Number of fi-si combinations in file=" << treeData.nAngles << std::endl;
+
+        unsigned int count;
 
         if (o.residuesInput.empty())
         {
             IGeneratorSimple* const generatorPtr = IGeneratorSimple::Factory::new_class(o.writeFormat);
             std::auto_ptr<IGeneratorSimple> g(generatorPtr);
 
-            g->generate(treeHelper);
+            count = g->generate(treeHelper);
         }
         else
         {
@@ -50,10 +62,10 @@ int main(int argc, char** argv)
             std::auto_ptr<FullCachedAnglesSeqReader> db(readerPtr);
             std::auto_ptr<IGeneratorChains> g(generatorPtr);
 
-            g->generate(treeHelper, db.get());
+            count = g->generate(treeHelper, db.get());
         }
 
-        std::cout << "Number of chains generated = " << treeData.cont << std::endl;
+        std::cout << "Number of chains generated = " << count << std::endl;
 
         prot_filer::Coord3DReaderFactory::destroy_instance();
         prot_filer::Coord3DSeqReaderFactory::destroy_instance();
@@ -79,6 +91,8 @@ void CommandLineOptions::show_usage()
     std::cerr << indent << "[ --chains_input [fragments_file] <input_file> ], default = No using chains" << std::endl;
     std::cerr << indent << "if using chains: [ {-f, --input_format} <compressed|fragments> ], default = compressed " << std::endl;
 }
+
+
 
 //TODO:
 // Hay que decidir si efectivamente estos valores queremos que se puedan configurar desde

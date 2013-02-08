@@ -14,7 +14,7 @@ class TreeGenerator
 public:
     inline TreeGenerator(TreeHelper& treeHelper, FullCachedAnglesSeqReader* const reader);
 
-    inline void generate();
+    inline unsigned int generate();
 
 private:
     inline void expandTree(unsigned int level, unsigned int previousLevelIndex);
@@ -24,8 +24,11 @@ private:
     inline bool processLeaf();
 
     TOperator treeOperator;
+
     const unsigned int CANT_RES;
     const unsigned int CANT_ANGLES;
+
+    unsigned int count;
 };
 
 
